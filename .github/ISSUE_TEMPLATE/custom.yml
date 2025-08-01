@@ -1,17 +1,17 @@
 name: "✨ 작업 템플릿"
 description: "새로운 기능, 버그 수정 등 작업을 생성할 때 사용합니다."
 body:
-  - type: dropdown
+  - type: checkboxes
     id: issue-type
     attributes:
       label: 🎯 이슈 유형
-      description: 이 이슈가 어떤 성격의 작업인가요?
+      description: 이 이슈가 어떤 성격의 작업인가요? 해당하는 모든 항목을 선택해주세요.
       options:
-        - "🚀 Feat: 새로운 기능 추가"
-        - "🐛 Fix: 버그 수정"
-        - "🛠 Refactor: 코드 구조 개선 (기능 변경 없이)"
-        - "📄 Docs: 문서 관련 작업"
-        - "🧹 Chore: 기타 관리 작업"
+        - label: "🚀 Feat: 새로운 기능 추가"
+        - label: "🐛 Fix: 버그 수정"
+        - label: "🛠 Refactor: 코드 구조 개선 (기능 변경 없이)"
+        - label: "📄 Docs: 문서 관련 작업"
+        - label: "🧹 Chore: 기타 관리 작업"
     validations:
       required: true
       
