@@ -1,5 +1,8 @@
 name: "✨ 작업 템플릿"
 description: "새로운 기능, 버그 수정 등 작업을 생성할 때 사용합니다."
+title: "[작업 유형] 간단한 작업 제목"
+labels: []
+assignees: []
 body: |
   ### 🎯 이슈 유형
   
