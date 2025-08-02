@@ -1,87 +1,39 @@
 name: "✨ 작업 템플릿"
 description: "새로운 기능, 버그 수정 등 작업을 생성할 때 사용합니다."
-body:
-  - type: checkboxes
-    id: issue-type
-    attributes:
-      label: 🎯 이슈 유형
-      description: 이 이슈가 어떤 성격의 작업인가요? 해당하는 모든 항목을 선택해주세요.
-      options:
-        - label: "🚀 Feat: 새로운 기능 추가"
-        - label: "🐛 Fix: 버그 수정"
-        - label: "🛠 Refactor: 코드 구조 개선 (기능 변경 없이)"
-        - label: "📄 Docs: 문서 관련 작업"
-        - label: "🧹 Chore: 기타 관리 작업"
-    validations:
-      required: true
-      
-  - type: textarea
-    id: feat-description
-    attributes:
-      label: "🚀 Feat: 추가한 기능에 대한 설명"
-      description: "새로운 기능에 대한 내용을 자세히 작성해주세요."
-      placeholder: "사용자가 OO을 할 수 있도록 OO 기능을 추가합니다."
-    validations:
-      required: false
-
-  - type: textarea
-    id: fix-description
-    attributes:
-      label: "🐛 Fix: 버그 수정에 대한 설명"
-      description: "어떤 버그가 발생했고, 어떻게 수정할 계획인지 작성해주세요."
-      placeholder: "기존 로그인 로직에서 발생하는 오류를 수정합니다."
-    validations:
-      required: false
-
-  - type: textarea
-    id: refactor-description
-    attributes:
-      label: "🛠 Refactor: 개선한 내용"
-      description: "어떤 부분을 리팩토링하고, 개선된 점은 무엇인지 작성해주세요."
-      placeholder: "중복 코드를 제거하고, 모듈화를 통해 가독성을 높입니다."
-    validations:
-      required: false
-
-  - type: textarea
-    id: docs-description
-    attributes:
-      label: "📄 Docs: 문서화 내용"
-      description: "어떤 문서를 추가하거나 수정할 것인지 작성해주세요."
-      placeholder: "README.md 파일에 설치 및 사용법을 추가합니다."
-    validations:
-      required: false
-      
-  - type: textarea
-    id: chore-description
-    attributes:
-      label: "🧹 Chore: 기타 관리 작업 내용"
-      description: "빌드 스크립트, 의존성 업데이트 등 기타 내용을 작성해주세요."
-      placeholder: "패키지 의존성(dependency)을 업데이트합니다."
-    validations:
-      required: false
-
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ### 📌 작성 가이드
+body: |
+  ### 🎯 이슈 유형
+  
+  > 해당하는 유형의 체크박스를 선택해주세요. (필수)
+  
+  - [ ] 🚀 Feat: 새로운 기능 추가
+  - [ ] 🐛 Fix: 버그 수정
+  - [ ] 🛠 Refactor: 코드 구조 개선
+  - [ ] 📄 Docs: 문서 관련 작업
+  - [ ] 🧹 Chore: 기타 관리 작업
+  
+  ---
+  
+  ### 📝 작업 내용
+  
+  > 아래 가이드를 참고하여 작업 내용을 구체적으로 작성해주세요. (필수)
+  > 작성 후 가이드 부분은 남겨두거나 삭제하셔도 좋습니다.
+  
+  **🚀 Feat: 새로운 기능 추가**
+  - 추가하려는 기능에 대해 구체적으로 작성해주세요.
+  - 예: 사용자가 OO을 할 수 있도록 OO 기능을 추가합니다.
         
-        **🚀 Feat: 새로운 기능 추가**
-        > 추가하려는 기능에 대해 구체적으로 작성해주세요.
-        > 예: 사용자가 OO을 할 수 있도록 OO 기능을 추가합니다.
+   **🐛 Fix: 버그 수정**
+   - 어떤 버그가 발생했고, 어떻게 수정할 계획인지 작성해주세요.
+   - 예: 특정 조건에서 로그인 시 발생하던 500 에러를 해결합니다.
         
-        **🐛 Fix: 버그 수정**
-        > 어떤 버그가 발생했고, 어떻게 수정할 계획인지 작성해주세요.
-        > 예: 특정 조건에서 로그인 시 발생하던 500 에러를 해결합니다.
+   **🛠 Refactor: 코드 구조 개선**
+   - 어떤 부분을 리팩토링하고, 개선된 점은 무엇인지 작성해주세요.
+   - 예: 중복된 인증 로직을 `AuthService`로 통합하여 관리 포인트를 줄입니다.
         
-        **🛠 Refactor: 코드 구조 개선**
-        > 어떤 부분을 리팩토링하고, 개선된 점은 무엇인지 작성해주세요.
-        > 예: 중복된 인증 로직을 `AuthService`로 통합하여 관리 포인트를 줄입니다.
+   **📄 Docs: 문서 관련 작업**
+   - 어떤 문서를 추가하거나 수정할 것인지 작성해주세요.
+   - 예: 프로젝트 README.md 파일에 새로운 API 사용법을 추가합니다.
         
-        **📄 Docs: 문서 관련 작업**
-        > 어떤 문서를 추가하거나 수정할 것인지 작성해주세요.
-        > 예: 프로젝트 README.md 파일에 새로운 API 사용법을 추가합니다.
-        
-        **🧹 Chore: 기타 관리 작업**
-        > 빌드 스크립트, 의존성 업데이트 등 기타 내용을 작성해주세요.
-        > 예: `requests` 라이브러리 버전을 `2.25.1`에서 `2.28.0`으로 업데이트합니다.
+   **🧹 Chore: 기타 관리 작업**
+   - 빌드 스크립트, 의존성 업데이트 등 기타 내용을 작성해주세요.
+   - 예: `requests` 라이브러리 버전을 `2.25.1`에서 `2.28.0`으로 업데이트합니다.
