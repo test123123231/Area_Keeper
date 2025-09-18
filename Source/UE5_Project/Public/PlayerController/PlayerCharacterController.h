@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "BasePlayerController.generated.h"
+#include "PlayerCharacterController.generated.h"
 
 
 class UInputMappingContext;
 
 
 UCLASS()
-class UE5_PROJECT_API ABasePlayerController : public APlayerController
+class UE5_PROJECT_API APlayerCharacterController : public APlayerController
 {
 	GENERATED_BODY()
 

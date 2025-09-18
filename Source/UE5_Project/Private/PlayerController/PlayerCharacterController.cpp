@@ -1,8 +1,8 @@
-#include "PlayerController/BasePlayerController.h"
+#include "PlayerController/PlayerCharacterController.h"
 #include "EnhancedInputSubsystems.h"
 
 
-void ABasePlayerController::BeginPlay()
+void APlayerCharacterController::BeginPlay()
 {
     Super::BeginPlay();
 
