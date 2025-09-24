@@ -4,15 +4,17 @@
 #include "HUD/HUDWidget.h"
 #include "Components/TextBlock.h"
 
-void UHUDWidget::UpdateHP(int32 CurrentHP)
+void UHUDWidget::UpdateHealth(float CurrentHealth)
 {
-    if (HPText) 
+    if (HealthText) 
     { 
-        HPText->SetText(FText::AsNumber(CurrentHP)); 
+        HealthText->SetText(FText::Format(
+            FText::FromString(TEXT("x {0}")),
+            FText::AsNumber(CurrentHealth))); 
     }
 }
 
-void UHUDWidget::UpdateAmulet(int32 CurrentAmulet)
+void UHUDWidget::UpdateAmulet(float CurrentAmulet)
 {
     if (AmuletText) 
     { 

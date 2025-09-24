@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -16,14 +16,14 @@ class UE5_PROJECT_API UHUDWidget : public UUserWidget
 
 protected:
 	UPROPERTY(meta=(BindWidget))
-	class UTextBlock* HPText;
+	class UTextBlock* HealthText;
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* AmuletText;
 
 public:
     UFUNCTION(BlueprintCallable)
-    void UpdateHP(int32 CurrentHP);
+    void UpdateHealth(float CurrentHealth);
 
     UFUNCTION(BlueprintCallable)
-    void UpdateAmulet(int32 CurrentAmulet);
+    void UpdateAmulet(float CurrentAmulet);
 };
