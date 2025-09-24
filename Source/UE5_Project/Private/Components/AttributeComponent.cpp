@@ -10,9 +10,9 @@ UAttributeComponent::UAttributeComponent()
 void UAttributeComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OnHealthChanged.Broadcast(MaxHealth);
-	OnAmuletChanged.Broadcast(MaxAmulet);
+	
+	OnHealthChanged.Broadcast(Health);
+	OnAmuletChanged.Broadcast(Amulet);
 }
 
 
@@ -48,6 +48,10 @@ void UAttributeComponent::SetHealth(float NewHealth)
 	OnHealthChanged.Broadcast(NewHealth);
 }
 
+float UAttributeComponent::GetHelath()
+{
+	return Health;
+}
 
 void UAttributeComponent::SetMaxHealth(float NewMaxHealth)
 {
@@ -63,6 +67,11 @@ void UAttributeComponent::SetAmulet(float NewAmulet)
 {
 	Amulet = FMath::Clamp(NewAmulet, 0.f, MaxAmulet);
 	OnAmuletChanged.Broadcast(NewAmulet);
+}
+
+float UAttributeComponent::GetAmulet()
+{
+	return Amulet;
 }
 
 void UAttributeComponent::SetMaxAmulet(float NewMaxAmulet)

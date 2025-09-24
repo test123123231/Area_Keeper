@@ -16,17 +16,22 @@ void APlayerCharacterController::BeginPlay()
         // �⺻ ���� ���ؽ�Ʈ�� �߰��մϴ�.
         Subsystem->AddMappingContext(DefaultMappingContext, 0);
     }
-
-    if (HUDWidgetClass)
+    
+    if (!HUDRef && HUDWidgetClass)
     {
         HUDRef = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
-        if (HUDRef && BoundAttribute)
+        if (HUDRef)
         {
             HUDRef->AddToViewport();
         }
     }
 
     BindToPawnDelegates(GetPawn());
+    if(HUDRef && BoundAttribute)
+    {
+        HUDRef -> UpdateHealth(BoundAttribute -> GetHelath());
+        HUDRef -> UpdateAmulet(BoundAttribute -> GetAmulet());
+    }
 }
 
 //possess

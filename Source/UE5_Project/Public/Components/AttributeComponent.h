@@ -40,6 +40,8 @@ public:
 	void HealthInit(float MaxHealth, float NewHealth);
 	void SetHealth(float NewHealth);
 	void SetMaxHealth(float NewMaxHealth);
+	float GetHelath();
+	float GetAmulet();
 	void SetAmulet(float NewAmulet);
 	void SetMaxAmulet(float NewMaxAmulet);
 	float GetMaxHelath();
