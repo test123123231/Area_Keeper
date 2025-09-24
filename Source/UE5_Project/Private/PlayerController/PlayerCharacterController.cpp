@@ -1,15 +1,29 @@
 #include "PlayerController/PlayerCharacterController.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blueprint/UserWidget.h"
+#include "HUD/HUDWidget.h"   
+
 
 
 void APlayerCharacterController::BeginPlay()
 {
     Super::BeginPlay();
 
-    // ·ÎÄÃ ÇÃ·¹ÀÌ¾î ¼­ºê½Ã½ºÅÛÀ» °¡Á®¿É´Ï´Ù.
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½É´Ï´ï¿½.
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
-        // ±âº» ¸ÅÇÎ ÄÁÅØ½ºÆ®¸¦ Ãß°¡ÇÕ´Ï´Ù.
+        // ï¿½âº» ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø½ï¿½Æ®ï¿½ï¿½ ï¿½ß°ï¿½ï¿½Õ´Ï´ï¿½.
         Subsystem->AddMappingContext(DefaultMappingContext, 0);
     }
+
+    if (HUDWidgetClass)
+    {
+        HUDRef = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
+        if (HUDRef)
+        {
+            HUDRef->AddToViewport();
+        }
+    }
 }
+
+

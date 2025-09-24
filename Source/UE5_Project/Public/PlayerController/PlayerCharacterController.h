@@ -5,7 +5,10 @@
 #include "PlayerCharacterController.generated.h"
 
 
+
 class UInputMappingContext;
+
+class UHUDWidget;
 
 
 UCLASS()
@@ -15,10 +18,19 @@ class UE5_PROJECT_API APlayerCharacterController : public APlayerController
 
 protected:
     virtual void BeginPlay() override;
+        
+    UPROPERTY(EditDefaultsOnly, Category="UI")
+    TSubclassOf<UHUDWidget> HUDWidgetClass;
+
+    UPROPERTY() 
+    TObjectPtr<UHUDWidget> HUDRef;
+
+
 
 private:
-    // ±âº» ÀÔ·Â ¸ÅÇÎ ÄÁÅØ½ºÆ®¸¦ ÀúÀåÇÒ º¯¼ö
+    // ï¿½âº» ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 	
+    
 };
