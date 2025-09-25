@@ -16,18 +16,18 @@ class UE5_PROJECT_API AMainMenuPlayerController : public APlayerController
 protected:
     virtual void BeginPlay() override;
 
-	/** * »ı¼ºÇÒ ¸ŞÀÎ ¸Ş´º À§Á¬ÀÇ ºí·çÇÁ¸°Æ® Å¬·¡½º
-	 * TSubclassOf´Â Æ¯Á¤ Å¬·¡½º(¿©±â¼­´Â UUserWidget)ÀÇ ÀÚ½Ä Å¬·¡½º¸¸ ÇÒ´çÇÒ ¼ö ÀÖµµ·Ï Á¦ÇÑ
+	/** * ìƒì„±í•  ë©”ì¸ ë©”ë‰´ ìœ„ì ¯ì˜ ë¸”ë£¨í”„ë¦°íŠ¸ í´ë˜ìŠ¤
+	 * TSubclassOfëŠ” íŠ¹ì • í´ë˜ìŠ¤(ì—¬ê¸°ì„œëŠ” UUserWidget)ì˜ ìì‹ í´ë˜ìŠ¤ë§Œ í• ë‹¹í•  ìˆ˜ ìˆë„ë¡ ì œí•œ
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;
 
-	// »ı¼ºµÈ ¸ŞÀÎ ¸Ş´º À§Á¬ÀÇ ÀÎ½ºÅÏ½º¸¦ ÀúÀåÇÒ º¯¼ö
+	// ìƒì„±ëœ ë©”ì¸ ë©”ë‰´ ìœ„ì ¯ì˜ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ì €ì¥í•  ë³€ìˆ˜
 	UPROPERTY(VisibleInstanceOnly, Category = "UI")
 	TObjectPtr<UUserWidget> MainMenuWidgetInstance;
 
 private:
-    // ±âº» ÀÔ·Â ¸ÅÇÎ ÄÁÅØ½ºÆ®¸¦ ÀúÀåÇÒ º¯¼ö
+    // ê¸°ë³¸ ì…ë ¥ ë§¤í•‘ ì»¨í…ìŠ¤íŠ¸ë¥¼ ì €ì¥í•  ë³€ìˆ˜
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 };

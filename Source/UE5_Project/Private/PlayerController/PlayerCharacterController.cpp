@@ -10,10 +10,10 @@ void APlayerCharacterController::BeginPlay()
 {
     Super::BeginPlay();
 
-    // ���� �÷��̾� ����ý����� �����ɴϴ�.
+    // 로컬 플레이어 서브시스템을 가져옵니다.
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
-        // �⺻ ���� ���ؽ�Ʈ�� �߰��մϴ�.
+        // 기본 매핑 컨텍스트를 추가합니다.
         Subsystem->AddMappingContext(DefaultMappingContext, 0);
     }
     

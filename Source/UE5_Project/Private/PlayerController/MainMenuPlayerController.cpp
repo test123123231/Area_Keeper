@@ -6,25 +6,25 @@
 void AMainMenuPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	// ¸¶¿ì½º Ä¿¼­ Ç¥½Ã
+	// ë§ˆìš°ìŠ¤ ì»¤ì„œ í‘œì‹œ
 	bShowMouseCursor = true;
-	// ·ÎÄÃ ÇÃ·¹ÀÌ¾î ¼­ºê½Ã½ºÅÛÀ» °¡Á®¿É´Ï´Ù.
+	// ë¡œì»¬ í”Œë ˆì´ì–´ ì„œë¸Œì‹œìŠ¤í…œì„ ê°€ì ¸ì˜µë‹ˆë‹¤.
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		// ±âº» ¸ÅÇÎ ÄÁÅØ½ºÆ®¸¦ Ãß°¡ÇÕ´Ï´Ù.
+		// ê¸°ë³¸ ë§¤í•‘ ì»¨í…ìŠ¤íŠ¸ë¥¼ ì¶”ê°€í•©ë‹ˆë‹¤.
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 
-	// MainMenuWidgetClass º¯¼ö¿¡ À¯È¿ÇÑ À§Á¬ Å¬·¡½º°¡ ÇÒ´çµÇ¾ú´ÂÁö È®ÀÎÇÕ´Ï´Ù.
+	// MainMenuWidgetClass ë³€ìˆ˜ì— ìœ íš¨í•œ ìœ„ì ¯ í´ë˜ìŠ¤ê°€ í• ë‹¹ë˜ì—ˆëŠ”ì§€ í™•ì¸í•©ë‹ˆë‹¤.
 	if (MainMenuWidgetClass)
 	{
-		// À§Á¬ ÀÎ½ºÅÏ½º¸¦ »ı¼ºÇÏ°í MainMenuWidgetInstance º¯¼ö¿¡ ÀúÀåÇÕ´Ï´Ù.
+		// ìœ„ì ¯ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ìƒì„±í•˜ê³  MainMenuWidgetInstance ë³€ìˆ˜ì— ì €ì¥í•©ë‹ˆë‹¤.
 		MainMenuWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
 
-		// À§Á¬ »ı¼ºÀÌ ¼º°øÇß´ÂÁö ´Ù½Ã ÇÑ¹ø È®ÀÎÇÕ´Ï´Ù.
+		// ìœ„ì ¯ ìƒì„±ì´ ì„±ê³µí–ˆëŠ”ì§€ ë‹¤ì‹œ í•œë²ˆ í™•ì¸í•©ë‹ˆë‹¤.
 		if (MainMenuWidgetInstance)
 		{
-			// »ı¼ºµÈ À§Á¬À» ºäÆ÷Æ®¿¡ Ãß°¡ÇÏ¿© È­¸é¿¡ Ç¥½ÃÇÕ´Ï´Ù.
+			// ìƒì„±ëœ ìœ„ì ¯ì„ ë·°í¬íŠ¸ì— ì¶”ê°€í•˜ì—¬ í™”ë©´ì— í‘œì‹œí•©ë‹ˆë‹¤.
 			MainMenuWidgetInstance->AddToViewport();
 		}
 	}

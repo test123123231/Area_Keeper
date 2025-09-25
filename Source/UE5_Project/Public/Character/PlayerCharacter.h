@@ -25,7 +25,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* ViewCamera;
 
-	// ÀÔ·Â Ã³¸® ÇÔ¼öµé
+	// ìž…ë ¥ ì²˜ë¦¬ í•¨ìˆ˜ë“¤
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 };

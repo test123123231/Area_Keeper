@@ -42,7 +42,7 @@ protected:
 
 
 private:
-    // �⺻ �Է� ���� ���ؽ�Ʈ�� ������ ����
+    // 기본 입력 매핑 컨텍스트를 저장할 변수
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 	

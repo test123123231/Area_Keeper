@@ -21,7 +21,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	// ÀÔ·Â ¾×¼ÇµéÀ» ´ãÀ» º¯¼öµé
+	// ì…ë ¥ ì•¡ì…˜ë“¤ì„ ë‹´ì„ ë³€ìˆ˜ë“¤
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind")
 	TObjectPtr<UInputAction> MoveAction;
 
