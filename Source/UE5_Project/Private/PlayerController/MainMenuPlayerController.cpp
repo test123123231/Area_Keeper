@@ -6,15 +6,12 @@
 void AMainMenuPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	// 마우스 커서 표시
-	bShowMouseCursor = true;
-	// 로컬 플레이어 서브시스템을 가져옵니다.
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		// 기본 매핑 컨텍스트를 추가합니다.
-		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-	}
 
+	OpenMainMenu();
+}
+
+void AMainMenuPlayerController::OpenMainMenu()
+{
 	// MainMenuWidgetClass 변수에 유효한 위젯 클래스가 할당되었는지 확인합니다.
 	if (MainMenuWidgetClass)
 	{
@@ -26,6 +23,14 @@ void AMainMenuPlayerController::BeginPlay()
 		{
 			// 생성된 위젯을 뷰포트에 추가하여 화면에 표시합니다.
 			MainMenuWidgetInstance->AddToViewport();
+
+			// 입력 모드를 게임 및 UI 겸용으로 변경
+			FInputModeGameAndUI InputModeData;
+			InputModeData.SetWidgetToFocus(MainMenuWidgetInstance->TakeWidget()); // 포커스를 위젯으로
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputModeData);
+
+			bShowMouseCursor = true; // 마우스 커서 보이기
 		}
 	}
 }
