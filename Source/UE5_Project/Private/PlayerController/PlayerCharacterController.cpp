@@ -147,7 +147,7 @@ void APlayerCharacterController::UnbindFromPawnDelegates()
 	if (BoundAttribute)
 	{
 		BoundAttribute->OnHealthChanged.RemoveDynamic(this, &APlayerCharacterController::HandleHealthChanged);
-        BoundAttribute->OnHealthChanged.RemoveDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
+        BoundAttribute->OnAmuletChanged.RemoveDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
 		BoundAttribute = nullptr;
 	}
 }
