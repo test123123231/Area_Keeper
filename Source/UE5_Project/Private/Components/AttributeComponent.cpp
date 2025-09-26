@@ -10,7 +10,7 @@ UAttributeComponent::UAttributeComponent()
 void UAttributeComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	//초기화
 	OnHealthChanged.Broadcast(Health);
 	OnAmuletChanged.Broadcast(Amulet);
 }
@@ -93,7 +93,7 @@ void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 }
 
 
-//for test
+//test용도 (추후 삭제)
 #if WITH_EDITOR
 void UAttributeComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {

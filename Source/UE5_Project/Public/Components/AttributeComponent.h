@@ -21,15 +21,16 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	// 현재 Health
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
 	float Health = 3.0f;
-
+	// 현재 MaxHealth
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
 	float MaxHealth = 3.0f;
-
+	// 현재 Amulet
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
 	float Amulet = 5.0f;
-
+	// 현재 MaxAmulet
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
 	float MaxAmulet = 5.0f;
 
@@ -55,7 +56,7 @@ public:
 	FOnAmuletChanged OnAmuletChanged;
 
 
-// //for test	
+//test용도 (추후 삭제)
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif

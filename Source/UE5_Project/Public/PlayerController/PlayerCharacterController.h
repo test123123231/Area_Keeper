@@ -20,24 +20,34 @@ protected:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
 
+    // controller가 소유하는 pawn을 정한다.
     virtual void OnPossess(APawn* InPawn) override;
+    // 소유된 pawn을 해제한다
     virtual void OnUnPossess() override;
 
+    // pawn을 소유했을 때 그 폰의 attributecomponent의 이벤트에 바인딩한다.
+    void BindToPawnDelegates(APawn* InPawn);
+    // 바인딩을 해제한다
+    void UnbindFromPawnDelegates();
+        
+
+    // 위젯의 HP가 바뀔때 호출 되는 함수
     UFUNCTION()
     void HandleHealthChanged(float NewHealth);
     
+    // 위젯의 Amulet이 바뀔때 호출 되는 함수
     UFUNCTION()
     void HandleAmuletChanged(float NewAmulet);
 
-    void BindToPawnDelegates(APawn* InPawn);
-    void UnbindFromPawnDelegates();
-        
+    //HUD로 사용할 위젯 블루프린트
     UPROPERTY(EditDefaultsOnly, Category="UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
 
+    //실제로 생성된 HUD 인스턴스
     UPROPERTY() 
     TObjectPtr<UHUDWidget> HUDRef;
 
+    // pawn의 attributecomponent 참조
     UPROPERTY()
     TObjectPtr<UAttributeComponent> BoundAttribute = nullptr;
 

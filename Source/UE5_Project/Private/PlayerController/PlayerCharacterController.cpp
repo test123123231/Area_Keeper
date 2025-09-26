@@ -24,16 +24,20 @@ void APlayerCharacterController::BeginPlay()
 
     bShowMouseCursor = false; // 마우스 커서 숨기기
     
+    // HUDRef가 없고 HUDWidgetclass가 있으면 HUDRef 생성
     if (!HUDRef && HUDWidgetClass)
     {
         HUDRef = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
         if (HUDRef)
         {
+            //UI를 표시한다
             HUDRef->AddToViewport();
         }
     }
 
+    // 현재 소유한 폰의 attributecomponent의 이벤트에 바인딩
     BindToPawnDelegates(GetPawn());
+    // 초기화
     if(HUDRef && BoundAttribute)
     {
         HUDRef -> UpdateHealth(BoundAttribute -> GetHelath());
@@ -110,24 +114,25 @@ void APlayerCharacterController::CloseSettingMenu()
 
 
 
-//possess
+// possess
 void APlayerCharacterController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
     BindToPawnDelegates(InPawn);
 }
-
 void APlayerCharacterController::OnUnPossess()
 {
     UnbindFromPawnDelegates();
     Super::OnUnPossess();
 }
 
-//bind
+// bind
 void APlayerCharacterController::BindToPawnDelegates(APawn* InPawn)
 {
+    // 중복 방지용 unbind
     UnbindFromPawnDelegates();
     if(!InPawn){ return; }
+    // OnHealthChanged/OnAmuletChanged와 HandleHelathChanged/HandleAmuletChanged를 연결
     if(UAttributeComponent* Attr = InPawn -> FindComponentByClass<UAttributeComponent>())
     {
         BoundAttribute = Attr;
@@ -138,6 +143,7 @@ void APlayerCharacterController::BindToPawnDelegates(APawn* InPawn)
 
 void APlayerCharacterController::UnbindFromPawnDelegates()
 {
+    // OnHealthChanged/OnAmuletChanged와 HandleHelathChanged/HandleAmuletChanged를 연결 해제
 	if (BoundAttribute)
 	{
 		BoundAttribute->OnHealthChanged.RemoveDynamic(this, &APlayerCharacterController::HandleHealthChanged);
@@ -147,7 +153,7 @@ void APlayerCharacterController::UnbindFromPawnDelegates()
 }
 
 
-//handle
+// handle, HUD가 존재할 때만 update 호출
 void APlayerCharacterController::HandleHealthChanged(float NewHealth)
 {
     if(HUDRef)
