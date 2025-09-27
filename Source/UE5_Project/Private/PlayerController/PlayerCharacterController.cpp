@@ -133,11 +133,11 @@ void APlayerCharacterController::BindToPawnDelegates(APawn* InPawn)
     UnbindFromPawnDelegates();
     if(!InPawn){ return; }
     // OnHealthChanged/OnAmuletChanged와 HandleHelathChanged/HandleAmuletChanged를 연결
-    if(UAttributeComponent* Attr = InPawn -> FindComponentByClass<UAttributeComponent>())
+    BoundAttribute = InPawn -> FindComponentByClass<UAttributeComponent>();
+    if(BoundAttribute)
     {
-        BoundAttribute = Attr;
-        Attr -> OnHealthChanged.AddDynamic(this, &APlayerCharacterController::HandleHealthChanged);
-        Attr -> OnAmuletChanged.AddDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
+        BoundAttribute -> OnHealthChanged.AddDynamic(this, &APlayerCharacterController::HandleHealthChanged);
+        BoundAttribute -> OnAmuletChanged.AddDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
     }
 }
 
