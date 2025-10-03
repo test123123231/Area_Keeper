@@ -30,20 +30,17 @@ private:
 	void Look(const FInputActionValue& Value);
 
 
-
-
 	// 현재 바라보는 아이템(여기서부터 추가)
 	AItemBase* CurrentFocusedItem;
 
 	// 아이템 감지 (라인트레이스)
 	void TraceForItems();
 
-	// E키 -> 아이템 줍기
 	void Interact();
 
-	void PickupItem(AItemBase* Item);
-	void ChangeItem(AItemBase* Item, const FVector& Location);
-	void DropHeldItem();   // G키로 손에 든 아이템 버리기
+	void PickupItem(AItemBase* Item); //아이템 집기
+	void ChangeItem(AItemBase* Item, const FVector& Location); //아이템 바꾸기
+	void DropHeldItem();   // 아이템 버리기
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	class UInputAction* DropAction;  // G키 입력 액션

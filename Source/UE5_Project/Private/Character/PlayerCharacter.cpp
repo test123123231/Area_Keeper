@@ -2,9 +2,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
-#include "Character/ItemBase.h"   // 아이템 클래스 포함
+#include "Character/ItemBase.h"   
 #include "DrawDebugHelpers.h"
-//#include "GameFramework/CharacterMovementComponent.h" // 이동방향 -> 회전방향용 헤더
 
 
 APlayerCharacter::APlayerCharacter()
@@ -21,10 +20,7 @@ APlayerCharacter::APlayerCharacter()
 
 	CurrentFocusedItem = nullptr;
 	HeldItem = nullptr;
-	// 캐릭터가 컨트롤러 회전을 그대로 따라가도록
-	//bUseControllerRotationYaw = true;
-	// 이동 방향 기준 회전은 끄기
-	//GetCharacterMovement()->bOrientRotationToMovement = false;
+
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -142,10 +138,7 @@ void APlayerCharacter::TraceForItems()
 
 }
 
-
-
 // 아이템 줍기
-// PickupItem (강제 Transform 적용 방어)
 void APlayerCharacter::PickupItem(AItemBase* Item)
 {
 	if (!Item || !IsValid(Item)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: Item invalid")); return; }
@@ -175,7 +168,6 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 
 
 // 아이템 내려놓기
-// DropItem (OnDropped는 ItemBase 쪽에서 지연된 physics 처리 유지)
 void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
 {
 	if (!Item || !IsValid(Item)) return;
