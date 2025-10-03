@@ -2,6 +2,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Character/ItemBase.h"   // 아이템 클래스 포함
+#include "DrawDebugHelpers.h"
+//#include "GameFramework/CharacterMovementComponent.h" // 이동방향 -> 회전방향용 헤더
 
 
 APlayerCharacter::APlayerCharacter()
@@ -15,11 +18,21 @@ APlayerCharacter::APlayerCharacter()
 
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(SpringArm);
+
+	CurrentFocusedItem = nullptr;
+	HeldItem = nullptr;
+	// 캐릭터가 컨트롤러 회전을 그대로 따라가도록
+	//bUseControllerRotationYaw = true;
+	// 이동 방향 기준 회전은 끄기
+	//GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// 매 프레임 아이템 찾기
+	TraceForItems();
 }
 
 
@@ -37,12 +50,19 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		if (LookAction) {
 			EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 		}
+		if (InteractAction) {
+			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+		}
+		if (DropAction) {
+			EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &APlayerCharacter::DropHeldItem);
+		}
 	}
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 
@@ -76,5 +96,151 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 		// 마우스 입력에 따라 컨트롤러의 Yaw, Pitch 값을 조절
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+
+
+void APlayerCharacter::TraceForItems()
+{
+	FVector Start = ViewCamera->GetComponentLocation();
+	FVector ForwardVector = ViewCamera->GetForwardVector();
+	FVector End = Start + (ForwardVector * 500.0f); // 카메라 앞 5m
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	// 손에 든 아이템은 무시
+	if (HeldItem && HeldItem->IsAttachedTo(this))
+	{
+		Params.AddIgnoredActor(HeldItem);
+	}
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult, Start, End, ECC_Visibility, Params);
+
+	AItemBase* HitItem = nullptr;
+	if (bHit)
+	{
+		HitItem = Cast<AItemBase>(HitResult.GetActor());
+	}
+
+	// 이전 아이템 하이라이트 해제
+	if (CurrentFocusedItem && CurrentFocusedItem != HitItem)
+	{
+		CurrentFocusedItem->HighlightItem(false);
+		CurrentFocusedItem = nullptr;
+	}
+
+	// 새로운 아이템 하이라이트
+	if (HitItem && HitItem != CurrentFocusedItem)
+	{
+		HitItem->HighlightItem(true);
+		CurrentFocusedItem = HitItem;
+	}
+
+}
+
+
+
+// 아이템 줍기
+// PickupItem (강제 Transform 적용 방어)
+void APlayerCharacter::PickupItem(AItemBase* Item)
+{
+	if (!Item || !IsValid(Item)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: Item invalid")); return; }
+	if (!GetMesh()) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: No mesh")); return; }
+	if (!GetMesh()->DoesSocketExist(HandSocketName)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: no socket")); return; }
+
+	// safety끄기
+	if (Item->ItemMesh)
+	{
+		Item->ItemMesh->SetSimulatePhysics(false);
+		Item->ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	bool bAttached = Item->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), HandSocketName);
+	if (bAttached)
+	{
+		// 강제 transform 맞춤
+		FTransform SocketTF = GetMesh()->GetSocketTransform(HandSocketName, RTS_World);
+		Item->SetActorTransform(SocketTF);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Pickup: %s attach=%d parent=%s loc=%s"),
+		*Item->GetName(), bAttached, *GetNameSafe(Item->GetAttachParentActor()), *Item->GetActorLocation().ToString());
+
+	Item->OnPickedUp();
+}
+
+
+// 아이템 내려놓기
+// DropItem (OnDropped는 ItemBase 쪽에서 지연된 physics 처리 유지)
+void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
+{
+	if (!Item || !IsValid(Item)) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Drop: %s BeforeDetach Parent=%s Phys=%d"),
+		*Item->GetName(), *GetNameSafe(Item->GetAttachParentActor()), Item->ItemMesh ? Item->ItemMesh->IsSimulatingPhysics() : 0);
+
+	Item->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	Item->SetActorLocation(Location);
+	Item->OnDropped();
+
+	UE_LOG(LogTemp, Warning, TEXT("Drop: %s AfterDetach Parent=%s Loc=%s"),
+		*Item->GetName(), *GetNameSafe(Item->GetAttachParentActor()), *Item->GetActorLocation().ToString());
+}
+
+
+// Interact (방어적)
+void APlayerCharacter::Interact()
+{
+	if (!CurrentFocusedItem) return;
+
+	AItemBase* NewItem = CurrentFocusedItem;
+	if (!IsValid(NewItem)) return;
+
+	// 만약 손에 다른 아이템 있으면 먼저 놓기
+	if (HeldItem && HeldItem != NewItem)
+	{
+		FVector DropLocation = NewItem->GetActorLocation();
+		DropLocation.Z += 50.f;
+		ChangeItem(HeldItem, DropLocation);
+		UE_LOG(LogTemp, Warning, TEXT("Interact: Dropped %s"), *HeldItem->GetName());
+		HeldItem = nullptr;
+	}
+
+	if (NewItem->ItemMesh)
+	{
+		NewItem->ItemMesh->SetSimulatePhysics(false);
+		NewItem->ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	PickupItem(NewItem);
+	if (IsValid(NewItem))
+	{
+		HeldItem = NewItem;
+		NewItem->HighlightItem(false);
+		CurrentFocusedItem = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("Interact: Picked up %s"), *NewItem->GetName());
+	}
+}
+
+void APlayerCharacter::DropHeldItem()
+{
+	if (HeldItem) // 손에 아이템이 있을 때만 실행
+	{
+		FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
+		DropLocation.Z += 30.f; // 바닥에 묻히지 않도록 살짝 올림
+
+		ChangeItem(HeldItem, DropLocation);
+		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: Dropped %s"), *HeldItem->GetName());
+
+		HeldItem = nullptr;
+	}
+	else
+	{
+		// 손에 아무것도 없으면 아무 일도 안 함
+		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: No item in hand"));
 	}
 }
