@@ -75,33 +75,6 @@ void AItemBase::OnDropped()
     }
 }
 
-/*void AItemBase::OnPickedUp()
-{
-    ItemMesh->SetSimulatePhysics(false);
-    ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-    UE_LOG(LogTemp, Warning, TEXT("OnPickedUp: %s (Physics=0, Collision=NoCollision)"),
-        *GetName());
-}
-
-void AItemBase::OnDropped()
-{
-    // 우선 충돌만 켜고
-    ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-    UE_LOG(LogTemp, Warning, TEXT("OnDropped called for %s -> Enable Collision, delay Physics"),
-        *GetName());
-
-    // Physics는 살짝 지연시켜서 Attach와 충돌하지 않게 함
-    FTimerHandle Timer;
-    GetWorldTimerManager().SetTimer(Timer, [this]()
-        {
-            if (IsValid(this) && ItemMesh)
-            {
-                ItemMesh->SetSimulatePhysics(true);
-                UE_LOG(LogTemp, Warning, TEXT("OnDropped Physics Enabled for %s"), *GetName());
-            }
-        }, 0.25f, false);
-}*/
 
 
