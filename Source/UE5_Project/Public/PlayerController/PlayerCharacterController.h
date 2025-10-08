@@ -21,7 +21,7 @@ private:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 	
-    UPROPERTY(EditAnywhere, Category = "UI")
+    UPROPERTY(EditAnywhere, Category = "UI") // Äü½½·Ô uiÃß°¡
     TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
 
     UPROPERTY()
