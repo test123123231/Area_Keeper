@@ -59,6 +59,17 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	/*if (QuickSlotWidgetClass)
+	{
+		UWB_QuickSlot* QuickSlotUI = CreateWidget<UWB_QuickSlot>(this, QuickSlotWidgetClass);
+		if (QuickSlotUI)
+		{
+			QuickSlotUI->AddToViewport();
+
+			// 예시: 첫 번째 슬롯에 임시 아이콘 세팅
+			QuickSlotUI->UpdateSlotIcon(0, LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Icons/TestIcon.TestIcon")));
+		}
+	}*/
 }
 
 

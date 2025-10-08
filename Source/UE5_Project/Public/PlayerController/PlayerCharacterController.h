@@ -4,7 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "PlayerCharacterController.generated.h"
 
-
+class UQuickSlot;
 class UInputMappingContext;
 
 
@@ -21,4 +21,9 @@ private:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 	
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
+
+    UPROPERTY()
+    UQuickSlot* QuickSlotWidget;
 };
