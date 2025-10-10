@@ -27,7 +27,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// ¸Å ÇÁ·¹ÀÓ ¾ÆÀÌÅÛ Ã£±â
+	// ë§¤ í”„ë ˆì„ ì•„ì´í…œ ì°¾ê¸°
 	TraceForItems();
 }
 
@@ -36,10 +36,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// PlayerInputComponent¸¦ Çâ»óµÈ ÀÔ·Â ÄÄÆ÷³ÍÆ®·Î Ä³½ºÆÃ
+	// PlayerInputComponentë¥¼ í–¥ìƒëœ ì…ë ¥ ì»´í¬ë„ŒíŠ¸ë¡œ ìºìŠ¤íŒ…
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// ÀÔ·Â ¾×¼Ç°ú Ã³¸® ÇÔ¼ö¸¦ ¹ÙÀÎµù
+		// ì…ë ¥ ì•¡ì…˜ê³¼ ì²˜ë¦¬ í•¨ìˆ˜ë¥¼ ë°”ì¸ë”©
 		if (MoveAction) {
 			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		}
@@ -66,7 +66,7 @@ void APlayerCharacter::BeginPlay()
 		{
 			QuickSlotUI->AddToViewport();
 
-			// ¿¹½Ã: Ã¹ ¹øÂ° ½½·Ô¿¡ ÀÓ½Ã ¾ÆÀÌÄÜ ¼¼ÆÃ
+			// ì˜ˆì‹œ: ì²« ë²ˆì§¸ ìŠ¬ë¡¯ì— ì„ì‹œ ì•„ì´ì½˜ ì„¸íŒ…
 			QuickSlotUI->UpdateSlotIcon(0, LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Icons/TestIcon.TestIcon")));
 		}
 	}*/
@@ -75,19 +75,19 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
-	// ÀÔ·Â°ª(Vector2D)À» °¡Á®¿È
+	// ì…ë ¥ê°’(Vector2D)ì„ ê°€ì ¸ì˜´
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// ÄÁÆ®·Ñ·¯ÀÇ È¸Àü ¹æÇâÀ» ±âÁØÀ¸·Î ÀüÈÄ/ÁÂ¿ì ¹æÇâÀ» Ã£±â
+		// ì»¨íŠ¸ë¡¤ëŸ¬ì˜ íšŒì „ ë°©í–¥ì„ ê¸°ì¤€ìœ¼ë¡œ ì „í›„/ì¢Œìš° ë°©í–¥ì„ ì°¾ê¸°
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// ÇØ´ç ¹æÇâÀ¸·Î ÀÌµ¿ ÀÔ·ÂÀ» Ãß°¡
+		// í•´ë‹¹ ë°©í–¥ìœ¼ë¡œ ì´ë™ ì…ë ¥ì„ ì¶”ê°€
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
@@ -100,7 +100,7 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		// ¸¶¿ì½º ÀÔ·Â¿¡ µû¶ó ÄÁÆ®·Ñ·¯ÀÇ Yaw, Pitch °ªÀ» Á¶Àı
+		// ë§ˆìš°ìŠ¤ ì…ë ¥ì— ë”°ë¼ ì»¨íŠ¸ë¡¤ëŸ¬ì˜ Yaw, Pitch ê°’ì„ ì¡°ì ˆ
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
@@ -112,13 +112,13 @@ void APlayerCharacter::TraceForItems()
 {
 	FVector Start = ViewCamera->GetComponentLocation();
 	FVector ForwardVector = ViewCamera->GetForwardVector();
-	FVector End = Start + (ForwardVector * 500.0f); // Ä«¸Ş¶ó ¾Õ 5m
+	FVector End = Start + (ForwardVector * 500.0f); // ì¹´ë©”ë¼ ì• 5m
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	// ¼Õ¿¡ µç ¾ÆÀÌÅÛÀº ¹«½Ã
+	// ì†ì— ë“  ì•„ì´í…œì€ ë¬´ì‹œ
 	if (HeldItem && HeldItem->IsAttachedTo(this))
 	{
 		Params.AddIgnoredActor(HeldItem);
@@ -133,14 +133,14 @@ void APlayerCharacter::TraceForItems()
 		HitItem = Cast<AItemBase>(HitResult.GetActor());
 	}
 
-	// ÀÌÀü ¾ÆÀÌÅÛ ÇÏÀÌ¶óÀÌÆ® ÇØÁ¦
+	// ì´ì „ ì•„ì´í…œ í•˜ì´ë¼ì´íŠ¸ í•´ì œ
 	if (CurrentFocusedItem && CurrentFocusedItem != HitItem)
 	{
 		CurrentFocusedItem->HighlightItem(false);
 		CurrentFocusedItem = nullptr;
 	}
 
-	// »õ·Î¿î ¾ÆÀÌÅÛ ÇÏÀÌ¶óÀÌÆ®
+	// ìƒˆë¡œìš´ ì•„ì´í…œ í•˜ì´ë¼ì´íŠ¸
 	if (HitItem && HitItem != CurrentFocusedItem)
 	{
 		HitItem->HighlightItem(true);
@@ -149,14 +149,14 @@ void APlayerCharacter::TraceForItems()
 
 }
 
-// ¾ÆÀÌÅÛ Áİ±â
+// ì•„ì´í…œ ì¤ê¸°
 void APlayerCharacter::PickupItem(AItemBase* Item)
 {
 	if (!Item || !IsValid(Item)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: Item invalid")); return; }
 	if (!GetMesh()) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: No mesh")); return; }
 	if (!GetMesh()->DoesSocketExist(HandSocketName)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: no socket")); return; }
 
-	// safety²ô±â
+	// safetyë„ê¸°
 	if (Item->ItemMesh)
 	{
 		Item->ItemMesh->SetSimulatePhysics(false);
@@ -166,7 +166,7 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 	bool bAttached = Item->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), HandSocketName);
 	if (bAttached)
 	{
-		// °­Á¦ transform ¸ÂÃã
+		// ê°•ì œ transform ë§ì¶¤
 		FTransform SocketTF = GetMesh()->GetSocketTransform(HandSocketName, RTS_World);
 		Item->SetActorTransform(SocketTF);
 	}
@@ -178,7 +178,7 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 }
 
 
-// ¾ÆÀÌÅÛ ³»·Á³õ±â
+// ì•„ì´í…œ ë‚´ë ¤ë†“ê¸°
 void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
 {
 	if (!Item || !IsValid(Item)) return;
@@ -195,7 +195,7 @@ void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
 }
 
 
-// Interact (¹æ¾îÀû)
+// Interact (ë°©ì–´ì )
 void APlayerCharacter::Interact()
 {
 	if (!CurrentFocusedItem) return;
@@ -203,7 +203,7 @@ void APlayerCharacter::Interact()
 	AItemBase* NewItem = CurrentFocusedItem;
 	if (!IsValid(NewItem)) return;
 
-	// ¸¸¾à ¼Õ¿¡ ´Ù¸¥ ¾ÆÀÌÅÛ ÀÖÀ¸¸é ¸ÕÀú ³õ±â
+	// ë§Œì•½ ì†ì— ë‹¤ë¥¸ ì•„ì´í…œ ìˆìœ¼ë©´ ë¨¼ì € ë†“ê¸°
 	if (HeldItem && HeldItem != NewItem)
 	{
 		FVector DropLocation = NewItem->GetActorLocation();
@@ -231,10 +231,10 @@ void APlayerCharacter::Interact()
 
 void APlayerCharacter::DropHeldItem()
 {
-	if (HeldItem) // ¼Õ¿¡ ¾ÆÀÌÅÛÀÌ ÀÖÀ» ¶§¸¸ ½ÇÇà
+	if (HeldItem) // ì†ì— ì•„ì´í…œì´ ìˆì„ ë•Œë§Œ ì‹¤í–‰
 	{
 		FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
-		DropLocation.Z += 30.f; // ¹Ù´Ú¿¡ ¹¯È÷Áö ¾Êµµ·Ï »ìÂ¦ ¿Ã¸²
+		DropLocation.Z += 30.f; // ë°”ë‹¥ì— ë¬»íˆì§€ ì•Šë„ë¡ ì‚´ì§ ì˜¬ë¦¼
 
 		ChangeItem(HeldItem, DropLocation);
 		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: Dropped %s"), *HeldItem->GetName());
@@ -243,7 +243,7 @@ void APlayerCharacter::DropHeldItem()
 	}
 	else
 	{
-		// ¼Õ¿¡ ¾Æ¹«°Íµµ ¾øÀ¸¸é ¾Æ¹« ÀÏµµ ¾È ÇÔ
+		// ì†ì— ì•„ë¬´ê²ƒë„ ì—†ìœ¼ë©´ ì•„ë¬´ ì¼ë„ ì•ˆ í•¨
 		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: No item in hand"));
 	}
 }

@@ -12,7 +12,7 @@ AItemBase::AItemBase()
     // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
 
-    // ¸Ş½Ã »ı¼º ¹× ·çÆ® ÄÄÆ÷³ÍÆ®·Î ¼³Á¤(Ãß°¡)
+    // ë©”ì‹œ ìƒì„± ë° ë£¨íŠ¸ ì»´í¬ë„ŒíŠ¸ë¡œ ì„¤ì •(ì¶”ê°€)
     ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
     RootComponent = ItemMesh;
 }
@@ -24,7 +24,7 @@ void AItemBase::BeginPlay()
 
     if (ItemMesh)
     {
-        // ¸ÓÆ¼¸®¾óÀ» µ¿ÀûÀ¸·Î Á¦¾îÇÒ ¼ö ÀÖµµ·Ï ÀÎ½ºÅÏ½º »ı¼º
+        // ë¨¸í‹°ë¦¬ì–¼ì„ ë™ì ìœ¼ë¡œ ì œì–´í•  ìˆ˜ ìˆë„ë¡ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±
         DynamicMaterial = ItemMesh->CreateAndSetMaterialInstanceDynamic(0);
     }
 
@@ -37,12 +37,12 @@ void AItemBase::Tick(float DeltaTime)
 
 }
 
-// ÇÏÀÌ¶óÀÌÆ® ÇÔ¼ö
+// í•˜ì´ë¼ì´íŠ¸ í•¨ìˆ˜
 void AItemBase::HighlightItem(bool bOn)
 {
     if (DynamicMaterial)
     {
-        // ¸ÓÆ¼¸®¾ó¿¡ "Color"¶ó´Â ÆÄ¶ó¹ÌÅÍ°¡ ÀÖ¾î¾ß ÀÛµ¿ÇÔ
+        // ë¨¸í‹°ë¦¬ì–¼ì— "Color"ë¼ëŠ” íŒŒë¼ë¯¸í„°ê°€ ìˆì–´ì•¼ ì‘ë™í•¨
         if (bOn)
         {
             DynamicMaterial->SetVectorParameterValue("Color", FLinearColor::Red);
@@ -71,10 +71,6 @@ void AItemBase::OnDropped()
         ItemMesh->SetSimulatePhysics(true);
         ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-        UE_LOG(LogTemp, Warning, TEXT("OnDropped: %s -> Collision+Physics Áï½Ã ÄÑÁü"), *GetName());
+        UE_LOG(LogTemp, Warning, TEXT("OnDropped: %s -> Collision+Physics ì¦‰ì‹œ ì¼œì§"), *GetName());
     }
 }
-
-
-
-

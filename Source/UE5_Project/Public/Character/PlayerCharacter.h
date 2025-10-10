@@ -25,34 +25,35 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* ViewCamera;
 
-	// ÀÔ·Â Ã³¸® ÇÔ¼öµé
+
+	// ì…ë ¥ ì²˜ë¦¬ í•¨ìˆ˜ë“¤
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 
 
-	// ÇöÀç ¹Ù¶óº¸´Â ¾ÆÀÌÅÛ(¿©±â¼­ºÎÅÍ Ãß°¡)
+	// í˜„ì¬ ë°”ë¼ë³´ëŠ” ì•„ì´í…œ(ì—¬ê¸°ì„œë¶€í„° ì¶”ê°€)
 	AItemBase* CurrentFocusedItem;
 
-	// ¾ÆÀÌÅÛ °¨Áö (¶óÀÎÆ®·¹ÀÌ½º)
+	// ì•„ì´í…œ ê°ì§€ (ë¼ì¸íŠ¸ë ˆì´ìŠ¤)
 	void TraceForItems();
 
 	void Interact();
 
-	void PickupItem(AItemBase* Item); //¾ÆÀÌÅÛ Áı±â
-	void ChangeItem(AItemBase* Item, const FVector& Location); //¾ÆÀÌÅÛ ¹Ù²Ù±â
-	void DropHeldItem();   // ¾ÆÀÌÅÛ ¹ö¸®±â
+	void PickupItem(AItemBase* Item); //ì•„ì´í…œ ì§‘ê¸°
+	void ChangeItem(AItemBase* Item, const FVector& Location); //ì•„ì´í…œ ë°”ê¾¸ê¸°
+	void DropHeldItem();   // ì•„ì´í…œ ë²„ë¦¬ê¸°
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	class UInputAction* DropAction;  // GÅ° ÀÔ·Â ¾×¼Ç
+	class UInputAction* DropAction;  // Gí‚¤ ì…ë ¥ ì•¡ì…˜
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	class UInputAction* InteractAction;
 
-	// ¼Õ¿¡ µé°í ÀÖ´Â ¾ÆÀÌÅÛ
+	// ì†ì— ë“¤ê³  ìˆëŠ” ì•„ì´í…œ
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	AItemBase* HeldItem;
 
-	// ¼Õ¿¡ ¾ÆÀÌÅÛ ºÙÀÏ ¼ÒÄÏ ÀÌ¸§
+	// ì†ì— ì•„ì´í…œ ë¶™ì¼ ì†Œì¼“ ì´ë¦„
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	FName HandSocketName = "RightHandSocket";
 };
