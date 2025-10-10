@@ -69,9 +69,9 @@ protected:
 private:
 
 public:
-    void ToggleSettingsMenu();
-	void OpenSettingMenu();
+    void TogglePauseMenu();
+    void OpenPauseMenu();
 
     UFUNCTION(BlueprintCallable, Category = "UI")
-	void CloseSettingMenu();
+    void ClosePauseMenu();
 };

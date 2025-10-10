@@ -54,27 +54,27 @@ void APlayerCharacterController::SetupInputComponent()
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
     {
         // IA_ToggleSettingsMenu 액션이 Triggered될 때, ToggleSettingsMenu 함수를 호출하도록 바인딩
-        EnhancedInputComponent->BindAction(IA_ToggleSettingsMenu, ETriggerEvent::Started, this, &APlayerCharacterController::ToggleSettingsMenu);
+        EnhancedInputComponent->BindAction(IA_ToggleSettingsMenu, ETriggerEvent::Started, this, &APlayerCharacterController::TogglePauseMenu);
     }
 }
 
 
-void APlayerCharacterController::ToggleSettingsMenu()
+void APlayerCharacterController::TogglePauseMenu()
 {
     // 설정 메뉴가 이미 화면에 있는지 확인
     if (SettingsMenuInstance && SettingsMenuInstance->IsInViewport())
     {
-        CloseSettingMenu();
+        ClosePauseMenu();
     }
     else
     {
         // 메뉴 열기
-        OpenSettingMenu();
+        OpenPauseMenu();
     }
 }
 
 
-void APlayerCharacterController::OpenSettingMenu()
+void APlayerCharacterController::OpenPauseMenu()
 {
     if (SettingsMenuWidgetClass)
     {
@@ -87,7 +87,7 @@ void APlayerCharacterController::OpenSettingMenu()
             // 입력 모드를 게임 및 UI 겸용으로 변경
             FInputModeGameAndUI InputModeData;
             InputModeData.SetWidgetToFocus(SettingsMenuInstance->TakeWidget()); // 포커스를 위젯으로
-            InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+            InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
             SetInputMode(InputModeData);
 
             bShowMouseCursor = true; // 마우스 커서 보이기
@@ -97,7 +97,7 @@ void APlayerCharacterController::OpenSettingMenu()
 }
 
 
-void APlayerCharacterController::CloseSettingMenu()
+void APlayerCharacterController::ClosePauseMenu()
 {
     UE_LOG(LogTemp, Warning, TEXT("CloseSettingMenu called"));
     // 메뉴 닫기
@@ -111,7 +111,6 @@ void APlayerCharacterController::CloseSettingMenu()
     bShowMouseCursor = false; // 마우스 커서 숨기기
     SetPause(false); // 게임 일시정지 해제
 }
-
 
 
 // possess
