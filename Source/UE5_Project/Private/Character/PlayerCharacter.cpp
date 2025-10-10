@@ -2,7 +2,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
-#include "Character/ItemBase.h"   
+#include "Character/ItemBase.h"
+#include "Character/QuickSlot.h"
 #include "DrawDebugHelpers.h"
 
 
@@ -59,17 +60,6 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*if (QuickSlotWidgetClass)
-	{
-		UWB_QuickSlot* QuickSlotUI = CreateWidget<UWB_QuickSlot>(this, QuickSlotWidgetClass);
-		if (QuickSlotUI)
-		{
-			QuickSlotUI->AddToViewport();
-
-			// 예시: 첫 번째 슬롯에 임시 아이콘 세팅
-			QuickSlotUI->UpdateSlotIcon(0, LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Icons/TestIcon.TestIcon")));
-		}
-	}*/
 }
 
 
@@ -106,7 +96,10 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-
+void APlayerCharacter::SetQuickSlotRef(UQuickSlot* NewRef)
+{
+	QuickSlotRef = NewRef;
+}
 
 void APlayerCharacter::TraceForItems()
 {
@@ -225,6 +218,11 @@ void APlayerCharacter::Interact()
 		HeldItem = NewItem;
 		NewItem->HighlightItem(false);
 		CurrentFocusedItem = nullptr;
+		// �����Կ� ���
+		if (QuickSlotRef)
+		{
+			QuickSlotRef->AddItemToEmptySlot(NewItem);
+		}
 		UE_LOG(LogTemp, Warning, TEXT("Interact: Picked up %s"), *NewItem->GetName());
 	}
 }
@@ -246,4 +244,53 @@ void APlayerCharacter::DropHeldItem()
 		// 손에 아무것도 없으면 아무 일도 안 함
 		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: No item in hand"));
 	}
+}
+
+void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
+{
+	if (!QuickSlotRef) return;
+
+	// ���� ���õ� ���� ����
+	QuickSlotRef->SetCurrentSlot(SlotIndex);
+	
+
+	// ������ ������ ��������
+	AItemBase* ItemToEquip = QuickSlotRef->GetItemAt(SlotIndex);
+
+	// ������ ����ִٸ� �տ� �� ������ ��������
+	if (!ItemToEquip)
+	{
+		if (HeldItem)
+		{
+			DropHeldItem();
+			UE_LOG(LogTemp, Warning, TEXT("Slot %d is empty. Dropped held item."), SlotIndex);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Slot %d is empty, nothing equipped."), SlotIndex);
+		}
+		return;
+	}
+
+	// �̹� ���� �������� ��� �ִٸ� �ƹ� ��ȭ ����
+	if (HeldItem == ItemToEquip)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Slot %d already equipped."), SlotIndex);
+		return;
+	}
+
+	// ���� ������ ��������
+	if (HeldItem)
+	{
+		DropHeldItem();
+	}
+
+	// ���õ� �����۸� �ʿ��� ���̰�
+	ItemToEquip->SetActorHiddenInGame(false);
+
+	// �� ������ �տ� ���
+	PickupItem(ItemToEquip);
+	HeldItem = ItemToEquip;
+
+	UE_LOG(LogTemp, Warning, TEXT("Equipped item from slot %d: %s"), SlotIndex, *ItemToEquip->GetName());
 }

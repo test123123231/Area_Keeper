@@ -4,8 +4,8 @@
 #include "Character/BaseCharacter.h"
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
+class UQuickSlot;
 class AItemBase;
-
 UCLASS()
 class UE5_PROJECT_API APlayerCharacter : public ABaseCharacter
 {
@@ -15,8 +15,12 @@ public:
 	APlayerCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SetQuickSlotRef(UQuickSlot* NewRef);
+	void SelectQuickSlot(int32 SlotIndex);
 protected:
 	virtual void BeginPlay() override;
+
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -56,4 +60,6 @@ private:
 	// ì†ì— ì•„ì´í…œ ë¶™ì¼ ì†Œì¼“ ì´ë¦„
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	FName HandSocketName = "RightHandSocket";
+
+	UQuickSlot* QuickSlotRef; // UI À§Á¬ ÂüÁ¶
 };

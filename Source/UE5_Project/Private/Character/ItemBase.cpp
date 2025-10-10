@@ -74,3 +74,6 @@ void AItemBase::OnDropped()
         UE_LOG(LogTemp, Warning, TEXT("OnDropped: %s -> Collision+Physics 즉시 켜짐"), *GetName());
     }
 }
+
+
+
