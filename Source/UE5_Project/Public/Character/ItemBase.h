@@ -32,6 +32,10 @@ public:
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicMaterial;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UTexture2D* ItemIcon;
+
+
 	// 하이라이트 토글 함수 
 	void HighlightItem(bool bOn);
 
