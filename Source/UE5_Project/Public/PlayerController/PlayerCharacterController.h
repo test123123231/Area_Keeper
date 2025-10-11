@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "PlayerCharacterController.generated.h"
-
 class APlayerCharacter;
 class UQuickSlot;
 class UInputMappingContext;
@@ -27,7 +26,7 @@ private:
 
 
     UPROPERTY(EditAnywhere, Category = "UI") // ������ ui�߰�
-        TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
+    TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
 
     UPROPERTY()
     UQuickSlot* QuickSlotWidget;

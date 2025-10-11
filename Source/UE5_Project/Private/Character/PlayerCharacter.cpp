@@ -236,7 +236,11 @@ void APlayerCharacter::Interact()
 		HeldItem = NewItem;
 		NewItem->HighlightItem(false);
 		CurrentFocusedItem = nullptr;
+<<<<<<< Updated upstream
 		// 퀵슬롯에 등록
+=======
+		// �����Կ� ���
+>>>>>>> Stashed changes
 		if (QuickSlotRef)
 		{
 			QuickSlotRef->AddItemToEmptySlot(NewItem);

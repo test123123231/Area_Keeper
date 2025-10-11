@@ -4,7 +4,10 @@
 #include "Character/BaseCharacter.h"
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 class UQuickSlot;
 class AItemBase;
 UCLASS()
