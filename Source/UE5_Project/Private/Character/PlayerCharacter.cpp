@@ -5,7 +5,7 @@
 #include "Character/ItemBase.h"
 #include "Character/QuickSlot.h"
 #include "DrawDebugHelpers.h"
-#include "Character/ChargealbeItem.h"
+#include "Character/ChargeableItem.h"
 
 
 APlayerCharacter::APlayerCharacter()
