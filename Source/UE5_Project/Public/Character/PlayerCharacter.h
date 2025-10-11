@@ -4,6 +4,7 @@
 #include "Character/BaseCharacter.h"
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
+
 class UQuickSlot;
 class AItemBase;
 UCLASS()
@@ -28,7 +29,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* ViewCamera;
-
 
 	// 입력 처리 함수들
 	void Move(const FInputActionValue& Value);
@@ -61,5 +61,24 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	FName HandSocketName = "RightHandSocket";
 
-	UQuickSlot* QuickSlotRef; // UI ���� ����
+	UQuickSlot* QuickSlotRef; // UI 위젯 참조
+
+
+	// 충전 상태
+    bool bIsCharging = false;
+    float ChargeTime = 0.0f;
+
+    // 홀드 충전 필요 시간(초)
+    UPROPERTY(EditAnywhere, Category="Charge")
+    float RequiredChargeTime = 2.0f;
+
+	// 충전 타겟 잠그기(TraceForItems가 유지해주는 대상과 일치하는지 확인)
+	TWeakObjectPtr<class AChargeableItem> ChargingTarget;
+
+    // 입력 처리
+    void StartCharge();
+    void StopCharge();
+
+    // 충전 로직
+    void HandleCharging(float DeltaTime);
 };

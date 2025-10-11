@@ -22,6 +22,9 @@ public:
 	virtual void OnCharged();
 
 	// 이미 충전되었는지 여부
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Charge")
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category="Charge")
 	bool bIsCharged = false;
+
+protected:
+    virtual void HighlightItem(bool bOn) override;
 };

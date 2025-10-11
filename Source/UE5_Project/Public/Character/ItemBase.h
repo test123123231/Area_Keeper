@@ -37,7 +37,7 @@ public:
 
 
 	// 하이라이트 토글 함수 
-	void HighlightItem(bool bOn);
+	virtual void HighlightItem(bool bOn);
 
 	void OnPickedUp();
 	void OnDropped();

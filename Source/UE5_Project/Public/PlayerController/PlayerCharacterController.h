@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "PlayerCharacterController.generated.h"
+
 class APlayerCharacter;
 class UQuickSlot;
 class UInputMappingContext;
@@ -19,13 +20,13 @@ protected:
     virtual void SetupInputComponent() override;
 
 private:
-    // ±âº» ÀÔ·Â ¸ÅÇÎ ÄÁÅØ½ºÆ®¸¦ ÀúÀåÇÒ º¯¼ö
+    // ï¿½âº» ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 
 
-    UPROPERTY(EditAnywhere, Category = "UI") // Äü½½·Ô uiÃß°¡
+    UPROPERTY(EditAnywhere, Category = "UI") // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ uiï¿½ß°ï¿½
         TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
 
     UPROPERTY()
