@@ -74,4 +74,5 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     void ClosePauseMenu();
+
 };

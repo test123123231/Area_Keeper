@@ -15,18 +15,25 @@ public:
     // 기본값을 설정하는 생성자
     USettingSaveGame();
 
-    // -- 저장할 설정 값들 --
+    // 저장할 설정 값들
 
     UPROPERTY(VisibleAnywhere, Category = "Settings|Sound")
     float MasterVolume;
 
-    UPROPERTY(VisibleAnywhere, Category = "Settings|Sound")
-    float MusicVolume;
-
     UPROPERTY(VisibleAnywhere, Category = "Settings|Mouse")
     float MouseSensitivity;
 
-    // -- 저장 시스템을 위한 정보 --
+	UPROPERTY(VisibleAnywhere, Category = "Settings|Screen")
+	float ScreenBrightness;
+
+	UPROPERTY(VisibleAnywhere, Category = "Settings|Screen")
+	uint32 ResolutionIndex;
+
+    /** 0: 전체 화면, 1: 테두리 없는 창모드, 2: 창 모드 */
+    UPROPERTY(VisibleAnywhere, Category = "Settings|Screen")
+    uint32 WindowModeIndex;
+
+    // 저장 시스템을 위한 정보
 
     UPROPERTY()
     FString SaveSlotName;

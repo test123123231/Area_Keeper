@@ -87,7 +87,7 @@ void APlayerCharacterController::OpenPauseMenu()
             // 입력 모드를 게임 및 UI 겸용으로 변경
             FInputModeGameAndUI InputModeData;
             InputModeData.SetWidgetToFocus(SettingsMenuInstance->TakeWidget()); // 포커스를 위젯으로
-            InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+            InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
             SetInputMode(InputModeData);
 
             bShowMouseCursor = true; // 마우스 커서 보이기

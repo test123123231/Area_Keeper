@@ -25,7 +25,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Settings")
     void ApplySettings();
 
-    // 블루프린트에서 값을 가져오고 임시로 변경하기 위한 Getter/Setter
+    void ApplySettingScreenResolution();
+
+	void ApplySettingWindowMode();
+
     UFUNCTION(BlueprintPure, Category = "Settings")
     float GetMasterVolume() const;
 
@@ -44,6 +47,41 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Settings")
     void SetMouseSensitivity(float NewValue);
 
+	UFUNCTION(BlueprintPure, Category = "Settings")
+	float GetScreenBrightness() const;
+
+	UFUNCTION(BlueprintPure, Category = "Settings")
+	float GetDefaultScreenBrightness() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	void SetScreenBrightness(float NewValue);
+
+    // 블루프린트에서 호출 가능하도록, 지원하는 모든 해상도 목록을 반환하는 함수
+    UFUNCTION(BlueprintCallable, Category = "Settings|Video")
+    TArray<FString> GetSupportedScreenResolutions() const;
+
+    // 블루프린트에서 해상도를 문자열로 받아 적용하는 함수
+    UFUNCTION(BlueprintCallable, Category = "Settings|Video")
+    void SetScreenResolution(const FString& Resolution);
+
+	UFUNCTION(BlueprintPure, Category = "Settings")
+	int GetResolutionIndex() const;
+
+	UFUNCTION(BlueprintPure, Category = "Settings")
+	int GetDefaultResolutionIndex() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	void SetResolutionIndex(int NewValue);
+
+	UFUNCTION(BlueprintPure, Category = "Settings")
+	int GetWindowModeIndex() const;
+
+	UFUNCTION(BlueprintPure, Category = "Settings")
+	int GetDefaultWindowModeIndex() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	void SetWindowModeIndex(int NewValue);
+
     // 기본값으로 되돌리기
     UFUNCTION(BlueprintCallable, Category = "Settings")
     void ResetAllSettingsToDefaults();
@@ -51,6 +89,9 @@ public:
 
 private:
     void LoadSettings();
+
+	// 현재 PC 환경에 가장 적합한 해상도/주사율 옵션의 인덱스 반환
+    uint32 FindOptimalResolutionIndex() const;
 
     // 현재 게임에 적용된 설정값을 담고 있는 인스턴스
     UPROPERTY()
