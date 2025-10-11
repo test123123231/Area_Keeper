@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/ChargealbeItem.h"
+#include "Character/ChargeableItem.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 AChargeableItem::AChargeableItem()

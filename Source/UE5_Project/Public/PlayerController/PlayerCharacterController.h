@@ -19,14 +19,14 @@ protected:
     virtual void SetupInputComponent() override;
 
 private:
-    // �⺻ �Է� ���� ���ؽ�Ʈ�� ������ ����
+    // 기본 입력 매핑 컨텍스트를 저장할 변수
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 
 
-    UPROPERTY(EditAnywhere, Category = "UI") // ������ ui�߰�
-    TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
+    UPROPERTY(EditAnywhere, Category = "UI") // 퀵슬롯 ui추가
+        TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
 
     UPROPERTY()
     UQuickSlot* QuickSlotWidget;

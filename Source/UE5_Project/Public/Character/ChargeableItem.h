@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/ItemBase.h"
-#include "ChargealbeItem.generated.h"
+#include "ChargeableItem.generated.h"
 
 /**
  * 

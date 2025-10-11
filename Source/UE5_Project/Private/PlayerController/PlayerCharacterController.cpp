@@ -1,11 +1,7 @@
 #include "PlayerController/PlayerCharacterController.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
-<<<<<<< Updated upstream
 #include "Character/QuickSlot.h"   // QuickSlot ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
-=======
-#include "Character/QuickSlot.h"   // QuickSlot À§Á¬ Çì´õ
->>>>>>> Stashed changes
 #include "Character/PlayerCharacter.h"
 
 void APlayerCharacterController::BeginPlay()
@@ -25,12 +21,6 @@ void APlayerCharacterController::BeginPlay()
         if (QuickSlotWidget)
         {
             QuickSlotWidget->AddToViewport();
-
-<<<<<<< Updated upstream
-            // PlayerCharacterï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-=======
-            // PlayerCharacter¿Í ¿¬°á
->>>>>>> Stashed changes
             APlayerCharacter* PlayerChar1 = Cast<APlayerCharacter>(GetPawn());
             if (PlayerChar1)
             {
@@ -46,12 +36,6 @@ void APlayerCharacterController::BeginPlay()
 void APlayerCharacterController::SetupInputComponent()
 {
     Super::SetupInputComponent();
-
-<<<<<<< Updated upstream
-    // ï¿½ï¿½ï¿½ï¿½ Å° ï¿½ï¿½ï¿½Îµï¿½
-=======
-    // ¼ýÀÚ Å° ¹ÙÀÎµù
->>>>>>> Stashed changes
     InputComponent->BindKey(EKeys::One, IE_Pressed, this, &APlayerCharacterController::SelectSlot1);
     InputComponent->BindKey(EKeys::Two, IE_Pressed, this, &APlayerCharacterController::SelectSlot2);
 }

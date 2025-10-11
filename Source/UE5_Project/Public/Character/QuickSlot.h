@@ -39,29 +39,29 @@ public:
     void SetCurrentSlot(int32 NewIndex);
     AItemBase* GetItemAt(int32 Index) const;
 
-    // ºó ½½·Ô¿¡ ¾ÆÀÌÅÛ Ãß°¡
+    // ë¹ˆ ìŠ¬ë¡¯ì— ì•„ì´í…œ ì¶”ê°€
     void AddItemToEmptySlot(AItemBase* NewItem);
 
-    // ½½·Ô ²Ë Ã¡´ÂÁö È®ÀÎ
+    // ìŠ¬ë¡¯ ê½‰ ì°¼ëŠ”ì§€ í™•ì¸
     bool IsFull() const;
 
 
 private:
-    // ½½·Ô µ¥ÀÌÅÍ 2°³
+    // ìŠ¬ë¡¯ ë°ì´í„° 2ê°œ
     UPROPERTY()
     TArray<FQuickSlotData> Slots;
 
-    // ÇöÀç ¼±ÅÃµÈ ½½·Ô ÀÎµ¦½º
+    // í˜„ì¬ ì„ íƒëœ ìŠ¬ë¡¯ ì¸ë±ìŠ¤
     int32 CurrentSlotIndex = 0;
     void UpdateSlotHighlight();
 
-    // ºí·çÇÁ¸°Æ® À§Á¬ ¿¬°á
+    // ë¸”ë£¨í”„ë¦°íŠ¸ ìœ„ì ¯ ì—°ê²°
     UPROPERTY(meta = (BindWidget))
     UImage* Img_Icon1;
 
     UPROPERTY(meta = (BindWidget))
     UImage* Img_Icon2;
 
-    // ½½·Ô ¾ÆÀÌÄÜ ¾÷µ¥ÀÌÆ®¿ë
+    // ìŠ¬ë¡¯ ì•„ì´ì½˜ ì—…ë°ì´íŠ¸ìš©
     void UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon);
 };
