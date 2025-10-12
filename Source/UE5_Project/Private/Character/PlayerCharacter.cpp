@@ -317,11 +317,14 @@ void APlayerCharacter::StartCharge()
 {
     // TraceForItems가 갱신해둔 현재 포커스 대상으로부터만 시작
     AChargeableItem* Target = Cast<AChargeableItem>(CurrentFocusedItem);
-    if (!Target || Target->bIsCharged)
+    if (!Target)
     {
 		UE_LOG(LogTemp, Display, TEXT("충전할 수 있는 대상이 아님"));
         return;
     }
+	if(Target->bIsCharged){
+		UE_LOG(LogTemp, Display, TEXT("쿨타임이 %d 초 남음"), (int32)(15.0f - Target-> Cooldown));
+	}
 
     ChargingTarget = Target;  // ← 타겟 잠금
     bIsCharging = true;
