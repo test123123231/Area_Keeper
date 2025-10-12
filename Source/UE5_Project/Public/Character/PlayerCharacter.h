@@ -4,7 +4,6 @@
 #include "Character/BaseCharacter.h"
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
-
 class UQuickSlot;
 class AItemBase;
 UCLASS()
