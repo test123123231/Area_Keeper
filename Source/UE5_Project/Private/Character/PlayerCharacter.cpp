@@ -27,10 +27,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// PlayerInputComponent¸¦ Çâ»óµÈ ÀÔ·Â ÄÄÆ÷³ÍÆ®·Î Ä³½ºÆÃ
+	// PlayerInputComponentë¥¼ í–¥ìƒëœ ì…ë ¥ ì»´í¬ë„ŒíŠ¸ë¡œ ìºìŠ¤íŒ…
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// ÀÔ·Â ¾×¼Ç°ú Ã³¸® ÇÔ¼ö¸¦ ¹ÙÀÎµù
+		// ì…ë ¥ ì•¡ì…˜ê³¼ ì²˜ë¦¬ í•¨ìˆ˜ë¥¼ ë°”ì¸ë”©
 		if (MoveAction) {
 			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		}
@@ -48,19 +48,19 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
-	// ÀÔ·Â°ª(Vector2D)À» °¡Á®¿È
+	// ì…ë ¥ê°’(Vector2D)ì„ ê°€ì ¸ì˜´
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// ÄÁÆ®·Ñ·¯ÀÇ È¸Àü ¹æÇâÀ» ±âÁØÀ¸·Î ÀüÈÄ/ÁÂ¿ì ¹æÇâÀ» Ã£±â
+		// ì»¨íŠ¸ë¡¤ëŸ¬ì˜ íšŒì „ ë°©í–¥ì„ ê¸°ì¤€ìœ¼ë¡œ ì „í›„/ì¢Œìš° ë°©í–¥ì„ ì°¾ê¸°
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// ÇØ´ç ¹æÇâÀ¸·Î ÀÌµ¿ ÀÔ·ÂÀ» Ãß°¡
+		// í•´ë‹¹ ë°©í–¥ìœ¼ë¡œ ì´ë™ ì…ë ¥ì„ ì¶”ê°€
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
@@ -73,7 +73,7 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		// ¸¶¿ì½º ÀÔ·Â¿¡ µû¶ó ÄÁÆ®·Ñ·¯ÀÇ Yaw, Pitch °ªÀ» Á¶Àı
+		// ë§ˆìš°ìŠ¤ ì…ë ¥ì— ë”°ë¼ ì»¨íŠ¸ë¡¤ëŸ¬ì˜ Yaw, Pitch ê°’ì„ ì¡°ì ˆ
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
