@@ -6,6 +6,7 @@
 #include "Character/QuickSlot.h"
 #include "DrawDebugHelpers.h"
 #include "Character/ChargeableItem.h"
+#include "Components/AttributeComponent.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -366,6 +367,10 @@ void APlayerCharacter::HandleCharging(float DeltaTime)
         ChargingTarget.Reset();
 
 		UE_LOG(LogTemp, Display, TEXT("부적 충전 완료!"));
+		if (UAttributeComponent* Attr = FindComponentByClass<UAttributeComponent>())
+    		{
+        		Attr->SetAmulet(5.0f);   //최대로 충전
+    		}
     }
 
 }
