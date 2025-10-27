@@ -6,26 +6,31 @@
 void AMainMenuPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	// ¸¶¿ì½º Ä¿¼­ Ç¥½Ã
-	bShowMouseCursor = true;
-	// ·ÎÄÃ ÇÃ·¹ÀÌ¾î ¼­ºê½Ã½ºÅÛÀ» °¡Á®¿É´Ï´Ù.
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		// ±âº» ¸ÅÇÎ ÄÁÅØ½ºÆ®¸¦ Ãß°¡ÇÕ´Ï´Ù.
-		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-	}
 
-	// MainMenuWidgetClass º¯¼ö¿¡ À¯È¿ÇÑ À§Á¬ Å¬·¡½º°¡ ÇÒ´çµÇ¾ú´ÂÁö È®ÀÎÇÕ´Ï´Ù.
+	OpenMainMenu();
+}
+
+void AMainMenuPlayerController::OpenMainMenu()
+{
+	// MainMenuWidgetClass ë³€ìˆ˜ì— ìœ íš¨í•œ ìœ„ì ¯ í´ë˜ìŠ¤ê°€ í• ë‹¹ë˜ì—ˆëŠ”ì§€ í™•ì¸í•©ë‹ˆë‹¤.
 	if (MainMenuWidgetClass)
 	{
-		// À§Á¬ ÀÎ½ºÅÏ½º¸¦ »ı¼ºÇÏ°í MainMenuWidgetInstance º¯¼ö¿¡ ÀúÀåÇÕ´Ï´Ù.
+		// ìœ„ì ¯ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ìƒì„±í•˜ê³  MainMenuWidgetInstance ë³€ìˆ˜ì— ì €ì¥í•©ë‹ˆë‹¤.
 		MainMenuWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
 
-		// À§Á¬ »ı¼ºÀÌ ¼º°øÇß´ÂÁö ´Ù½Ã ÇÑ¹ø È®ÀÎÇÕ´Ï´Ù.
+		// ìœ„ì ¯ ìƒì„±ì´ ì„±ê³µí–ˆëŠ”ì§€ ë‹¤ì‹œ í•œë²ˆ í™•ì¸í•©ë‹ˆë‹¤.
 		if (MainMenuWidgetInstance)
 		{
-			// »ı¼ºµÈ À§Á¬À» ºäÆ÷Æ®¿¡ Ãß°¡ÇÏ¿© È­¸é¿¡ Ç¥½ÃÇÕ´Ï´Ù.
+			// ìƒì„±ëœ ìœ„ì ¯ì„ ë·°í¬íŠ¸ì— ì¶”ê°€í•˜ì—¬ í™”ë©´ì— í‘œì‹œí•©ë‹ˆë‹¤.
 			MainMenuWidgetInstance->AddToViewport();
+
+			// ì…ë ¥ ëª¨ë“œë¥¼ ê²Œì„ ë° UI ê²¸ìš©ìœ¼ë¡œ ë³€ê²½
+			FInputModeGameAndUI InputModeData;
+			InputModeData.SetWidgetToFocus(MainMenuWidgetInstance->TakeWidget()); // í¬ì»¤ìŠ¤ë¥¼ ìœ„ì ¯ìœ¼ë¡œ
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputModeData);
+
+			bShowMouseCursor = true; // ë§ˆìš°ìŠ¤ ì»¤ì„œ ë³´ì´ê¸°
 		}
 	}
 }
