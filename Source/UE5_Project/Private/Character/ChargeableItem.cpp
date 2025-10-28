@@ -19,7 +19,7 @@ void AChargeableItem::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // 충전 중이면 쿨타임 경과 체크
+    // 충전이 된 상태면 쿨타임 경과
     if (bIsCharged)
     {
         Cooldown += DeltaTime;
@@ -35,15 +35,16 @@ void AChargeableItem::Tick(float DeltaTime)
     }
 }
 
-void AChargeableItem::OnCharged()
+// 충전 로직
+bool AChargeableItem::OnCharged()
 {
-	if (bIsCharged) return;
+	if (bIsCharged) 
+        return false;
 	bIsCharged = true;
+    Cooldown = 0.0f;
 	HighlightItem(true);
-
-    // 임시 텍스트 표시, 추후 ui와 연결 예정
-	UE_LOG(LogTemp, Display, TEXT("ui 업데이트"));
 	SetActorTickEnabled(true);  
+    return true;
 }
 
 // 충전용 아이템 하이라이트

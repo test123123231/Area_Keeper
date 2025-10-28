@@ -205,7 +205,7 @@ void APlayerCharacter::Interact()
 	if (CurrentFocusedItem && Cast<AChargeableItem>(CurrentFocusedItem))
     {
         // 충전은 StartCharge/HandleCharging 로직으로만 처리
-        UE_LOG(LogTemp, Display,  TEXT("충전용, 소유x"));
+        UE_LOG(LogTemp, Display,  TEXT("충전용"));
         return;
     }
 
@@ -319,15 +319,9 @@ void APlayerCharacter::StartCharge()
     // TraceForItems가 갱신해둔 현재 포커스 대상으로부터만 시작
     AChargeableItem* Target = Cast<AChargeableItem>(CurrentFocusedItem);
     if (!Target)
-    {
-		UE_LOG(LogTemp, Display, TEXT("충전할 수 있는 대상이 아님"));
         return;
-    }
-	if(Target->bIsCharged){
-		UE_LOG(LogTemp, Display, TEXT("쿨타임이 %d 초 남음"), (int32)(15.0f - Target-> Cooldown));
-	}
 
-    ChargingTarget = Target;  // ← 타겟 잠금
+    ChargingTarget = Target;  // 타겟 잠금
     bIsCharging = true;
     ChargeTime = 0.0f;
 
@@ -355,22 +349,36 @@ void APlayerCharacter::HandleCharging(float DeltaTime)
         StopCharge();
         return;
     }
+	//쿨타임인지 판정
+	if (ChargingTarget->bIsCharged)
+    {
+        const float Remain = FMath::Max(0.f, ChargingTarget->RechargeCooldown - ChargingTarget->Cooldown);
+        UE_LOG(LogTemp, Display, TEXT("아직 쿨타임입니다. 남은 시간: %.0f 초"), Remain);
+        StopCharge();
+        return;
+    }
 
     ChargeTime += DeltaTime;
 
+	//충전 시간이 지난후 실행
     if (ChargeTime >= RequiredChargeTime)
     {
         bIsCharging = false;
 
-        // 최종 적용
-        ChargingTarget->OnCharged();
-        ChargingTarget.Reset();
+        bool ChargeSuccess = ChargingTarget->OnCharged();
 
-		UE_LOG(LogTemp, Display, TEXT("부적 충전 완료!"));
-		if (UAttributeComponent* Attr = FindComponentByClass<UAttributeComponent>())
+		if(ChargeSuccess)
+		{
+			UE_LOG(LogTemp, Display, TEXT("부적의 충전 완료되었습니다"));
+			if (UAttributeComponent* Attr = FindComponentByClass<UAttributeComponent>())
     		{
         		Attr->SetAmulet(5.0f);   //최대로 충전
     		}
+		
+		}
+
+		ChargingTarget.Reset();
+		ChargeTime = 0.0f;
     }
 
 }

@@ -20,9 +20,9 @@ public:
 
 	// 충전 완료 시 호출
 	UFUNCTION(BlueprintCallable, Category="Charge")
-	virtual void OnCharged();
+	virtual bool OnCharged();
 
-	// 이미 충전되었는지 여부
+	// 충전 쿨타임이 도는지 유무
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category="Charge")
 	bool bIsCharged = false;
 
