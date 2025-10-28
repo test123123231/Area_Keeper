@@ -40,11 +40,22 @@ public:
     AItemBase* GetItemAt(int32 Index) const;
 
     // 빈 슬롯에 아이템 추가
-    void AddItemToEmptySlot(AItemBase* NewItem);
+    //void AddItemToEmptySlot(AItemBase* NewItem);
 
     // 슬롯 꽉 찼는지 확인
     bool IsFull() const;
 
+    //void RemoveItem(AItemBase* TargetItem); // 아이템 제거
+    //void ReplaceItem(AItemBase* OldItem, AItemBase* NewItem); // 아이템 교체
+
+    int32 FindSlotIndexByItem(AItemBase* TargetItem) const;
+    void UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon);
+    void ForceRefreshUI();
+
+
+    int32 GetCurrentSlotIndex() const { return CurrentSlotIndex; }
+    void AssignItemToSlot(int32 Index, AItemBase* NewItem);
+    void RemoveItemAt(int32 Index);
 
 private:
     // 슬롯 데이터 2개
@@ -62,6 +73,5 @@ private:
     UPROPERTY(meta = (BindWidget))
     UImage* Img_Icon2;
 
-    // 슬롯 아이콘 업데이트용
-    void UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon);
+   
 };
