@@ -205,3 +205,36 @@ void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
     }
 }
 
+//중앙 텍스트 관련 함수들
+void APlayerCharacterController::ShowCenterText()
+{
+    if(HUDRef)
+    {
+        HUDRef -> ShowCenterText();
+    }
+}
+
+void APlayerCharacterController::HideCenterText()
+{
+    if(HUDRef)
+    {
+        HUDRef -> HideCenterText();
+    }
+}
+
+void APlayerCharacterController::HideCenterText()
+{
+    if(HUDRef)
+    {
+        HUDRef -> HideCenterText();
+    }
+}
+
+void APlayerCharacterController::UpdateCenterText(const FString& Text)
+{
+    if(HUDRef)
+    {
+        HUDRef -> UpdateCenterText(Text);
+    }
+}
+
