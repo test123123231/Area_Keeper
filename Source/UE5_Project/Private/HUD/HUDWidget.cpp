@@ -21,3 +21,27 @@ void UHUDWidget::UpdateAmulet(float CurrentAmulet)
         AmuletText->SetText(FText::AsNumber(CurrentAmulet)); 
     }
 }
+
+void UHUDWidget::ShowCenterText()
+{
+    if (CenterText)
+    {
+        CenterText->SetVisibility(ESlateVisibility::Visible);
+    }
+}
+
+void UHUDWidget::HideCenterText()
+{
+    if (CenterText)
+    {
+        CenterText->SetVisibility(ESlateVisibility::Hidden);
+    }
+}
+
+void UHUDWidget::UpdateCenterText(const FString& Text)
+{
+    if (CenterText)
+    {
+        CenterText->SetText(FText::FromString(Text));
+    }
+}
