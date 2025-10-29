@@ -45,6 +45,6 @@ public:
     void HideCenterText();
 
 	// 중앙 텍스트 업데이트
-	UFUNCTION(BluprintCallable)
+	UFUNCTION(BlueprintCallable)
 	void UpdateCenterText(const FString& Text);
 };

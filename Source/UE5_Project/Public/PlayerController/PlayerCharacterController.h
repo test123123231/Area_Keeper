@@ -39,16 +39,6 @@ protected:
     UFUNCTION()
     void HandleAmuletChanged(float NewAmulet);
 
-    // 중앙 텍스트 관련 함수들
-    UFUNCTION()
-    void ShowCenterText();
-
-    UFUNCTION()
-    void HideCenterText();
-
-    UFUNCTION()
-    void UpdateCenterText(const FString& Text);
-
     //HUD로 사용할 위젯 블루프린트
     UPROPERTY(EditDefaultsOnly, Category="UI")
     TSubclassOf<UHUDWidget> HUDWidgetClass;
@@ -88,6 +78,7 @@ protected:
     UUserWidget* SettingsMenuInstance;
 
 private:
+    FTimerHandle HideTextTimerHandle;
 
 public:
     void TogglePauseMenu();
@@ -95,5 +86,11 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     void ClosePauseMenu();
+
+    // 중앙 텍스트 관련 함수들
+    void ShowText();
+    void ShowAutoText(float Seconds);
+    void HideText();
+    void UpdateText(const FString& Text);
 
 };

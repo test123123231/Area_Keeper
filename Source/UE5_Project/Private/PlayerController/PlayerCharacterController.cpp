@@ -206,15 +206,32 @@ void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
 }
 
 //중앙 텍스트 관련 함수들
-void APlayerCharacterController::ShowCenterText()
+void APlayerCharacterController::ShowText()
 {
     if(HUDRef)
     {
+        GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
         HUDRef -> ShowCenterText();
     }
 }
 
-void APlayerCharacterController::HideCenterText()
+void APlayerCharacterController::ShowAutoText(float Seconds)
+{
+    if (HUDRef)
+    {
+        HUDRef->ShowCenterText();
+        GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
+        GetWorldTimerManager().SetTimer(
+            HideTextTimerHandle,
+            this,
+            &APlayerCharacterController::HideText,
+            Seconds,
+            false
+        );
+    }
+}
+
+void APlayerCharacterController::HideText()
 {
     if(HUDRef)
     {
@@ -222,15 +239,7 @@ void APlayerCharacterController::HideCenterText()
     }
 }
 
-void APlayerCharacterController::HideCenterText()
-{
-    if(HUDRef)
-    {
-        HUDRef -> HideCenterText();
-    }
-}
-
-void APlayerCharacterController::UpdateCenterText(const FString& Text)
+void APlayerCharacterController::UpdateText(const FString& Text)
 {
     if(HUDRef)
     {

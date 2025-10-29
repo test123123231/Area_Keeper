@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "Character/ChargeableItem.h"
 #include "Components/AttributeComponent.h"
+#include "PlayerController/PlayerCharacterController.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -324,13 +325,15 @@ void APlayerCharacter::StartCharge()
     ChargingTarget = Target;  // 타겟 잠금
     bIsCharging = true;
     ChargeTime = 0.0f;
-
-	UE_LOG(LogTemp, Display, TEXT("부적 충전 시작... E를 계속 누르세요"));
 }
 
 void APlayerCharacter::StopCharge()
 {
     if (!bIsCharging) return;
+	if(auto* Pcc = Cast<APlayerCharacterController>(GetController()))
+	{
+		Pcc -> HideText();
+	}
     bIsCharging = false;
     ChargeTime = 0.0f;
     ChargingTarget.Reset();
@@ -349,27 +352,33 @@ void APlayerCharacter::HandleCharging(float DeltaTime)
         StopCharge();
         return;
     }
+	auto* Pcc = Cast<APlayerCharacterController>(GetController());
+
 	//쿨타임인지 판정
 	if (ChargingTarget->bIsCharged)
     {
         const float Remain = FMath::Max(0.f, ChargingTarget->RechargeCooldown - ChargingTarget->Cooldown);
-        UE_LOG(LogTemp, Display, TEXT("아직 쿨타임입니다. 남은 시간: %.0f 초"), Remain);
-        StopCharge();
+		Pcc -> ShowAutoText(2.0f);
+		Pcc -> UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain));
         return;
     }
-
+	
+	Pcc -> ShowText();
+	Pcc -> UpdateText(FString::Printf(TEXT("충전 중.. %.1f초"), (2.0f - ChargeTime)));
     ChargeTime += DeltaTime;
+
 
 	//충전 시간이 지난후 실행
     if (ChargeTime >= RequiredChargeTime)
     {
+		Pcc -> UpdateText(TEXT("충전 완료"));
+		Pcc -> ShowAutoText(2.0f);
         bIsCharging = false;
 
         bool ChargeSuccess = ChargingTarget->OnCharged();
 
 		if(ChargeSuccess)
 		{
-			UE_LOG(LogTemp, Display, TEXT("부적의 충전 완료되었습니다"));
 			if (UAttributeComponent* Attr = FindComponentByClass<UAttributeComponent>())
     		{
         		Attr->SetAmulet(5.0f);   //최대로 충전

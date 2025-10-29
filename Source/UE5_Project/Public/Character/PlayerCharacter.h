@@ -67,6 +67,7 @@ private:
     bool bIsCharging = false;
     float ChargeTime = 0.0f;
 
+	
     // 홀드 충전 필요 시간(초)
     UPROPERTY(EditAnywhere, Category="Charge")
     float RequiredChargeTime = 2.0f;
