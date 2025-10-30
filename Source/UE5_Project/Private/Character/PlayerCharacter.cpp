@@ -200,7 +200,7 @@ void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
 
 
 // Interact (방어적)
-void APlayerCharacter::Interact()
+/*void APlayerCharacter::Interact()
 {
 	//충전 메쉬는 소유하지 않게 하는 가드
 	if (CurrentFocusedItem && Cast<AChargeableItem>(CurrentFocusedItem))
@@ -219,14 +219,21 @@ void APlayerCharacter::Interact()
 	// 만약 손에 다른 아이템 있으면 먼저 놓기
 	if (HeldItem && HeldItem != NewItem)
 	{
+		if (QuickSlotRef)
+		{
+			QuickSlotRef->RemoveItem(HeldItem);
+		}
+
 		FVector DropLocation = NewItem->GetActorLocation();
 		DropLocation.Z += 50.f;
 		ChangeItem(HeldItem, DropLocation);
-		UE_LOG(LogTemp, Warning, TEXT("Interact: Dropped %s"), *HeldItem->GetName());
+		
+
+		//UE_LOG(LogTemp, Warning, TEXT("Interact: Dropped %s"), *HeldItem->GetName());
 		HeldItem = nullptr;
 	}
 
-	if (NewItem->ItemMesh)
+	/*if (NewItem->ItemMesh)
 	{
 		NewItem->ItemMesh->SetSimulatePhysics(false);
 		NewItem->ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -241,20 +248,37 @@ void APlayerCharacter::Interact()
 		// 퀵슬롯에 등록
 		if (QuickSlotRef)
 		{
-			QuickSlotRef->AddItemToEmptySlot(NewItem);
+			int32 FoundIndex = QuickSlotRef->FindSlotIndexByItem(NewItem);
+			if (FoundIndex == INDEX_NONE)
+			{
+				if (QuickSlotRef->IsFull())
+				{
+					QuickSlotRef->ReplaceItem(nullptr, NewItem);
+				}
+				else
+				{
+					QuickSlotRef->AddItemToEmptySlot(NewItem);
+				}
+			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Interact: Picked up %s"), *NewItem->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("Interact: Picked up %s"), *NewItem->GetName());
 	}
-}
+}*/
 
-void APlayerCharacter::DropHeldItem()
+/*void APlayerCharacter::DropHeldItem()
 {
 	if (HeldItem) // 손에 아이템이 있을 때만 실행
 	{
+		if (QuickSlotRef)
+		{
+			QuickSlotRef->RemoveItem(HeldItem);
+		}
+
 		FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
 		DropLocation.Z += 30.f; // 바닥에 묻히지 않도록 살짝 올림
 
 		ChangeItem(HeldItem, DropLocation);
+
 		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: Dropped %s"), *HeldItem->GetName());
 
 		HeldItem = nullptr;
@@ -264,7 +288,75 @@ void APlayerCharacter::DropHeldItem()
 		// 손에 아무것도 없으면 아무 일도 안 함
 		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: No item in hand"));
 	}
+}*/
+
+void APlayerCharacter::Interact()
+{
+	if (!CurrentFocusedItem || !QuickSlotRef) return;
+
+	//충전 메쉬는 소유하지 않게 하는 가드
+	if (CurrentFocusedItem && Cast<AChargeableItem>(CurrentFocusedItem))
+    {
+        // 충전은 StartCharge/HandleCharging 로직으로만 처리
+        UE_LOG(LogTemp, Display,  TEXT("충전용"));
+        return;
+    }
+
+	AItemBase* NewItem = CurrentFocusedItem;
+	if (!IsValid(NewItem)) return;
+
+	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex(); // ���� ���õ� ���� �ε���
+	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
+
+	// �տ� �ٸ� �������� ������ ��ü ó��
+	if (HeldItem && HeldItem != NewItem)
+	{
+		// ���� �������� �ش� ���Կ��� ����
+		//QuickSlotRef->RemoveItem(HeldItem);
+		QuickSlotRef->RemoveItemAt(TargetSlotIndex);
+
+		FVector DropLocation = NewItem->GetActorLocation();
+		DropLocation.Z += 50.f;
+		ChangeItem(HeldItem, DropLocation);
+		HeldItem = nullptr;
+	}
+
+	// �� ������ �ݱ�
+	PickupItem(NewItem);
+	HeldItem = NewItem;
+	NewItem->HighlightItem(false);
+	CurrentFocusedItem = nullptr;
+
+	// ������ UI ������Ʈ
+	//int32 FoundIndex = QuickSlotRef->FindSlotIndexByItem(NewItem);
+	//if (FoundIndex == INDEX_NONE) QuickSlotRef->AssignItemToSlot(TargetSlotIndex, NewItem);
+	QuickSlotRef->AssignItemToSlot(TargetSlotIndex, NewItem);
+
+
+	UE_LOG(LogTemp, Warning, TEXT("Interact: Added %s to slot %d"), *NewItem->GetName(), TargetSlotIndex);
 }
+
+void APlayerCharacter::DropHeldItem()
+{
+	if (!HeldItem || !QuickSlotRef) return;
+
+	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
+	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
+
+	QuickSlotRef->RemoveItemAt(TargetSlotIndex); // ���� ���� �������� ����
+
+	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
+	DropLocation.Z += 30.f;
+
+	HeldItem->SetActorHiddenInGame(false);
+	HeldItem->SetActorEnableCollision(true);
+
+	ChangeItem(HeldItem, DropLocation);
+	HeldItem = nullptr;
+
+	UE_LOG(LogTemp, Warning, TEXT("Dropped held item from slot %d"), TargetSlotIndex);
+}
+
 
 void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 {
@@ -282,7 +374,12 @@ void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 	{
 		if (HeldItem)
 		{
-			DropHeldItem();
+			//DropHeldItem();
+			HeldItem->SetActorHiddenInGame(true);
+
+			HeldItem->SetActorEnableCollision(false);
+
+			HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			UE_LOG(LogTemp, Warning, TEXT("Slot %d is empty. Dropped held item."), SlotIndex);
 		}
 		else
@@ -302,15 +399,20 @@ void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 	// 기존 아이템 내려놓기
 	if (HeldItem)
 	{
-		DropHeldItem();
+		HeldItem->SetActorHiddenInGame(true);
+
+		HeldItem->SetActorEnableCollision(false);
+
+		HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		//DropHeldItem();
 	}
 
 	// 선택된 아이템만 맵에서 보이게
 	ItemToEquip->SetActorHiddenInGame(false);
-
-	// 새 아이템 손에 쥐기
+	ItemToEquip->SetActorEnableCollision(false);
 	PickupItem(ItemToEquip);
 	HeldItem = ItemToEquip;
+	HeldItem->SetActorHiddenInGame(false);
 
 	UE_LOG(LogTemp, Warning, TEXT("Equipped item from slot %d: %s"), SlotIndex, *ItemToEquip->GetName());
 }
