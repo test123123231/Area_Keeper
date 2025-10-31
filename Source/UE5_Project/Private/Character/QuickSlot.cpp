@@ -1,4 +1,4 @@
-#include "Character/QuickSlot.h"
+ï»¿#include "Character/QuickSlot.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
 
@@ -6,7 +6,7 @@ void UQuickSlot::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    // ½½·Ô 2°³ ÃÊ±âÈ­
+    // ìŠ¬ë¡¯ 2ê°œ ì´ˆê¸°í™”
     Slots.SetNum(2);
     for (FQuickSlotData& EachSlot : Slots)
     {
@@ -17,7 +17,7 @@ void UQuickSlot::NativeConstruct()
 
     CurrentSlotIndex = 0;
 
-    // ÃÊ±â ¾ÆÀÌÄÜ ºñ¿ì±â (UI¿¡ ¾Æ¹«°Íµµ Ç¥½Ã ¾È ÇÔ)
+    // ì´ˆê¸° ì•„ì´ì½˜ ë¹„ìš°ê¸° (UIì— ì•„ë¬´ê²ƒë„ í‘œì‹œ ì•ˆ í•¨)
     if (Img_Icon1) Img_Icon1->SetBrushFromTexture(nullptr);
     if (Img_Icon2) Img_Icon2->SetBrushFromTexture(nullptr);
     UpdateSlotHighlight();
@@ -30,7 +30,7 @@ void UQuickSlot::NativeConstruct()
         return;
     }
 
-    // ½½·Ô ¼øÈ¸ÇÏ¸ç ºó °ø°£ Ã£±â
+    // ìŠ¬ë¡¯ ìˆœíšŒí•˜ë©° ë¹ˆ ê³µê°„ ì°¾ê¸°
     for (int32 i = 0; i < Slots.Num(); i++)
     {
         if (!Slots[i].bIsOccupied)
@@ -50,11 +50,11 @@ void UQuickSlot::NativeConstruct()
         }
     }
 
-    // ¿©±â±îÁö ¿Ô´Ù´Â °Ç ½½·ÔÀÌ ¸ðµÎ Ã¡´Ù´Â ÀÇ¹Ì
+    // ì—¬ê¸°ê¹Œì§€ ì™”ë‹¤ëŠ” ê±´ ìŠ¬ë¡¯ì´ ëª¨ë‘ ì°¼ë‹¤ëŠ” ì˜ë¯¸
     //UE_LOG(LogTemp, Warning, TEXT("QuickSlot: All slots are full!"));
 }*/
 /*
-// ½½·ÔÀÌ ¸ðµÎ Ã¡´ÂÁö ÆÇ´Ü
+// ìŠ¬ë¡¯ì´ ëª¨ë‘ ì°¼ëŠ”ì§€ íŒë‹¨
 bool UQuickSlot::IsFull() const
 {
     //return Slots.Num() == 2 && Slots[0].bIsOccupied && Slots[1].bIsOccupied;
@@ -62,7 +62,7 @@ bool UQuickSlot::IsFull() const
 }
 
 
-// ¾ÆÀÌÄÜ ¾÷µ¥ÀÌÆ® (°øÅë ÇÔ¼ö)
+// ì•„ì´ì½˜ ì—…ë°ì´íŠ¸ (ê³µí†µ í•¨ìˆ˜)
 void UQuickSlot::UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon)
 {
     if (SlotIndex == 0 && Img_Icon1)
@@ -90,7 +90,7 @@ AItemBase* UQuickSlot::GetItemAt(int32 Index) const
     return nullptr;
 }
 
-// ÇÏÀÌ¶óÀÌÆ® »ö»ó º¯°æ (¼±ÅÃµÈ ½½·Ô¸¸ ³ë¶þ°Ô)
+// í•˜ì´ë¼ì´íŠ¸ ìƒ‰ìƒ ë³€ê²½ (ì„ íƒëœ ìŠ¬ë¡¯ë§Œ ë…¸ëž—ê²Œ)
 void UQuickSlot::UpdateSlotHighlight()
 {
     FLinearColor NormalColor = FLinearColor::White;
@@ -128,7 +128,7 @@ void UQuickSlot::UpdateSlotHighlight()
             Slots[i].Icon = nullptr;
             Slots[i].bIsOccupied = false;
 
-            // UI ¾ÆÀÌÄÜ Á¦°Å
+            // UI ì•„ì´ì½˜ ì œê±°
             UpdateSlotIcon(i, nullptr);
             UE_LOG(LogTemp, Warning, TEXT("QuickSlot: Removed item from slot %d"), i);
             return;
@@ -170,7 +170,7 @@ void UQuickSlot::UpdateSlotHighlight()
 }*/
 
 
-// Æ¯Á¤ ¾ÆÀÌÅÛÀÌ µé¾î ÀÖ´Â ½½·Ô ÀÎµ¦½º Ã£±â
+// íŠ¹ì • ì•„ì´í…œì´ ë“¤ì–´ ìžˆëŠ” ìŠ¬ë¡¯ ì¸ë±ìŠ¤ ì°¾ê¸°
 int32 UQuickSlot::FindSlotIndexByItem(AItemBase* TargetItem) const
 {
     for (int32 i = 0; i < Slots.Num(); i++)
@@ -181,7 +181,7 @@ int32 UQuickSlot::FindSlotIndexByItem(AItemBase* TargetItem) const
     return INDEX_NONE;
 }
 
-// UI °­Á¦ »õ·Î°íÄ§
+// UI ê°•ì œ ìƒˆë¡œê³ ì¹¨
 void UQuickSlot::ForceRefreshUI()
 {
     if (Img_Icon1) Img_Icon1->InvalidateLayoutAndVolatility();
@@ -224,14 +224,6 @@ void UQuickSlot::UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon)
     else if (SlotIndex == 1 && Img_Icon2)
         Img_Icon2->SetBrushFromTexture(NewIcon);
 }
-
-
-
-
-
-
-
-
 
 
 void UQuickSlot::AssignItemToSlot(int32 Index, AItemBase* NewItem)

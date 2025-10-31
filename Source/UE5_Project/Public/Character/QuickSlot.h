@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -39,14 +39,14 @@ public:
     void SetCurrentSlot(int32 NewIndex);
     AItemBase* GetItemAt(int32 Index) const;
 
-    // ºó ½½·Ô¿¡ ¾ÆÀÌÅÛ Ãß°¡
+    // ë¹ˆ ìŠ¬ë¡¯ì— ì•„ì´í…œ ì¶”ê°€
     //void AddItemToEmptySlot(AItemBase* NewItem);
 
-    // ½½·Ô ²Ë Ã¡´ÂÁö È®ÀÎ
+    // ìŠ¬ë¡¯ ê½‰ ì°¼ëŠ”ì§€ í™•ì¸
     bool IsFull() const;
 
-    //void RemoveItem(AItemBase* TargetItem); // ¾ÆÀÌÅÛ Á¦°Å
-    //void ReplaceItem(AItemBase* OldItem, AItemBase* NewItem); // ¾ÆÀÌÅÛ ±³Ã¼
+    //void RemoveItem(AItemBase* TargetItem); // ì•„ì´í…œ ì œê±°
+    //void ReplaceItem(AItemBase* OldItem, AItemBase* NewItem); // ì•„ì´í…œ êµì²´
 
     int32 FindSlotIndexByItem(AItemBase* TargetItem) const;
     void UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon);
@@ -58,15 +58,15 @@ public:
     void RemoveItemAt(int32 Index);
 
 private:
-    // ½½·Ô µ¥ÀÌÅÍ 2°³
+    // ìŠ¬ë¡¯ ë°ì´í„° 2ê°œ
     UPROPERTY()
     TArray<FQuickSlotData> Slots;
 
-    // ÇöÀç ¼±ÅÃµÈ ½½·Ô ÀÎµ¦½º
+    // í˜„ì¬ ì„ íƒëœ ìŠ¬ë¡¯ ì¸ë±ìŠ¤
     int32 CurrentSlotIndex = 0;
     void UpdateSlotHighlight();
 
-    // ºí·çÇÁ¸°Æ® À§Á¬ ¿¬°á
+    // ë¸”ë£¨í”„ë¦°íŠ¸ ìœ„ì ¯ ì—°ê²°
     UPROPERTY(meta = (BindWidget))
     UImage* Img_Icon1;
 
