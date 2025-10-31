@@ -1,4 +1,4 @@
-#include "Character/PlayerCharacter.h"
+ï»¿#include "Character/PlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -28,7 +28,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// ¸Å ÇÁ·¹ÀÓ ¾ÆÀÌÅÛ Ã£±â
+	// ë§¤ í”„ë ˆìž„ ì•„ì´í…œ ì°¾ê¸°
 	TraceForItems();
 }
 
@@ -106,13 +106,13 @@ void APlayerCharacter::TraceForItems()
 {
 	FVector Start = ViewCamera->GetComponentLocation();
 	FVector ForwardVector = ViewCamera->GetForwardVector();
-	FVector End = Start + (ForwardVector * 500.0f); // Ä«¸Þ¶ó ¾Õ 5m
+	FVector End = Start + (ForwardVector * 500.0f); // ì¹´ë©”ë¼ ì•ž 5m
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	// ¼Õ¿¡ µç ¾ÆÀÌÅÛÀº ¹«½Ã
+	// ì†ì— ë“  ì•„ì´í…œì€ ë¬´ì‹œ
 	if (HeldItem && HeldItem->IsAttachedTo(this))
 	{
 		Params.AddIgnoredActor(HeldItem);
@@ -127,14 +127,14 @@ void APlayerCharacter::TraceForItems()
 		HitItem = Cast<AItemBase>(HitResult.GetActor());
 	}
 
-	// ÀÌÀü ¾ÆÀÌÅÛ ÇÏÀÌ¶óÀÌÆ® ÇØÁ¦
+	// ì´ì „ ì•„ì´í…œ í•˜ì´ë¼ì´íŠ¸ í•´ì œ
 	if (CurrentFocusedItem && CurrentFocusedItem != HitItem)
 	{
 		CurrentFocusedItem->HighlightItem(false);
 		CurrentFocusedItem = nullptr;
 	}
 
-	// »õ·Î¿î ¾ÆÀÌÅÛ ÇÏÀÌ¶óÀÌÆ®
+	// ìƒˆë¡œìš´ ì•„ì´í…œ í•˜ì´ë¼ì´íŠ¸
 	if (HitItem && HitItem != CurrentFocusedItem)
 	{
 		HitItem->HighlightItem(true);
@@ -143,14 +143,14 @@ void APlayerCharacter::TraceForItems()
 
 }
 
-// ¾ÆÀÌÅÛ ÁÝ±â
+// ì•„ì´í…œ ì¤ê¸°
 void APlayerCharacter::PickupItem(AItemBase* Item)
 {
 	if (!Item || !IsValid(Item)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: Item invalid")); return; }
 	if (!GetMesh()) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: No mesh")); return; }
 	if (!GetMesh()->DoesSocketExist(HandSocketName)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: no socket")); return; }
 
-	// safety²ô±â
+	// safetyë„ê¸°
 	if (Item->ItemMesh)
 	{
 		Item->ItemMesh->SetSimulatePhysics(false);
@@ -160,7 +160,7 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 	bool bAttached = Item->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), HandSocketName);
 	if (bAttached)
 	{
-		// °­Á¦ transform ¸ÂÃã
+		// ê°•ì œ transform ë§žì¶¤
 		FTransform SocketTF = GetMesh()->GetSocketTransform(HandSocketName, RTS_World);
 		Item->SetActorTransform(SocketTF);
 	}
@@ -172,7 +172,7 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 }
 
 
-// ¾ÆÀÌÅÛ ³»·Á³õ±â
+// ì•„ì´í…œ ë‚´ë ¤ë†“ê¸°
 void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
 {
 	if (!Item || !IsValid(Item)) return;
@@ -189,25 +189,32 @@ void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
 }
 
 
-// Interact (¹æ¾îÀû)
-void APlayerCharacter::Interact()
+// Interact (ë°©ì–´ì )
+/*void APlayerCharacter::Interact()
 {
 	if (!CurrentFocusedItem) return;
 
 	AItemBase* NewItem = CurrentFocusedItem;
 	if (!IsValid(NewItem)) return;
 
-	// ¸¸¾à ¼Õ¿¡ ´Ù¸¥ ¾ÆÀÌÅÛ ÀÖÀ¸¸é ¸ÕÀú ³õ±â
+	// ë§Œì•½ ì†ì— ë‹¤ë¥¸ ì•„ì´í…œ ìžˆìœ¼ë©´ ë¨¼ì € ë†“ê¸°
 	if (HeldItem && HeldItem != NewItem)
 	{
+		if (QuickSlotRef)
+		{
+			QuickSlotRef->RemoveItem(HeldItem);
+		}
+
 		FVector DropLocation = NewItem->GetActorLocation();
 		DropLocation.Z += 50.f;
 		ChangeItem(HeldItem, DropLocation);
-		UE_LOG(LogTemp, Warning, TEXT("Interact: Dropped %s"), *HeldItem->GetName());
+		
+
+		//UE_LOG(LogTemp, Warning, TEXT("Interact: Dropped %s"), *HeldItem->GetName());
 		HeldItem = nullptr;
 	}
 
-	if (NewItem->ItemMesh)
+	/*if (NewItem->ItemMesh)
 	{
 		NewItem->ItemMesh->SetSimulatePhysics(false);
 		NewItem->ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -219,51 +226,133 @@ void APlayerCharacter::Interact()
 		HeldItem = NewItem;
 		NewItem->HighlightItem(false);
 		CurrentFocusedItem = nullptr;
-		// Äü½½·Ô¿¡ µî·Ï
+		// í€µìŠ¬ë¡¯ì— ë“±ë¡
 		if (QuickSlotRef)
 		{
-			QuickSlotRef->AddItemToEmptySlot(NewItem);
+			int32 FoundIndex = QuickSlotRef->FindSlotIndexByItem(NewItem);
+			if (FoundIndex == INDEX_NONE)
+			{
+				if (QuickSlotRef->IsFull())
+				{
+					QuickSlotRef->ReplaceItem(nullptr, NewItem);
+				}
+				else
+				{
+					QuickSlotRef->AddItemToEmptySlot(NewItem);
+				}
+			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Interact: Picked up %s"), *NewItem->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("Interact: Picked up %s"), *NewItem->GetName());
 	}
-}
+}*/
 
-void APlayerCharacter::DropHeldItem()
+/*void APlayerCharacter::DropHeldItem()
 {
-	if (HeldItem) // ¼Õ¿¡ ¾ÆÀÌÅÛÀÌ ÀÖÀ» ¶§¸¸ ½ÇÇà
+	if (HeldItem) // ì†ì— ì•„ì´í…œì´ ìžˆì„ ë•Œë§Œ ì‹¤í–‰
 	{
+		if (QuickSlotRef)
+		{
+			QuickSlotRef->RemoveItem(HeldItem);
+		}
+
 		FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
-		DropLocation.Z += 30.f; // ¹Ù´Ú¿¡ ¹¯È÷Áö ¾Êµµ·Ï »ìÂ¦ ¿Ã¸²
+		DropLocation.Z += 30.f; // ë°”ë‹¥ì— ë¬»ížˆì§€ ì•Šë„ë¡ ì‚´ì§ ì˜¬ë¦¼
 
 		ChangeItem(HeldItem, DropLocation);
+
 		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: Dropped %s"), *HeldItem->GetName());
 
 		HeldItem = nullptr;
 	}
 	else
 	{
-		// ¼Õ¿¡ ¾Æ¹«°Íµµ ¾øÀ¸¸é ¾Æ¹« ÀÏµµ ¾È ÇÔ
+		// ì†ì— ì•„ë¬´ê²ƒë„ ì—†ìœ¼ë©´ ì•„ë¬´ ì¼ë„ ì•ˆ í•¨
 		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: No item in hand"));
 	}
+}*/
+
+void APlayerCharacter::Interact()
+{
+	if (!CurrentFocusedItem || !QuickSlotRef) return;
+
+	AItemBase* NewItem = CurrentFocusedItem;
+	if (!IsValid(NewItem)) return;
+
+	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex(); // í˜„ìž¬ ì„ íƒëœ ìŠ¬ë¡¯ ì¸ë±ìŠ¤
+	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
+
+	// ì†ì— ë‹¤ë¥¸ ì•„ì´í…œì´ ìžˆìœ¼ë©´ êµì²´ ì²˜ë¦¬
+	if (HeldItem && HeldItem != NewItem)
+	{
+		// ê¸°ì¡´ ì•„ì´í…œì„ í•´ë‹¹ ìŠ¬ë¡¯ì—ì„œ ì œê±°
+		//QuickSlotRef->RemoveItem(HeldItem);
+		QuickSlotRef->RemoveItemAt(TargetSlotIndex);
+
+		FVector DropLocation = NewItem->GetActorLocation();
+		DropLocation.Z += 50.f;
+		ChangeItem(HeldItem, DropLocation);
+		HeldItem = nullptr;
+	}
+
+	// ìƒˆ ì•„ì´í…œ ì¤ê¸°
+	PickupItem(NewItem);
+	HeldItem = NewItem;
+	NewItem->HighlightItem(false);
+	CurrentFocusedItem = nullptr;
+
+	// í€µìŠ¬ë¡¯ UI ì—…ë°ì´íŠ¸
+	//int32 FoundIndex = QuickSlotRef->FindSlotIndexByItem(NewItem);
+	//if (FoundIndex == INDEX_NONE) QuickSlotRef->AssignItemToSlot(TargetSlotIndex, NewItem);
+	QuickSlotRef->AssignItemToSlot(TargetSlotIndex, NewItem);
+
+
+	UE_LOG(LogTemp, Warning, TEXT("Interact: Added %s to slot %d"), *NewItem->GetName(), TargetSlotIndex);
 }
+
+void APlayerCharacter::DropHeldItem()
+{
+	if (!HeldItem || !QuickSlotRef) return;
+
+	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
+	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
+
+	QuickSlotRef->RemoveItemAt(TargetSlotIndex); // í˜„ìž¬ ìŠ¬ë¡¯ ê¸°ì¤€ìœ¼ë¡œ ì œê±°
+
+	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
+	DropLocation.Z += 30.f;
+
+	HeldItem->SetActorHiddenInGame(false);
+	HeldItem->SetActorEnableCollision(true);
+
+	ChangeItem(HeldItem, DropLocation);
+	HeldItem = nullptr;
+
+	UE_LOG(LogTemp, Warning, TEXT("Dropped held item from slot %d"), TargetSlotIndex);
+}
+
 
 void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 {
 	if (!QuickSlotRef) return;
 
-	// ÇöÀç ¼±ÅÃµÈ ½½·Ô º¯°æ
+	// í˜„ìž¬ ì„ íƒëœ ìŠ¬ë¡¯ ë³€ê²½
 	QuickSlotRef->SetCurrentSlot(SlotIndex);
 	
 
-	// ½½·ÔÀÇ ¾ÆÀÌÅÛ °¡Á®¿À±â
+	// ìŠ¬ë¡¯ì˜ ì•„ì´í…œ ê°€ì ¸ì˜¤ê¸°
 	AItemBase* ItemToEquip = QuickSlotRef->GetItemAt(SlotIndex);
 
-	// ½½·ÔÀÌ ºñ¾îÀÖ´Ù¸é ¼Õ¿¡ µç ¾ÆÀÌÅÛ ³»·Á³õ±â
+	// ìŠ¬ë¡¯ì´ ë¹„ì–´ìžˆë‹¤ë©´ ì†ì— ë“  ì•„ì´í…œ ë‚´ë ¤ë†“ê¸°
 	if (!ItemToEquip)
 	{
 		if (HeldItem)
 		{
-			DropHeldItem();
+			//DropHeldItem();
+			HeldItem->SetActorHiddenInGame(true);
+
+			HeldItem->SetActorEnableCollision(false);
+
+			HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			UE_LOG(LogTemp, Warning, TEXT("Slot %d is empty. Dropped held item."), SlotIndex);
 		}
 		else
@@ -273,25 +362,31 @@ void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 		return;
 	}
 
-	// ÀÌ¹Ì °°Àº ¾ÆÀÌÅÛÀ» µé°í ÀÖ´Ù¸é ¾Æ¹« º¯È­ ¾øÀ½
+	// ì´ë¯¸ ê°™ì€ ì•„ì´í…œì„ ë“¤ê³  ìžˆë‹¤ë©´ ì•„ë¬´ ë³€í™” ì—†ìŒ
 	if (HeldItem == ItemToEquip)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Slot %d already equipped."), SlotIndex);
 		return;
 	}
 
-	// ±âÁ¸ ¾ÆÀÌÅÛ ³»·Á³õ±â
+	// ê¸°ì¡´ ì•„ì´í…œ ë‚´ë ¤ë†“ê¸°
 	if (HeldItem)
 	{
-		DropHeldItem();
+		HeldItem->SetActorHiddenInGame(true);
+
+		HeldItem->SetActorEnableCollision(false);
+
+		HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		//DropHeldItem();
 	}
 
-	// ¼±ÅÃµÈ ¾ÆÀÌÅÛ¸¸ ¸Ê¿¡¼­ º¸ÀÌ°Ô
+	// ì„ íƒëœ ì•„ì´í…œë§Œ ë§µì—ì„œ ë³´ì´ê²Œ
 	ItemToEquip->SetActorHiddenInGame(false);
-
-	// »õ ¾ÆÀÌÅÛ ¼Õ¿¡ Áã±â
+	ItemToEquip->SetActorEnableCollision(false);
+	// ìƒˆ ì•„ì´í…œ ì†ì— ì¥ê¸°
 	PickupItem(ItemToEquip);
 	HeldItem = ItemToEquip;
+	HeldItem->SetActorHiddenInGame(false);
 
 	UE_LOG(LogTemp, Warning, TEXT("Equipped item from slot %d: %s"), SlotIndex, *ItemToEquip->GetName());
 }

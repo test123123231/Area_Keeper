@@ -17,20 +17,20 @@ public:
 
     // 저장할 설정 값들
 
-    UPROPERTY(VisibleAnywhere, Category = "Settings|Sound")
+    UPROPERTY()
     float MasterVolume;
 
-    UPROPERTY(VisibleAnywhere, Category = "Settings|Mouse")
+    UPROPERTY()
     float MouseSensitivity;
 
-	UPROPERTY(VisibleAnywhere, Category = "Settings|Screen")
+	UPROPERTY()
 	float ScreenBrightness;
 
-	UPROPERTY(VisibleAnywhere, Category = "Settings|Screen")
+	UPROPERTY()
 	uint32 ResolutionIndex;
 
     /** 0: 전체 화면, 1: 테두리 없는 창모드, 2: 창 모드 */
-    UPROPERTY(VisibleAnywhere, Category = "Settings|Screen")
+    UPROPERTY()
     uint32 WindowModeIndex;
 
     // 저장 시스템을 위한 정보
