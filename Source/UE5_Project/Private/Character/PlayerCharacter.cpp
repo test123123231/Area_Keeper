@@ -1,4 +1,4 @@
-#include "Character/PlayerCharacter.h"
+﻿#include "Character/PlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
@@ -305,13 +305,13 @@ void APlayerCharacter::Interact()
 	AItemBase* NewItem = CurrentFocusedItem;
 	if (!IsValid(NewItem)) return;
 
-	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex(); // ���� ���õ� ���� �ε���
+	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex(); // 현재 선택된 슬롯 인덱스
 	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
 
-	// �տ� �ٸ� �������� ������ ��ü ó��
+	// 손에 다른 아이템이 있으면 교체 처리
 	if (HeldItem && HeldItem != NewItem)
 	{
-		// ���� �������� �ش� ���Կ��� ����
+		// 기존 아이템을 해당 슬롯에서 제거
 		//QuickSlotRef->RemoveItem(HeldItem);
 		QuickSlotRef->RemoveItemAt(TargetSlotIndex);
 
@@ -321,13 +321,13 @@ void APlayerCharacter::Interact()
 		HeldItem = nullptr;
 	}
 
-	// �� ������ �ݱ�
+	// 새 아이템 줍기
 	PickupItem(NewItem);
 	HeldItem = NewItem;
 	NewItem->HighlightItem(false);
 	CurrentFocusedItem = nullptr;
 
-	// ������ UI ������Ʈ
+	// 퀵슬롯 UI 업데이트
 	//int32 FoundIndex = QuickSlotRef->FindSlotIndexByItem(NewItem);
 	//if (FoundIndex == INDEX_NONE) QuickSlotRef->AssignItemToSlot(TargetSlotIndex, NewItem);
 	QuickSlotRef->AssignItemToSlot(TargetSlotIndex, NewItem);
@@ -343,7 +343,7 @@ void APlayerCharacter::DropHeldItem()
 	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
 	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
 
-	QuickSlotRef->RemoveItemAt(TargetSlotIndex); // ���� ���� �������� ����
+	QuickSlotRef->RemoveItemAt(TargetSlotIndex); // 현재 슬롯 기준으로 제거
 
 	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
 	DropLocation.Z += 30.f;
@@ -410,6 +410,7 @@ void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 	// 선택된 아이템만 맵에서 보이게
 	ItemToEquip->SetActorHiddenInGame(false);
 	ItemToEquip->SetActorEnableCollision(false);
+	// 새 아이템 손에 쥐기
 	PickupItem(ItemToEquip);
 	HeldItem = ItemToEquip;
 	HeldItem->SetActorHiddenInGame(false);

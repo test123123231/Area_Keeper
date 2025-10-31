@@ -1,4 +1,4 @@
-#include "Character/QuickSlot.h"
+﻿#include "Character/QuickSlot.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
 
@@ -128,7 +128,7 @@ void UQuickSlot::UpdateSlotHighlight()
             Slots[i].Icon = nullptr;
             Slots[i].bIsOccupied = false;
 
-             // UI 아이콘 제거
+            // UI 아이콘 제거
             UpdateSlotIcon(i, nullptr);
             UE_LOG(LogTemp, Warning, TEXT("QuickSlot: Removed item from slot %d"), i);
             return;
@@ -224,14 +224,6 @@ void UQuickSlot::UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon)
     else if (SlotIndex == 1 && Img_Icon2)
         Img_Icon2->SetBrushFromTexture(NewIcon);
 }
-
-
-
-
-
-
-
-
 
 
 void UQuickSlot::AssignItemToSlot(int32 Index, AItemBase* NewItem)
