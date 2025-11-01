@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "ReadyZone.generated.h"
 
+class UBoxComponent;
+class UPrimitiveComponent;
+class AActor;
+
 UCLASS()
 class UE5_PROJECT_API AReadyZone : public AActor
 {
@@ -16,10 +20,17 @@ public:
 	AReadyZone();
 
 protected:
-	UPROPERTY(VisibleAnywhere)
+    virtual void BeginPlay() override;
+
+    UPROPERTY(VisibleAnywhere, Category = "Zone")
     class UBoxComponent* ZoneBox;
 
 public:	
 	UFUNCTION()
-    void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+    void OnOverlapEnd(
+        UPrimitiveComponent* OverlappedComp,
+        AActor* OtherActor,
+        UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex
+    );
 };

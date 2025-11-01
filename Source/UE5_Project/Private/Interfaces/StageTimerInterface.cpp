@@ -2,11 +2,3 @@
 
 
 #include "Interfaces/StageTimerInterface.h"
-
-StageTimerInterface::StageTimerInterface()
-{
-}
-
-StageTimerInterface::~StageTimerInterface()
-{
-}

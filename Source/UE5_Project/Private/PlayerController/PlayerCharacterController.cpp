@@ -234,7 +234,7 @@ void APlayerCharacterController::ShowAutoText(float Seconds)
         GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
 
         FTimerDelegate Del;
-        Del.BindUObject(this, &APlayerCharacterController::HideText, (uint8)0);
+        Del.BindUObject(this, &APlayerCharacterController::HideText, static_cast<uint8>(0));
 
         GetWorldTimerManager().SetTimer(
             HideTextTimerHandle,
