@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "PlayerCharacterController.generated.h"
-
-
+class APlayerCharacter;
+class UQuickSlot;
 class UInputMappingContext;
 class UHUDWidget;
 class UAttributeComponent;
@@ -14,7 +14,7 @@ class UInputAction;
 UCLASS()
 class UE5_PROJECT_API APlayerCharacterController : public APlayerController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 protected:
     virtual void BeginPlay() override;
@@ -55,6 +55,17 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
+
+
+    UPROPERTY(EditAnywhere, Category = "UI") // 퀵슬롯 ui추가
+        TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
+
+    UPROPERTY()
+    UQuickSlot* QuickSlotWidget;
+
+    void SelectSlot1();
+    void SelectSlot2();
+
     /** Settings Menu Input Action */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* IA_ToggleSettingsMenu;
@@ -67,6 +78,7 @@ protected:
     UUserWidget* SettingsMenuInstance;
 
 private:
+    FTimerHandle HideTextTimerHandle;
 
 public:
     void TogglePauseMenu();
@@ -74,5 +86,11 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     void ClosePauseMenu();
+
+    // 중앙 텍스트 관련 함수들
+    void ShowText();
+    void ShowAutoText(float Seconds);
+    void HideText();
+    void UpdateText(const FString& Text);
 
 };
