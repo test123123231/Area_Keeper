@@ -5,6 +5,9 @@
 #include "Character/ItemBase.h"
 #include "Character/QuickSlot.h"
 #include "DrawDebugHelpers.h"
+#include "Character/ChargeableItem.h"
+#include "Components/AttributeComponent.h"
+#include "PlayerController/PlayerCharacterController.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -27,7 +30,8 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	// 매 프레임 마다 충전
+	HandleCharging(DeltaTime);
 	// 매 프레임 아이템 찾기
 	TraceForItems();
 }
@@ -48,7 +52,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 		}
 		if (InteractAction) {
+			//짧게 
 			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+
+            //홀드
+            EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started,   this, &APlayerCharacter::StartCharge);
+            EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopCharge);
+            EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled,  this, &APlayerCharacter::StopCharge);
 		}
 		if (DropAction) {
 			EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &APlayerCharacter::DropHeldItem);
@@ -192,6 +202,15 @@ void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
 // Interact (방어적)
 /*void APlayerCharacter::Interact()
 {
+	//충전 메쉬는 소유하지 않게 하는 가드
+	if (CurrentFocusedItem && Cast<AChargeableItem>(CurrentFocusedItem))
+    {
+        // 충전은 StartCharge/HandleCharging 로직으로만 처리
+        UE_LOG(LogTemp, Display,  TEXT("충전용"));
+        return;
+    }
+
+
 	if (!CurrentFocusedItem) return;
 
 	AItemBase* NewItem = CurrentFocusedItem;
@@ -274,6 +293,14 @@ void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
 void APlayerCharacter::Interact()
 {
 	if (!CurrentFocusedItem || !QuickSlotRef) return;
+
+	//충전 메쉬는 소유하지 않게 하는 가드
+	if (CurrentFocusedItem && Cast<AChargeableItem>(CurrentFocusedItem))
+    {
+        // 충전은 StartCharge/HandleCharging 로직으로만 처리
+        UE_LOG(LogTemp, Display,  TEXT("충전용"));
+        return;
+    }
 
 	AItemBase* NewItem = CurrentFocusedItem;
 	if (!IsValid(NewItem)) return;
@@ -390,3 +417,81 @@ void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 
 	UE_LOG(LogTemp, Warning, TEXT("Equipped item from slot %d: %s"), SlotIndex, *ItemToEquip->GetName());
 }
+
+void APlayerCharacter::StartCharge()
+{
+    // TraceForItems가 갱신해둔 현재 포커스 대상으로부터만 시작
+    AChargeableItem* Target = Cast<AChargeableItem>(CurrentFocusedItem);
+    if (!Target)
+        return;
+
+    ChargingTarget = Target;  // 타겟 잠금
+    bIsCharging = true;
+    ChargeTime = 0.0f;
+}
+
+void APlayerCharacter::StopCharge()
+{
+    if (!bIsCharging) return;
+	if(auto* Pcc = Cast<APlayerCharacterController>(GetController()))
+	{
+		Pcc -> HideText();
+	}
+    bIsCharging = false;
+    ChargeTime = 0.0f;
+    ChargingTarget.Reset();
+
+	UE_LOG(LogTemp, Display, TEXT("부적 충전 취소"));
+}
+
+void APlayerCharacter::HandleCharging(float DeltaTime)
+{
+    if (!bIsCharging) return;
+
+    // 여전히 같은 오브젝트를 보고 있는지(TraceForItems가 유지)
+    if (!ChargingTarget.IsValid() || CurrentFocusedItem != ChargingTarget.Get())
+    {
+        // 시선을 벗어나면 취소
+        StopCharge();
+        return;
+    }
+	auto* Pcc = Cast<APlayerCharacterController>(GetController());
+
+	//쿨타임인지 판정
+	if (ChargingTarget->bIsCharged)
+    {
+        const float Remain = FMath::Max(0.f, ChargingTarget->RechargeCooldown - ChargingTarget->Cooldown);
+		Pcc -> ShowAutoText(2.0f);
+		Pcc -> UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain));
+        return;
+    }
+	
+	Pcc -> ShowText();
+	Pcc -> UpdateText(FString::Printf(TEXT("충전 중.. %.1f초"), (2.0f - ChargeTime)));
+    ChargeTime += DeltaTime;
+
+
+	//충전 시간이 지난후 실행
+    if (ChargeTime >= RequiredChargeTime)
+    {
+		Pcc -> UpdateText(TEXT("충전 완료"));
+		Pcc -> ShowAutoText(2.0f);
+        bIsCharging = false;
+
+        bool ChargeSuccess = ChargingTarget->OnCharged();
+
+		if(ChargeSuccess)
+		{
+			if (UAttributeComponent* Attr = FindComponentByClass<UAttributeComponent>())
+    		{
+        		Attr->SetAmulet(5.0f);   //최대로 충전
+    		}
+		
+		}
+
+		ChargingTarget.Reset();
+		ChargeTime = 0.0f;
+    }
+
+}
+

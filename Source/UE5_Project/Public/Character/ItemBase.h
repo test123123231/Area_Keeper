@@ -36,8 +36,8 @@ public:
 	UTexture2D* ItemIcon;
 
 
-	// 하이라이트 토글 함수 
-	void HighlightItem(bool bOn);
+	// 하이라이트 토글 함수(충전용 상속을 위해서 바꿈)
+	virtual void HighlightItem(bool bOn);
 
 	void OnPickedUp();
 	void OnDropped();

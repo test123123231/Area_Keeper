@@ -55,7 +55,9 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
-    UPROPERTY(EditAnywhere, Category = "UI") // ������ ui�߰�
+
+
+    UPROPERTY(EditAnywhere, Category = "UI") // 퀵슬롯 ui추가
         TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
 
     UPROPERTY()
@@ -76,6 +78,7 @@ protected:
     UUserWidget* SettingsMenuInstance;
 
 private:
+    FTimerHandle HideTextTimerHandle;
 
 public:
     void TogglePauseMenu();
@@ -83,5 +86,11 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     void ClosePauseMenu();
+
+    // 중앙 텍스트 관련 함수들
+    void ShowText();
+    void ShowAutoText(float Seconds);
+    void HideText();
+    void UpdateText(const FString& Text);
 
 };

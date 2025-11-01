@@ -51,7 +51,7 @@ void APlayerCharacterController::BeginPlay()
         QuickSlotWidget = CreateWidget<UQuickSlot>(this, QuickSlotWidgetClass);
         if (QuickSlotWidget)
         {
-            QuickSlotWidget->AddToViewport();
+            QuickSlotWidget->AddToViewport(1);
 
             // PlayerCharacter에 QuickSlot 위젯 참조 설정
             APlayerCharacter* PlayerChar1 = Cast<APlayerCharacter>(GetPawn());
@@ -70,6 +70,9 @@ void APlayerCharacterController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
+    InputComponent->BindKey(EKeys::One, IE_Pressed, this, &APlayerCharacterController::SelectSlot1);
+    InputComponent->BindKey(EKeys::Two, IE_Pressed, this, &APlayerCharacterController::SelectSlot2);
+
     // Enhanced Input Component를 가져와서 액션을 바인딩
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
     {
@@ -78,6 +81,19 @@ void APlayerCharacterController::SetupInputComponent()
     }
 }
 
+void APlayerCharacterController::SelectSlot1()
+{
+    APlayerCharacter* PlayerChar2 = Cast<APlayerCharacter>(GetPawn());
+    if (PlayerChar2)
+        PlayerChar2->SelectQuickSlot(0);
+}
+
+void APlayerCharacterController::SelectSlot2()
+{
+    APlayerCharacter* PlayerChar3 = Cast<APlayerCharacter>(GetPawn());
+    if (PlayerChar3)
+        PlayerChar3->SelectQuickSlot(1);
+}
 
 void APlayerCharacterController::TogglePauseMenu()
 {
@@ -186,6 +202,48 @@ void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
     if(HUDRef)
     {
         HUDRef ->UpdateAmulet(NewAmulet);
+    }
+}
+
+//중앙 텍스트 관련 함수들
+void APlayerCharacterController::ShowText()
+{
+    if(HUDRef)
+    {
+        GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
+        HUDRef -> ShowCenterText();
+    }
+}
+
+void APlayerCharacterController::ShowAutoText(float Seconds)
+{
+    if (HUDRef)
+    {
+        HUDRef->ShowCenterText();
+        GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
+        GetWorldTimerManager().SetTimer(
+            HideTextTimerHandle,
+            this,
+            &APlayerCharacterController::HideText,
+            Seconds,
+            false
+        );
+    }
+}
+
+void APlayerCharacterController::HideText()
+{
+    if(HUDRef)
+    {
+        HUDRef -> HideCenterText();
+    }
+}
+
+void APlayerCharacterController::UpdateText(const FString& Text)
+{
+    if(HUDRef)
+    {
+        HUDRef -> UpdateCenterText(Text);
     }
 }
 

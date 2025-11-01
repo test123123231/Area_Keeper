@@ -23,6 +23,10 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* AmuletText;
 
+	// 중앙 텍스트(현재는 Charge 상태로만 사용)
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* CenterText;
+
 public:
 	// HealthText를 업데이트한다
     UFUNCTION(BlueprintCallable)
@@ -31,4 +35,16 @@ public:
 	// AmuletText를 업데이트한다
     UFUNCTION(BlueprintCallable)
     void UpdateAmulet(float CurrentAmulet);
+
+	//중앙 텍스트 보이게
+	UFUNCTION(BlueprintCallable)
+    void ShowCenterText();
+
+	//중앙 텍스트 안 보이게
+    UFUNCTION(BlueprintCallable)
+    void HideCenterText();
+
+	// 중앙 텍스트 업데이트
+	UFUNCTION(BlueprintCallable)
+	void UpdateCenterText(const FString& Text);
 };
