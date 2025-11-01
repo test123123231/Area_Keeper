@@ -5,8 +5,11 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Image.h"
-#include "Character/ItemBase.h"
 #include "QuickSlot.generated.h"
+
+
+class AItemBase;
+
 
 USTRUCT(BlueprintType)
 struct FQuickSlotData

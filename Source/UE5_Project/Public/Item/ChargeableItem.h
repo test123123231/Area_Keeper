@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/ItemBase.h"
+#include "Item/ItemBase.h"
 #include "ChargeableItem.generated.h"
 
 UCLASS()

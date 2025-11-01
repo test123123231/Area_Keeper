@@ -2,10 +2,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
-#include "Character/ItemBase.h"
-#include "Character/QuickSlot.h"
+#include "Item/ItemBase.h"
+#include "HUD/QuickSlot.h"
 #include "DrawDebugHelpers.h"
-#include "Character/ChargeableItem.h"
+#include "Item/ChargeableItem.h"
 #include "Components/AttributeComponent.h"
 #include "PlayerController/PlayerCharacterController.h"
 

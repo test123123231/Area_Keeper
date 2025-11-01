@@ -5,7 +5,7 @@
 #include "HUD/HUDWidget.h"   
 #include "Components/AttributeComponent.h"
 #include "GameFramework/Pawn.h"
-#include "Character/QuickSlot.h"   // QuickSlot 위젯 헤더
+#include "HUD/QuickSlot.h"   // QuickSlot 위젯 헤더
 #include "Character/PlayerCharacter.h"
 
 
