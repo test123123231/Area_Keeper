@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,11 +24,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 
-	// ¾ÆÀÌÅÛ Mesh 
+	// ì•„ì´í…œ Mesh 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* ItemMesh;
 
-	// »ö»ó º¯°æ¿ë µ¿Àû ¸ÓÆ¼¸®¾ó 
+	// ìƒ‰ìƒ ë³€ê²½ìš© ë™ì  ë¨¸í‹°ë¦¬ì–¼ 
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicMaterial;
 
@@ -36,7 +36,7 @@ public:
 	UTexture2D* ItemIcon;
 
 
-	// ÇÏÀÌ¶óÀÌÆ® Åä±Û ÇÔ¼ö(ÃæÀü¿ë »ó¼ÓÀ» À§ÇØ¼­ ¹Ù²Ş)
+	// í•˜ì´ë¼ì´íŠ¸ í† ê¸€ í•¨ìˆ˜(ì¶©ì „ìš© ìƒì†ì„ ìœ„í•´ì„œ ë°”ê¿ˆ)
 	virtual void HighlightItem(bool bOn);
 
 	void OnPickedUp();
