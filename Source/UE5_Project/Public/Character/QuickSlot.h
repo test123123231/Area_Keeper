@@ -39,14 +39,10 @@ public:
     void SetCurrentSlot(int32 NewIndex);
     AItemBase* GetItemAt(int32 Index) const;
 
-    // 빈 슬롯에 아이템 추가
-    //void AddItemToEmptySlot(AItemBase* NewItem);
 
     // 슬롯 꽉 찼는지 확인
     bool IsFull() const;
 
-    //void RemoveItem(AItemBase* TargetItem); // 아이템 제거
-    //void ReplaceItem(AItemBase* OldItem, AItemBase* NewItem); // 아이템 교체
 
     int32 FindSlotIndexByItem(AItemBase* TargetItem) const;
     void UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon);

@@ -68,8 +68,14 @@ void AItemBase::OnDropped()
 {
     if (ItemMesh)
     {
-        ItemMesh->SetSimulatePhysics(true);
+
         ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        ItemMesh->SetSimulatePhysics(true);
+        ItemMesh->SetEnableGravity(true);
+
+        FVector NewLoc = GetActorLocation();
+        NewLoc.Z += 10.f;
+        SetActorLocation(NewLoc, false, nullptr, ETeleportType::TeleportPhysics);
 
         UE_LOG(LogTemp, Warning, TEXT("OnDropped: %s -> Collision+Physics 즉시 켜짐"), *GetName());
     }
