@@ -88,9 +88,16 @@ public:
     void ClosePauseMenu();
 
     // 중앙 텍스트 관련 함수들
-    void ShowText();
+    UFUNCTION(BlueprintCallable, Category="UI")
+    void ShowText(uint8 TextLocation);
+    
+    UFUNCTION(BlueprintCallable, Category="UI")
     void ShowAutoText(float Seconds);
-    void HideText();
-    void UpdateText(const FString& Text);
+
+    UFUNCTION(BlueprintCallable, Category="UI")
+    void HideText(uint8 TextLocation);
+
+    UFUNCTION(BlueprintCallable, Category="UI")
+    void UpdateText(const FString& Text, uint8 TextLocation);
 
 };

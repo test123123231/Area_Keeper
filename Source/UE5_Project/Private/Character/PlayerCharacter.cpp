@@ -359,7 +359,7 @@ void APlayerCharacter::StopCharge()
     if (!bIsCharging) return;
 	if(auto* Pcc = Cast<APlayerCharacterController>(GetController()))
 	{
-		Pcc -> HideText();
+		Pcc -> HideText(0);
 	}
     bIsCharging = false;
     ChargeTime = 0.0f;
@@ -386,19 +386,19 @@ void APlayerCharacter::HandleCharging(float DeltaTime)
     {
         const float Remain = FMath::Max(0.f, ChargingTarget->RechargeCooldown - ChargingTarget->Cooldown);
 		Pcc -> ShowAutoText(2.0f);
-		Pcc -> UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain));
+		Pcc -> UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain), 0);
         return;
     }
 	
-	Pcc -> ShowText();
-	Pcc -> UpdateText(FString::Printf(TEXT("충전 중.. %.1f초"), (2.0f - ChargeTime)));
+	Pcc -> ShowText(0);
+	Pcc -> UpdateText(FString::Printf(TEXT("충전 중.. %.1f초"), (2.0f - ChargeTime)), 0);
     ChargeTime += DeltaTime;
 
 
 	//충전 시간이 지난후 실행
     if (ChargeTime >= RequiredChargeTime)
     {
-		Pcc -> UpdateText(TEXT("충전 완료"));
+		Pcc -> UpdateText(TEXT("충전 완료"), 0);
 		Pcc -> ShowAutoText(2.0f);
         bIsCharging = false;
 

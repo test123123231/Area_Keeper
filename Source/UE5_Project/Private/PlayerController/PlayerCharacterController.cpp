@@ -6,6 +6,7 @@
 #include "Components/AttributeComponent.h"
 #include "GameFramework/Pawn.h"
 #include "HUD/QuickSlot.h"   // QuickSlot 위젯 헤더
+#include "TimerManager.h"
 #include "Character/PlayerCharacter.h"
 
 
@@ -206,12 +207,22 @@ void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
 }
 
 //중앙 텍스트 관련 함수들
-void APlayerCharacterController::ShowText()
+void APlayerCharacterController::ShowText(uint8 TextLocation)
 {
     if(HUDRef)
     {
         GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
-        HUDRef -> ShowCenterText();
+        switch(TextLocation)
+        {
+            case 0:
+                HUDRef -> ShowCenterText();
+                break;
+            case 1:
+                HUDRef -> ShowTimeText();
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -221,29 +232,52 @@ void APlayerCharacterController::ShowAutoText(float Seconds)
     {
         HUDRef->ShowCenterText();
         GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
+
+        FTimerDelegate Del;
+        Del.BindUObject(this, &APlayerCharacterController::HideText, (uint8)0);
+
         GetWorldTimerManager().SetTimer(
             HideTextTimerHandle,
-            this,
-            &APlayerCharacterController::HideText,
+            Del,
             Seconds,
             false
         );
     }
 }
 
-void APlayerCharacterController::HideText()
+void APlayerCharacterController::HideText(uint8 TextLocation)
 {
     if(HUDRef)
     {
-        HUDRef -> HideCenterText();
+        switch(TextLocation)
+        {
+            case 0:
+                HUDRef -> HideCenterText();
+                break;
+            case 1:
+                HUDRef -> HideTimeText();
+                break;
+            default:
+                break;
+        }
     }
 }
 
-void APlayerCharacterController::UpdateText(const FString& Text)
+void APlayerCharacterController::UpdateText(const FString& Text, uint8 TextLocation)
 {
     if(HUDRef)
     {
-        HUDRef -> UpdateCenterText(Text);
+        switch(TextLocation)
+        {
+            case 0:
+                HUDRef -> UpdateCenterText(Text);
+                break;
+            case 1:
+                HUDRef -> UpdateTimeText(Text);
+                break;
+            default:
+                break;
+        }
     }
 }
 
