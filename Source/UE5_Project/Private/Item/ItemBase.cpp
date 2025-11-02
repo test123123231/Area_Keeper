@@ -1,85 +1,85 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Item/ItemBase.h"
-
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Character/PlayerCharacter.h"
+
 
 // Sets default values
 AItemBase::AItemBase()
 {
-    // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-    PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 
-    // 메시 생성 및 루트 컴포넌트로 설정(추가)
-    ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
-    RootComponent = ItemMesh;
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+	RootComponent = ItemMesh;
+
+	// 아이템은 기본적으로 상호작용(Visibility 채널)이 가능해야 함
+	ItemMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 }
+
 
 // Called when the game starts or when spawned
 void AItemBase::BeginPlay()
 {
-    Super::BeginPlay();
+	Super::BeginPlay();
 
-    if (ItemMesh)
-    {
-        // 머티리얼을 동적으로 제어할 수 있도록 인스턴스 생성
-        DynamicMaterial = ItemMesh->CreateAndSetMaterialInstanceDynamic(0);
-    }
-
+	if (ItemMesh)
+	{
+		DynamicMaterial = ItemMesh->CreateAndSetMaterialInstanceDynamic(0);
+	}
 }
 
-// Called every frame
-void AItemBase::Tick(float DeltaTime)
+
+// 플레이어가 바라볼 때
+void AItemBase::Highlight_Implementation(bool bIsLooking)
 {
-    Super::Tick(DeltaTime);
-
+	if (DynamicMaterial)
+	{
+		// 머티리얼에 "Color"라는 파라미터가 있어야 작동함
+		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor::Red : FLinearColor::White);
+	}
 }
 
-// 하이라이트 함수
-void AItemBase::HighlightItem(bool bOn)
+// 플레이어가 상호작용(E)할 때
+void AItemBase::Interact_Implementation(APlayerCharacter* Interactor)
 {
-    if (DynamicMaterial)
-    {
-        // 머티리얼에 "Color"라는 파라미터가 있어야 작동함
-        if (bOn)
-        {
-            DynamicMaterial->SetVectorParameterValue("Color", FLinearColor::Red);
-        }
-        else
-        {
-            DynamicMaterial->SetVectorParameterValue("Color", FLinearColor::White);
-        }
-    }
+	if (Interactor)
+	{
+		// 플레이어의 '아이템 줍기' 로직을 호출
+		Interactor->PickupItem(this);
+	}
 }
 
 
-void AItemBase::OnPickedUp()
+FString AItemBase::GetInteractText_Implementation()
 {
-    if (ItemMesh)
-    {
-        ItemMesh->SetSimulatePhysics(false);
-        ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    }
+	return FString(TEXT("줍기"));
 }
 
+
+// 아이템을 주웠을 때
+void AItemBase::OnPickedUp(USceneComponent* AttachTo, FName SocketName)
+{
+	if (!ItemMesh) return;
+
+	// 물리 및 충돌 비활성화
+	ItemMesh->SetSimulatePhysics(false);
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 부모 컴포넌트에 부착
+	AttachToComponent(AttachTo, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), SocketName);
+}
+
+
+// 아이템을 떨어뜨렸을 때
 void AItemBase::OnDropped()
 {
-    if (ItemMesh)
-    {
+	if (!ItemMesh) return;
 
-        ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-        ItemMesh->SetSimulatePhysics(true);
-        ItemMesh->SetEnableGravity(true);
+	// 부착 해제
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
-        FVector NewLoc = GetActorLocation();
-        NewLoc.Z += 10.f;
-        SetActorLocation(NewLoc, false, nullptr, ETeleportType::TeleportPhysics);
-
-        UE_LOG(LogTemp, Warning, TEXT("OnDropped: %s -> Collision+Physics 즉시 켜짐"), *GetName());
-    }
+	// 물리 및 충돌 활성화
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	ItemMesh->SetSimulatePhysics(true);
+	ItemMesh->SetEnableGravity(true);
 }
-
-
-
