@@ -1,33 +1,63 @@
-#include "Character/BaseCharacter.h"
-#include <Components/AttributeComponent.h>
+﻿#include "Character/BaseCharacter.h"
+#include "Components/AttributeComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
 ABaseCharacter::ABaseCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false; // 플레이어가 아니므로 틱이 필요 없음
 
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
+	// 체력을 관리할 AttributeComponent 생성
+	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 
+	// 'AreaKeeper'의 3인칭 이동 설정을 가져옴 (APlayerCharacter가 오버라이드할 수 있음)
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
-
-	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
 }
-
 
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	Attributes->HealthInit(3.f, 3.f);
 }
 
-
-void ABaseCharacter::Tick(float DeltaTime)
+/**
+ * 데미지를 AttributeComponent에 전달
+ */
+void ABaseCharacter::HandleDamage(float DamageAmount)
 {
-	Super::Tick(DeltaTime);
+	if (Attributes && IsAlive())
+	{
+		Attributes->ReceiveDamage(DamageAmount);
 
+		if (!IsAlive())
+		{
+			Die();
+		}
+	}
 }
+
+/**
+ * 캐릭터가 죽었을 때(체력 0) 호출
+ */
+void ABaseCharacter::Die()
+{
+	// 게임오버 로직 (GameMode에 알림) 추가 해야 함
+	UE_LOG(LogTemp, Warning, TEXT("%s has died. GAME OVER."), *GetName());
+
+	// 캡슐 충돌 비활성화
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+/**
+ * AttributeComponent를 통해 생존 여부를 확인합니다.
+ */
+bool ABaseCharacter::IsAlive()
+{
+	return Attributes && Attributes->IsAlive();
+}
+

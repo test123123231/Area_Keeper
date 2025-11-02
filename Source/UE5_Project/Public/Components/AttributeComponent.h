@@ -23,16 +23,16 @@ protected:
 private:
 	// 현재 Health
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
-	float Health = 3.0f;
+	float Health;
 	// 현재 MaxHealth
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
-	float MaxHealth = 3.0f;
+	float MaxHealth;
 	// 현재 Amulet
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
-	float Amulet = 5.0f;
+	float Amulet;
 	// 현재 MaxAmulet
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
-	float MaxAmulet = 5.0f;
+	float MaxAmulet;
 
 public:
 	void ReceiveDamage(float DamageAmount);

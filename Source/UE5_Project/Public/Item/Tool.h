@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/BaseCharacter.h"
-#include "EnemyCharacter.generated.h"
+#include "Item/ItemBase.h"
+#include "Tool.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UE5_PROJECT_API AEnemyCharacter : public ABaseCharacter
+class UE5_PROJECT_API ATool : public AItemBase
 {
 	GENERATED_BODY()
 	
