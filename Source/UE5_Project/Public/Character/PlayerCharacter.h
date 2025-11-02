@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Character/BaseCharacter.h"
 #include "InputActionValue.h"
+#include "Anomaly/AnomalyTypes.h"
 #include "PlayerCharacter.generated.h"
 
 class UQuickSlot;
@@ -73,8 +74,8 @@ protected:
 	// 입력 처리 함수 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void StartCrouch();
-	void StopCrouch();
+	/*void StartCrouch();
+	void StopCrouch();*/
 
 	// 상호작용 및 아이템
 private:
@@ -111,7 +112,11 @@ public:
 	void SelectQuickSlot(int32 SlotIndex);
 
 	// '소지' (이상현상 해결) 로직 
-	void StartExorcism(class AStationaryAnomaly* Anomaly);
+	void TalismanRitual(class AStationaryAnomaly* Anomaly);
+
+	// '소지' UI가 닫힐 때 (UI의 OnClose 버튼 등에서 호출)
+	UFUNCTION(BlueprintCallable, Category = "TalismanRitual")
+	void FinishTalismanRitual(EAnomalyCategory SelectedCategory);
 
 	// '지방' 충전 로직
 private:
@@ -127,7 +132,7 @@ private:
 	void HandleCharging(float DeltaTime);
 
 	// 소지 UI가 열려있는지 여부, 틱 및 입력 차단용
-	bool bIsExorcismUIOpen = false;
+	bool bIsTalismanRitualUIOpen = false;
 
 	// 도구 사용 로직 
 	void UseTool();

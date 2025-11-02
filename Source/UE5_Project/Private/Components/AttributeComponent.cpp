@@ -12,7 +12,7 @@ void UAttributeComponent::BeginPlay()
 	Super::BeginPlay();
 	//초기화
 	OnHealthChanged.Broadcast(Health);
-	OnAmuletChanged.Broadcast(Amulet);
+	OnTalismanChanged.Broadcast(Talisman);
 }
 
 
@@ -35,6 +35,7 @@ bool UAttributeComponent::IsAlive()
 	return Health > 0.f;
 }
 
+
 void UAttributeComponent::HealthInit(float NewMaxHealth, float NewHealth)
 {
 	SetMaxHealth(NewMaxHealth);
@@ -48,42 +49,48 @@ void UAttributeComponent::SetHealth(float NewHealth)
 	OnHealthChanged.Broadcast(NewHealth);
 }
 
-float UAttributeComponent::GetHelath()
-{
-	return Health;
-}
 
 void UAttributeComponent::SetMaxHealth(float NewMaxHealth)
 {
 	MaxHealth = FMath::Max(0.f, NewMaxHealth);
 }
 
+
+void UAttributeComponent::SetTalisman(float NewTalisman)
+{
+	Talisman = FMath::Clamp(NewTalisman, 0.f, MaxTalisman);
+	OnTalismanChanged.Broadcast(NewTalisman);
+}
+
+
+void UAttributeComponent::SetMaxTalisman(float NewMaxTalisman)
+{
+	MaxTalisman = FMath::Max(0.f, NewMaxTalisman);
+}
+
+
+float UAttributeComponent::GetHelath()
+{
+	return Health;
+}
+
+
 float UAttributeComponent::GetMaxHelath()
 {
 	return MaxHealth;
 }
 
-void UAttributeComponent::SetAmulet(float NewAmulet)
+
+float UAttributeComponent::GetTalisman()
 {
-	Amulet = FMath::Clamp(NewAmulet, 0.f, MaxAmulet);
-	OnAmuletChanged.Broadcast(NewAmulet);
+	return Talisman;
 }
 
-float UAttributeComponent::GetAmulet()
-{
-	return Amulet;
-}
 
-void UAttributeComponent::SetMaxAmulet(float NewMaxAmulet)
+float UAttributeComponent::GetMaxTalisman()
 {
-	MaxAmulet = FMath::Max(0.f, NewMaxAmulet);
+	return MaxTalisman;
 }
-
-float UAttributeComponent::GetMaxAmulet()
-{
-	return MaxAmulet;
-}
-
 
 
 void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -103,8 +110,8 @@ void UAttributeComponent::PostEditChangeProperty(FPropertyChangedEvent& Property
 	// 값 정리
 	MaxHealth = FMath::Max(0.f, MaxHealth);
 	Health    = FMath::Clamp(Health, 0.f, MaxHealth);
-	MaxAmulet = FMath::Max(0.f, MaxAmulet);
-	Amulet    = FMath::Clamp(Amulet, 0.f, MaxAmulet);
+	MaxTalisman = FMath::Max(0.f, MaxTalisman);
+	Talisman = FMath::Clamp(Talisman, 0.f, MaxTalisman);
 
 	const FName Name = PropertyChangedEvent.Property->GetFName();
 
@@ -113,10 +120,10 @@ void UAttributeComponent::PostEditChangeProperty(FPropertyChangedEvent& Property
 	{
 		OnHealthChanged.Broadcast(Health);
 	}
-	if (Name == GET_MEMBER_NAME_CHECKED(UAttributeComponent, Amulet) ||
-		Name == GET_MEMBER_NAME_CHECKED(UAttributeComponent, MaxAmulet))
+	if (Name == GET_MEMBER_NAME_CHECKED(UAttributeComponent, Talisman) ||
+		Name == GET_MEMBER_NAME_CHECKED(UAttributeComponent, MaxTalisman))
 	{
-		OnAmuletChanged.Broadcast(Amulet);
+		OnTalismanChanged.Broadcast(Talisman);
 	}
 }
 #endif

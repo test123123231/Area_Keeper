@@ -43,7 +43,7 @@ void APlayerCharacterController::BeginPlay()
     if(HUDRef && BoundAttribute)
     {
         HUDRef -> UpdateHealth(BoundAttribute -> GetHelath());
-        HUDRef -> UpdateAmulet(BoundAttribute -> GetAmulet());
+        HUDRef -> UpdateAmulet(BoundAttribute -> GetTalisman());
     }
 
     if (QuickSlotWidgetClass)
@@ -81,6 +81,7 @@ void APlayerCharacterController::SetupInputComponent()
     }
 }
 
+
 void APlayerCharacterController::SelectSlot1()
 {
     APlayerCharacter* PlayerChar2 = Cast<APlayerCharacter>(GetPawn());
@@ -88,12 +89,14 @@ void APlayerCharacterController::SelectSlot1()
         PlayerChar2->SelectQuickSlot(0);
 }
 
+
 void APlayerCharacterController::SelectSlot2()
 {
     APlayerCharacter* PlayerChar3 = Cast<APlayerCharacter>(GetPawn());
     if (PlayerChar3)
         PlayerChar3->SelectQuickSlot(1);
 }
+
 
 void APlayerCharacterController::TogglePauseMenu()
 {
@@ -149,6 +152,43 @@ void APlayerCharacterController::ClosePauseMenu()
 }
 
 
+void APlayerCharacterController::OpenTalismanUI(AStationaryAnomaly* Anomaly)
+{
+    if (TalismanWidgetClass)
+    {
+        // 위젯 생성
+        TalismanInstance = CreateWidget<UUserWidget>(this, TalismanWidgetClass);
+        if (TalismanInstance)
+        {
+            TalismanInstance->AddToViewport(); // 화면에 추가
+            // 입력 모드를 게임 및 UI 겸용으로 변경
+            FInputModeGameAndUI InputModeData;
+            InputModeData.SetWidgetToFocus(TalismanInstance->TakeWidget()); // 포커스를 위젯으로
+            InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
+            SetInputMode(InputModeData);
+            bShowMouseCursor = true; // 마우스 커서 보이기
+            SetPause(true);
+        }
+    }
+}
+
+
+void APlayerCharacterController::CloseTalismanUI()
+{
+    if (TalismanInstance)
+    {
+        // 메뉴 닫기
+        TalismanInstance->RemoveFromParent();
+        TalismanInstance = nullptr; // 포인터 정리
+        // 입력 모드를 게임 전용으로 변경
+        FInputModeGameOnly InputModeData;
+        SetInputMode(InputModeData);
+        bShowMouseCursor = false; // 마우스 커서 숨기기
+        SetPause(false);
+    }
+}
+
+
 // possess
 void APlayerCharacterController::OnPossess(APawn* InPawn)
 {
@@ -161,28 +201,29 @@ void APlayerCharacterController::OnUnPossess()
     Super::OnUnPossess();
 }
 
+
 // bind
 void APlayerCharacterController::BindToPawnDelegates(APawn* InPawn)
 {
     // 중복 방지용 unbind
     UnbindFromPawnDelegates();
     if(!InPawn){ return; }
-    // OnHealthChanged/OnAmuletChanged와 HandleHelathChanged/HandleAmuletChanged를 연결
+    // OnHealthChanged/OnTalismanChanged와 HandleHelathChanged/HandleTalismanChanged를 연결
     BoundAttribute = InPawn -> FindComponentByClass<UAttributeComponent>();
     if(BoundAttribute)
     {
         BoundAttribute -> OnHealthChanged.AddDynamic(this, &APlayerCharacterController::HandleHealthChanged);
-        BoundAttribute -> OnAmuletChanged.AddDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
+        BoundAttribute -> OnTalismanChanged.AddDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
     }
 }
 
 void APlayerCharacterController::UnbindFromPawnDelegates()
 {
-    // OnHealthChanged/OnAmuletChanged와 HandleHelathChanged/HandleAmuletChanged를 연결 해제
+    // OnHealthChanged/OnTalismanChanged와 HandleHelathChanged/HandleTalismanChanged를 연결 해제
 	if (BoundAttribute)
 	{
 		BoundAttribute->OnHealthChanged.RemoveDynamic(this, &APlayerCharacterController::HandleHealthChanged);
-        BoundAttribute->OnAmuletChanged.RemoveDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
+        BoundAttribute->OnTalismanChanged.RemoveDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
 		BoundAttribute = nullptr;
 	}
 }
@@ -197,6 +238,7 @@ void APlayerCharacterController::HandleHealthChanged(float NewHealth)
     }
 }
 
+
 void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
 {
     if(HUDRef)
@@ -204,6 +246,7 @@ void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
         HUDRef ->UpdateAmulet(NewAmulet);
     }
 }
+
 
 //중앙 텍스트 관련 함수들
 void APlayerCharacterController::ShowText()
@@ -214,6 +257,7 @@ void APlayerCharacterController::ShowText()
         HUDRef -> ShowCenterText();
     }
 }
+
 
 void APlayerCharacterController::ShowAutoText(float Seconds)
 {
@@ -231,6 +275,7 @@ void APlayerCharacterController::ShowAutoText(float Seconds)
     }
 }
 
+
 void APlayerCharacterController::HideText()
 {
     if(HUDRef)
@@ -238,6 +283,7 @@ void APlayerCharacterController::HideText()
         HUDRef -> HideCenterText();
     }
 }
+
 
 void APlayerCharacterController::UpdateText(const FString& Text)
 {

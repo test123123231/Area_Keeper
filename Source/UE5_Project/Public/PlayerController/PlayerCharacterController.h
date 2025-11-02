@@ -9,6 +9,7 @@ class UInputMappingContext;
 class UHUDWidget;
 class UAttributeComponent;
 class UInputAction;
+class AStationaryAnomaly;
 
 
 UCLASS()
@@ -55,10 +56,8 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
-
-
     UPROPERTY(EditAnywhere, Category = "UI") // 퀵슬롯 ui추가
-        TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
+    TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
 
     UPROPERTY()
     UQuickSlot* QuickSlotWidget;
@@ -70,12 +69,19 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* IA_ToggleSettingsMenu;
 
-    // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장합니다.
+    // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<UUserWidget> SettingsMenuWidgetClass;
 
     // 실제로 생성된 위젯 인스턴스를 저장할 포인터
     UUserWidget* SettingsMenuInstance;
+
+    // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    TSubclassOf<UUserWidget> TalismanWidgetClass;
+
+    // 실제로 생성된 위젯 인스턴스를 저장할 포인터
+    UUserWidget* TalismanInstance;
 
 private:
     FTimerHandle HideTextTimerHandle;
@@ -83,6 +89,10 @@ private:
 public:
     void TogglePauseMenu();
     void OpenPauseMenu();
+	void OpenTalismanUI(AStationaryAnomaly* Anomaly);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void CloseTalismanUI();
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     void ClosePauseMenu();
