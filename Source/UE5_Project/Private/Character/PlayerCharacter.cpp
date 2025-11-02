@@ -1,19 +1,27 @@
 ﻿#include "Character/PlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "EnhancedInputComponent.h"
 #include "Item/ItemBase.h"
+#include "Item/ToolBase.h"
+#include "Item/ChargeableItem.h"
+#include "Anomaly/StationaryAnomaly.h"
+#include "Anomaly/ChasingAnomaly.h"
 #include "HUD/QuickSlot.h"
 #include "DrawDebugHelpers.h"
-#include "Item/ChargeableItem.h"
 #include "Components/AttributeComponent.h"
 #include "PlayerController/PlayerCharacterController.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Interfaces/InteractableInterface.h"
+#include "Components/CapsuleComponent.h"
 
 
 APlayerCharacter::APlayerCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true; // 틱 사용
 
+	// 'AreaKeeper'의 3인칭 카메라/이동 설정
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->TargetArmLength = 300.f;
@@ -22,18 +30,38 @@ APlayerCharacter::APlayerCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(SpringArm);
 
-	CurrentFocusedItem = nullptr;
-	HeldItem = nullptr;
+	// 1인칭으로 변경 시 추가 코드
+	// ViewCamera->SetupAttachment(GetMesh(), FName("head")); // 1인칭
+	// ViewCamera->bUsePawnControlRotation = true;
+	// SpringArm->Deactivate();
 
+	CurrentFocusedInteractable = nullptr;
+	HeldItem = nullptr;
 }
+
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// 매 프레임 마다 충전
+
+	// '소지' UI가 열려있으면 플레이어 틱(추적, 충전)을 멈춤
+	if (bIsExorcismUIOpen || !IsAlive()) return;
+
 	HandleCharging(DeltaTime);
-	// 매 프레임 아이템 찾기
-	TraceForItems();
+	TraceForInteractable();
+}
+
+
+void APlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	Tags.Add(FName("PlayerCharacter"));
+
+	GetAttributes()->SetMaxHealth(3.f);
+	GetAttributes()->SetMaxAmulet(5.f);
+	GetAttributes()->SetHealth(3.f);
+	GetAttributes()->SetAmulet(5.f);
 }
 
 
@@ -41,54 +69,53 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// PlayerInputComponent를 향상된 입력 컴포넌트로 캐스팅
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// 입력 액션과 처리 함수를 바인딩
-		if (MoveAction) {
-			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-		}
-		if (LookAction) {
-			EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
-		}
-		if (InteractAction) {
-			//짧게 
-			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 
-            //홀드
-            EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started,   this, &APlayerCharacter::StartCharge);
-            EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopCharge);
-            EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled,  this, &APlayerCharacter::StopCharge);
-		}
-		if (DropAction) {
-			EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &APlayerCharacter::DropHeldItem);
-		}
+		// E키 바인딩
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::OnInteractPressed);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APlayerCharacter::OnInteractReleased);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled, this, &APlayerCharacter::OnInteractReleased);
+
+		// G키 바인딩
+		EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &APlayerCharacter::OnDropItem);
+
+		// F키 바인딩
+		//EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &APlayerCharacter::ToggleFlashlight);
+
+		// Ctrl키 바인딩
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &APlayerCharacter::StartCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopCrouch);
 	}
 }
 
-void APlayerCharacter::BeginPlay()
+
+void APlayerCharacter::Die()
 {
-	Super::BeginPlay();
+	Super::Die();
 
+	// 플레이어 입력 비활성화
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		DisableInput(PC);
+	}
 
+	// 게임오버 UI 띄우기 (GameMode 또는 PlayerController에서 처리)
 }
 
 
+// 기본 입력
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
-	// 입력값(Vector2D)을 가져옴
 	const FVector2D MovementVector = Value.Get<FVector2D>();
-
 	if (Controller != nullptr)
 	{
-		// 컨트롤러의 회전 방향을 기준으로 전후/좌우 방향을 찾기
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// 해당 방향으로 이동 입력을 추가
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
@@ -98,287 +125,243 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 void APlayerCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
-
 	if (Controller != nullptr)
 	{
-		// 마우스 입력에 따라 컨트롤러의 Yaw, Pitch 값을 조절
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
 
-void APlayerCharacter::SetQuickSlotRef(UQuickSlot* NewRef)
+
+void APlayerCharacter::StartCrouch()
 {
-	QuickSlotRef = NewRef;
+	Crouch();
 }
 
-void APlayerCharacter::TraceForItems()
+
+void APlayerCharacter::StopCrouch()
+{
+	UnCrouch();
+}
+
+
+// 상호작용 마스터 로직
+// 매 틱 호출: IInteractableInterface를 구현한 객체를 찾음
+void APlayerCharacter::TraceForInteractable()
 {
 	FVector Start = ViewCamera->GetComponentLocation();
 	FVector ForwardVector = ViewCamera->GetForwardVector();
-	FVector End = Start + (ForwardVector * 500.0f); // 카메라 앞 5m
+	FVector End = Start + (ForwardVector * 500.0f); // 5m
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
+	if (HeldItem) Params.AddIgnoredActor(HeldItem);
 
-	// 손에 든 아이템은 무시
-	if (HeldItem && HeldItem->IsAttachedTo(this))
-	{
-		Params.AddIgnoredActor(HeldItem);
-	}
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult, Start, End, ECC_Visibility, Params);
-
-	AItemBase* HitItem = nullptr;
+	TScriptInterface<IInteractableInterface> HitInteractable = nullptr;
 	if (bHit)
 	{
-		HitItem = Cast<AItemBase>(HitResult.GetActor());
+		HitInteractable = TScriptInterface<IInteractableInterface>(HitResult.GetActor());
 	}
 
-	// 이전 아이템 하이라이트 해제
-	if (CurrentFocusedItem && CurrentFocusedItem != HitItem)
+	if (CurrentFocusedInteractable != HitInteractable)
 	{
-		CurrentFocusedItem->HighlightItem(false);
-		CurrentFocusedItem = nullptr;
+		if (CurrentFocusedInteractable)
+		{
+			IInteractableInterface::Execute_Highlight(CurrentFocusedInteractable.GetObject(), false);
+		}
+		if (HitInteractable)
+		{
+			IInteractableInterface::Execute_Highlight(HitInteractable.GetObject(), true);
+		}
+		CurrentFocusedInteractable = HitInteractable;
 	}
-
-	// 새로운 아이템 하이라이트
-	if (HitItem && HitItem != CurrentFocusedItem)
-	{
-		HitItem->HighlightItem(true);
-		CurrentFocusedItem = HitItem;
-	}
-
 }
 
-// 아이템 줍기
+
+// E키를 눌렀을 때: 모든 상호작용의 분기점
+void APlayerCharacter::OnInteractPressed()
+{
+	// 쫓아오는 이상현상을 바라보고 있고, 손에 '도구'를 들고 있는가?
+	if (Cast<AChasingAnomaly>(CurrentFocusedInteractable.GetObject()) && HeldItem && Cast<AToolBase>(HeldItem))
+	{
+		UseTool();
+		return;
+	}
+
+	// '충전기'를 바라보고 있는가?
+	if (AChargeableItem* Charger = Cast<AChargeableItem>(CurrentFocusedInteractable.GetObject()))
+	{
+		StartCharge(Charger);
+		return;
+	}
+
+	// '정지된 이상현상'을 바라보고 있는가?
+	if (AStationaryAnomaly* Anomaly = Cast<AStationaryAnomaly>(CurrentFocusedInteractable.GetObject()))
+	{
+		StartExorcism(Anomaly);
+		return;
+	}
+
+	// '아이템' 또는 '도구'를 바라보고 있는가?
+	if (Cast<AItemBase>(CurrentFocusedInteractable.GetObject()))
+	{
+		// 인터페이스의 Interact 함수 호출 (ItemBase.cpp 또는 ToolBase.cpp의 줍기 로직 실행)
+		IInteractableInterface::Execute_Interact(CurrentFocusedInteractable.GetObject(), this);
+		return;
+	}
+
+	// 아무것도 바라보지 않지만, 손에 '도구'를 들고 있는가? (허공에 사용)
+	if (!CurrentFocusedInteractable && HeldItem && Cast<AToolBase>(HeldItem))
+	{
+		UseTool();
+		return;
+	}
+}
+
+
+// E키를 뗐을 때
+void APlayerCharacter::OnInteractReleased()
+{
+	if (bIsCharging)
+	{
+		StopCharge();
+	}
+}
+
+
+// 아이템 줍기/버리기
 void APlayerCharacter::PickupItem(AItemBase* Item)
 {
-	if (!Item || !IsValid(Item)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: Item invalid")); return; }
-	if (!GetMesh()) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: No mesh")); return; }
-	if (!GetMesh()->DoesSocketExist(HandSocketName)) { UE_LOG(LogTemp, Error, TEXT("Pickup FAILED: no socket")); return; }
+	if (!Item || !QuickSlotRef) return;
 
-	// safety끄기
-	if (Item->ItemMesh)
-	{
-		Item->ItemMesh->SetSimulatePhysics(false);
-		Item->ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	bool bAttached = Item->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), HandSocketName);
-	if (bAttached)
-	{
-		// 강제 transform 맞춤
-		FTransform SocketTF = GetMesh()->GetSocketTransform(HandSocketName, RTS_World);
-		Item->SetActorTransform(SocketTF);
-
-		Item->SetActorScale3D(FVector(0.3f, 0.3f, 0.3f));
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Pickup: %s attach=%d parent=%s loc=%s"),
-		*Item->GetName(), bAttached, *GetNameSafe(Item->GetAttachParentActor()), *Item->GetActorLocation().ToString());
-
-	Item->OnPickedUp();
-}
-
-
-// 아이템 내려놓기
-void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
-{
-	if (!Item || !IsValid(Item)) return;
-
-	UE_LOG(LogTemp, Warning, TEXT("Drop: %s BeforeDetach Parent=%s Phys=%d"),
-		*Item->GetName(), *GetNameSafe(Item->GetAttachParentActor()), Item->ItemMesh ? Item->ItemMesh->IsSimulatingPhysics() : 0);
-
-	Item->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	Item->SetActorLocation(Location);
-
-	Item->SetActorScale3D(FVector(0.3f, 0.3f, 0.3f));
-
-	Item->OnDropped();
-
-	UE_LOG(LogTemp, Warning, TEXT("Drop: %s AfterDetach Parent=%s Loc=%s"),
-		*Item->GetName(), *GetNameSafe(Item->GetAttachParentActor()), *Item->GetActorLocation().ToString());
-}
-
-void APlayerCharacter::Interact()
-{
-	if (!CurrentFocusedItem || !QuickSlotRef) return;
-
-	//충전 메쉬는 소유하지 않게 하는 가드
-	if (CurrentFocusedItem && Cast<AChargeableItem>(CurrentFocusedItem))
-    {
-        // 충전은 StartCharge/HandleCharging 로직으로만 처리
-        UE_LOG(LogTemp, Display,  TEXT("충전용"));
-        return;
-    }
-
-	AItemBase* NewItem = CurrentFocusedItem;
-	if (!IsValid(NewItem)) return;
-
-	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex(); // 현재 선택된 슬롯 인덱스
+	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
 	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
 
-	// 손에 다른 아이템이 있으면 교체 처리
-	if (HeldItem && HeldItem != NewItem)
+	// 손에 다른 아이템이 있으면 교체
+	if (HeldItem && HeldItem != Item)
 	{
-		// 기존 아이템을 해당 슬롯에서 제거
 		QuickSlotRef->RemoveItemAt(TargetSlotIndex);
-
-		FVector DropLocation = NewItem->GetActorLocation();
-		DropLocation.Z += 50.f;
+		FVector DropLocation = Item->GetActorLocation();
 		ChangeItem(HeldItem, DropLocation);
 		HeldItem = nullptr;
 	}
 
-	// 새 아이템 줍기
-	PickupItem(NewItem);
-	HeldItem = NewItem;
-	NewItem->HighlightItem(false);
-	CurrentFocusedItem = nullptr;
+	// 새 아이템 줍기 (ItemBase의 OnPickedUp 호출)
+	Item->OnPickedUp(GetMesh(), HandSocketName);
+	HeldItem = Item;
+	QuickSlotRef->AssignItemToSlot(TargetSlotIndex, Item);
 
-	QuickSlotRef->AssignItemToSlot(TargetSlotIndex, NewItem);
-
-
-	UE_LOG(LogTemp, Warning, TEXT("Interact: Added %s to slot %d"), *NewItem->GetName(), TargetSlotIndex);
+	if (CurrentFocusedInteractable.GetObject() == Item)
+	{
+		IInteractableInterface::Execute_Highlight(Item, false);
+		CurrentFocusedInteractable = nullptr;
+	}
 }
 
-void APlayerCharacter::DropHeldItem()
+
+void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
+{
+	if (!Item) return;
+	Item->OnDropped();
+	Item->SetActorLocation(Location);
+}
+
+
+void APlayerCharacter::OnDropItem()
 {
 	if (!HeldItem || !QuickSlotRef) return;
 
 	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
 	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
-
-	// 현재 슬롯의 아이템 가져오기
 	AItemBase* ItemInSlot = QuickSlotRef->GetItemAt(TargetSlotIndex);
 
-	// 빈 슬롯이면 그냥 리턴 (아무 일도 안 함)
-	if (!ItemInSlot)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: Current slot %d is empty, nothing to drop."), TargetSlotIndex);
-		return;
-	}
+	if (!ItemInSlot || HeldItem != ItemInSlot) return; // 손에 든 것과 슬롯이 다르면 무시
 
-	// 현재 손에 든 아이템이 슬롯의 아이템과 다르면 드롭 금지
-	if (HeldItem != ItemInSlot)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("DropHeldItem: HeldItem does not match slot %d item."), TargetSlotIndex);
-		return;
-	}
+	QuickSlotRef->RemoveItemAt(TargetSlotIndex);
 
-	QuickSlotRef->RemoveItemAt(TargetSlotIndex); // 현재 슬롯 기준으로 제거
-
-	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 50.f;
+	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.f;
 	DropLocation.Z += 30.f;
-
-	HeldItem->SetActorHiddenInGame(false);
-	HeldItem->SetActorEnableCollision(true);
 
 	ChangeItem(HeldItem, DropLocation);
 	HeldItem = nullptr;
+}
+// ---
 
-	UE_LOG(LogTemp, Warning, TEXT("Dropped held item from slot %d"), TargetSlotIndex);
+
+// 퀵슬롯
+void APlayerCharacter::SetQuickSlotRef(UQuickSlot* NewRef)
+{
+	QuickSlotRef = NewRef;
 }
 
 
 void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 {
 	if (!QuickSlotRef) return;
-
-	// 현재 선택된 슬롯 변경
 	QuickSlotRef->SetCurrentSlot(SlotIndex);
-
-
-	// 슬롯의 아이템 가져오기
 	AItemBase* ItemToEquip = QuickSlotRef->GetItemAt(SlotIndex);
 
-	// 슬롯이 비어있다면 손에 든 아이템 내려놓기
 	if (!ItemToEquip)
 	{
-		if (HeldItem)
-		{
-			HeldItem->SetActorHiddenInGame(true);
-
-			HeldItem->SetActorEnableCollision(false);
-
-			HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			HeldItem->SetActorLocation(GetActorLocation());
-			UE_LOG(LogTemp, Warning, TEXT("Slot %d is empty. Dropped held item."), SlotIndex);
-		}
+		if (HeldItem) HeldItem->SetActorHiddenInGame(true);
 		HeldItem = nullptr;
 		return;
 	}
-
-	// 이미 같은 아이템을 들고 있다면 아무 변화 없음
 	if (HeldItem == ItemToEquip)
 	{
 		HeldItem->SetActorHiddenInGame(false);
-		HeldItem->SetActorEnableCollision(false); // 손에 있을 땐 항상 꺼둬야 함
-		UE_LOG(LogTemp, Warning, TEXT("Slot %d already equipped."), SlotIndex);
-		//HeldItem->SetActorHiddenInGame(false); // 혹시라도 숨겨진 상태면 다시 보이게
 		return;
 	}
-
-	// 기존 아이템 내려놓기
 	if (HeldItem)
 	{
 		HeldItem->SetActorHiddenInGame(true);
+	}
 
-		HeldItem->SetActorEnableCollision(false);
-
-		HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		HeldItem->SetActorLocation(GetActorLocation());
-	} 
-
-	// 새 아이템 손에 쥐기
-	PickupItem(ItemToEquip);
+	ItemToEquip->OnPickedUp(GetMesh(), HandSocketName); // ItemBase.h에 OnPickedUp 시그니처 필요
+	ItemToEquip->SetActorHiddenInGame(false);
 	HeldItem = ItemToEquip;
-	HeldItem->SetActorHiddenInGame(false);
-	HeldItem->SetActorEnableCollision(false);
-
-	UE_LOG(LogTemp, Warning, TEXT("Equipped item from slot %d: %s"), SlotIndex, *ItemToEquip->GetName());
 }
+// ---
 
-void APlayerCharacter::StartCharge()
+
+// '지방' 충전 
+void APlayerCharacter::StartCharge(AChargeableItem* Target)
 {
-    // TraceForItems가 갱신해둔 현재 포커스 대상으로부터만 시작
-    AChargeableItem* Target = Cast<AChargeableItem>(CurrentFocusedItem);
-    if (!Target)
-        return;
+	if (!Target) return;
 
-    ChargingTarget = Target;  // 타겟 잠금
-    bIsCharging = true;
-    ChargeTime = 0.0f;
+	ChargingTarget = Target;
+	bIsCharging = true;
+	ChargeTime = 0.0f;
 }
+
 
 void APlayerCharacter::StopCharge()
 {
-    if (!bIsCharging) return;
-	if(auto* Pcc = Cast<APlayerCharacterController>(GetController()))
+	if (!bIsCharging) return;
+	if (auto* Pcc = Cast<APlayerCharacterController>(GetController()))
 	{
 		Pcc -> HideText(0);
 	}
-    bIsCharging = false;
-    ChargeTime = 0.0f;
-    ChargingTarget.Reset();
-
-	UE_LOG(LogTemp, Display, TEXT("부적 충전 취소"));
+	bIsCharging = false;
+	ChargeTime = 0.0f;
+	ChargingTarget.Reset();
 }
+
 
 void APlayerCharacter::HandleCharging(float DeltaTime)
 {
-    if (!bIsCharging) return;
+	if (!bIsCharging) return;
 
-    // 여전히 같은 오브젝트를 보고 있는지(TraceForItems가 유지)
-    if (!ChargingTarget.IsValid() || CurrentFocusedItem != ChargingTarget.Get())
-    {
-        // 시선을 벗어나면 취소
-        StopCharge();
-        return;
-    }
+	// 여전히 같은 오브젝트를 보고 있는지(TraceForItems가 유지)
+	if (!ChargingTarget.IsValid() || CurrentFocusedInteractable.GetObject() != ChargingTarget.Get())
+	{
+		// 시선을 벗어나면 취소
+		StopCharge();
+		return;
+	}
 	auto* Pcc = Cast<APlayerCharacterController>(GetController());
 
 	//쿨타임인지 판정
@@ -402,20 +385,102 @@ void APlayerCharacter::HandleCharging(float DeltaTime)
 		Pcc -> ShowAutoText(2.0f);
         bIsCharging = false;
 
-        bool ChargeSuccess = ChargingTarget->OnCharged();
+		bool ChargeSuccess = ChargingTarget->OnCharged();
 
-		if(ChargeSuccess)
+		if (ChargeSuccess)
 		{
 			if (UAttributeComponent* Attr = FindComponentByClass<UAttributeComponent>())
-    		{
-        		Attr->SetAmulet(5.0f);   //최대로 충전
-    		}
-		
+			{
+				Attr->SetAmulet(5.0f);   //최대로 충전
+			}
+
 		}
 
 		ChargingTarget.Reset();
 		ChargeTime = 0.0f;
-    }
-
+	}
 }
 
+
+// '소지'
+void APlayerCharacter::StartExorcism(AStationaryAnomaly* Anomaly)
+{
+	if (bIsExorcismUIOpen || !Anomaly) return;
+
+	// (SRS 4.1.6) 게임 일시 정지
+	bIsExorcismUIOpen = true;
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+	{
+		PC->SetPause(true);
+		// 플레이어 입력은 막되, UI 조작은 가능해야 함
+		PC->SetInputMode(FInputModeGameAndUI());
+		PC->bShowMouseCursor = true;
+	}
+
+	// '지방' UI 표시
+	// Anomaly->ShowExorcismUI(this); // AStationaryAnomaly에 UI 표시 함수 구현 필요
+	UE_LOG(LogTemp, Warning, TEXT("'소지' 시작. UI를 엽니다..."));
+
+	// 참고: UI가 닫힐 때(성공/실패/취소) APlayerCharacter의 함수를 호출하여
+	// bIsExorcismUIOpen = false; PC->SetPause(false); 등을 실행해야 함
+}
+
+
+// 도구 사용
+void APlayerCharacter::UseTool()
+{
+	AToolBase* Tool = Cast<AToolBase>(HeldItem);
+	if (!Tool) return;
+
+	// 쫓아오는 이상현상에게 사용
+	AChasingAnomaly* TargetAnomaly = Cast<AChasingAnomaly>(CurrentFocusedInteractable.GetObject());
+	if (TargetAnomaly)
+	{
+		if (Tool->UseTool(TargetAnomaly)) // ToolBase.h/cpp에 UseTool 구현 필요
+		{
+			// (SRS 9.2.3) 사용 성공 시 손에서 제거
+			QuickSlotRef->RemoveItemAt(QuickSlotRef->GetCurrentSlotIndex());
+			HeldItem = nullptr;
+		}
+	}
+}
+
+
+// 플레이어 피해 처리 (무적 시간 로직 포함)
+void APlayerCharacter::HandleDamage(float DamageAmount)
+{
+	if (bIsInvincible)
+	{
+		// 무적 상태일 때는 데미지를 받지 않음
+		return;
+	}
+
+	if (Attributes)
+	{
+		Attributes->ReceiveDamage(DamageAmount);
+
+		// 피해를 입었으므로 1초간 무적 상태로 만듦
+		bIsInvincible = true;
+		GetWorld()->GetTimerManager().SetTimer(
+			InvincibilityTimerHandle,
+			this,
+			&APlayerCharacter::ResetInvincibility,
+			1.0f, // 1초 무적
+			false
+		);
+
+		// 피격 시각 효과 (예: 화면 붉어짐)
+		// APlayerCharacterController* PC = Cast<APlayerCharacterController>(GetController());
+		// if (PC)
+		// {
+		// 	PC->PlayHitEffect(); 
+		// }
+	}
+}
+
+
+void APlayerCharacter::ResetInvincibility()
+{
+	bIsInvincible = false;
+}
