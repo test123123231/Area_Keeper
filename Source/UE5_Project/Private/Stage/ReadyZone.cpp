@@ -35,7 +35,7 @@ void AReadyZone::OnOverlapEnd(
     int32 OtherBodyIndex
 )
 {
-    // 플레이어만 감지 (ACharacter 기반)
+    // 플레이어만 감지
     if (!OtherActor || !OtherActor->IsA(ACharacter::StaticClass()))
         return;
 
@@ -46,7 +46,7 @@ void AReadyZone::OnOverlapEnd(
         if (GM && GM->GetClass()->ImplementsInterface(UStageTimerInterface::StaticClass()))
         {
             IStageTimerInterface::Execute_StartStageTimer(GM);
-            UE_LOG(LogTemp, Display, TEXT("ReadyZone: EndOverlap → StartStageTimer"));
+            UE_LOG(LogTemp, Display, TEXT("ReadyZone: EndOverlap -> StartStageTimer"));
         }
         else
         {

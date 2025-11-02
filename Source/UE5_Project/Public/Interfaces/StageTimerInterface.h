@@ -21,7 +21,7 @@ public:
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="StageTimer")
     void StopStageTimer();
 
-	// Stage 벗어났을 때 호출되는 이벤트 함수
+	// 대기 시간이 끝났을 때 호출되는 이벤트 함수
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="StageTimer")
     void TriggerAbnormalEvent();
 };
