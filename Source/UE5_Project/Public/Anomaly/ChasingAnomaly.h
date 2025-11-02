@@ -91,5 +91,10 @@ protected:
 
 	void ApplyDamageToPlayer(APlayerCharacter* Player);
 	void ResetDamageFlag();
+	
+	// 무적이 끝났을 때 실행
+	UFUNCTION()
+	void OnPlayerInvincibilityEnd(APlayerCharacter* Player);
+	
 };
 

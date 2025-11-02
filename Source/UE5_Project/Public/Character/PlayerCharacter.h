@@ -13,6 +13,8 @@ class UCameraComponent;
 class USpotLightComponent;
 class IInteractableInterface; // 인터페이스 참조
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityEnd, APlayerCharacter*, Player);
+
 UCLASS()
 class UE5_PROJECT_API APlayerCharacter : public ABaseCharacter
 {
@@ -30,6 +32,9 @@ public:
 	virtual void Die() override;
 
 	virtual void HandleDamage(float DamageAmount) override;
+	bool getIsInvincible();
+	UPROPERTY(BlueprintAssignable, Category="State")
+	FOnInvincibilityEnd OnInvincibilityEnd;
 
 protected:
 	virtual void BeginPlay() override;

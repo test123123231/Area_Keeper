@@ -482,5 +482,11 @@ void APlayerCharacter::HandleDamage(float DamageAmount)
 
 void APlayerCharacter::ResetInvincibility()
 {
-	bIsInvincible = false;
+    bIsInvincible = false;
+    OnInvincibilityEnd.Broadcast(this);
+}
+
+bool APlayerCharacter::getIsInvincible()
+{
+	return bIsInvincible;
 }
