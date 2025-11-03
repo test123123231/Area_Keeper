@@ -182,10 +182,39 @@ void AChasingAnomaly::MoveDirectlyToTarget(const FVector& TargetLocation)
 void AChasingAnomaly::OnAnomalyOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
-	if (Player && Player->IsAlive())
+	if (!Player) return;
+	
+	//무적 상태일 때 이벤트와 연결
+	if (Player->getIsInvincible())
+	{
+    	if (!Player->OnInvincibilityEnd.IsAlreadyBound(this, &AChasingAnomaly::OnPlayerInvincibilityEnd))
+    	{
+        	Player->OnInvincibilityEnd.AddDynamic(this, &AChasingAnomaly::OnPlayerInvincibilityEnd);
+    	}
+    	return;
+	}
+	
+	if(Player->IsAlive())
 	{
 		ApplyDamageToPlayer(Player);
 	}
+}
+
+void AChasingAnomaly::OnPlayerInvincibilityEnd(APlayerCharacter* Player)
+{
+    if (!Player) return;
+	//범위 밖에 있으면 리턴
+    if (!GetCapsuleComponent()->IsOverlappingActor(Player)) return;
+	// 죽었거나 또 무적이면 리턴
+    if (!Player->IsAlive() || Player->getIsInvincible()) return;
+
+    ApplyDamageToPlayer(Player);
+
+    // 한 번 사용 후 해제
+    if (Player->OnInvincibilityEnd.IsAlreadyBound(this, &AChasingAnomaly::OnPlayerInvincibilityEnd))
+    {
+        Player->OnInvincibilityEnd.RemoveDynamic(this, &AChasingAnomaly::OnPlayerInvincibilityEnd);
+    }
 }
 
 

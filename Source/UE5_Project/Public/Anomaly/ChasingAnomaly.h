@@ -88,5 +88,11 @@ protected:
 	void OnAnomalyOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	void ApplyDamageToPlayer(APlayerCharacter* Player);
+	void ResetDamageFlag();
+	
+	// 무적이 끝났을 때 실행
+	UFUNCTION()
+	void OnPlayerInvincibilityEnd(APlayerCharacter* Player);
+	
 };
 
