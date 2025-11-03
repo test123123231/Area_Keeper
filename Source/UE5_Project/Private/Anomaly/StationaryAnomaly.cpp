@@ -90,6 +90,7 @@ void AStationaryAnomaly::OnTalismanRitualFinished(EAnomalyCategory SelectedCateg
 
 		GetWorld()->GetTimerManager().ClearTimer(ResolveTimerHandle);
 		Destroy();
+		GameStateRef->IncrementAnomaliesSolved();
 	}
 	else
 	{
