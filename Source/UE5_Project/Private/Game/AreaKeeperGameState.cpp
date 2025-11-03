@@ -1,6 +1,7 @@
 ﻿#include "Game/AreaKeeperGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Game/AnomalyManager.h"
+#include "PlayerController/PlayerCharacterController.h"
 
 
 AAreaKeeperGameState::AAreaKeeperGameState()
@@ -32,14 +33,23 @@ void AAreaKeeperGameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	auto* PCC = Cast<APlayerCharacterController>(PC);
+	PCC -> ShowText(1);
+	FString Msg;
+	float LeftTime;
+
 	// 현재 게임 상태에 따라 다른 로직 수행
 	switch (CurrentPlayState)
 	{
 		// 준비 구역 대기 상태
 	case EAreaKeeperPlayState::EPS_WaitingToStart:
+	{
 		// 준비 타이머 카운트다운 (StartReadyZoneTimer가 호출된 이후)
 		if (ReadyZoneTimer > 0.0f)
 		{
+			Msg = FString::Printf(TEXT("이상현상까지 남은 시간: %.0f"), ReadyZoneTimer);
+			PCC -> UpdateText(Msg, 1);
 			ReadyZoneTimer -= DeltaTime;
 			if (ReadyZoneTimer <= 0.0f)
 			{
@@ -55,10 +65,18 @@ void AAreaKeeperGameState::Tick(float DeltaTime)
 			}
 		}
 		break;
+	}
 
 		// 메인 게임 플레이 상태
 	case EAreaKeeperPlayState::EPS_InProgress:
+	{
 		// 메인 게임 타이머 카운트업
+		LeftTime = TotalGameTime - GameTimer;
+		int MM = FMath::FloorToInt(LeftTime / 60.0f);
+		int SS = FMath::Fmod(LeftTime, 60.0f);
+		Msg = FString::Printf(TEXT("%.02d:%.02d"), MM, SS);
+		PCC -> UpdateText(Msg, 1);
+
 		GameTimer += DeltaTime;
 
 		SetCurrentAnomalySpawnInterval();
@@ -72,6 +90,7 @@ void AAreaKeeperGameState::Tick(float DeltaTime)
 			OnGameClear.Broadcast();
 		}
 		break;
+	}	
 
 		// 게임 종료 상태
 	case EAreaKeeperPlayState::EPS_GameFinished:

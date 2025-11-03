@@ -249,7 +249,7 @@ void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
 }
 
 
-//중앙 텍스트 관련 함수들
+//텍스트 출력 관련 함수들
 void APlayerCharacterController::ShowText(uint8 TextLocation)
 {
     if(HUDRef)

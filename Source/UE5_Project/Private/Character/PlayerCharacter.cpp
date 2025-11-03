@@ -411,7 +411,7 @@ void APlayerCharacter::TalismanRitual(AStationaryAnomaly* Anomaly)
 			if (PC)
 			{
 				PC->ShowAutoText(2.0f);
-				PC->UpdateText(TEXT("지방이 부족합니다."));
+				PC->UpdateText(TEXT("지방이 부족합니다."), 0);
 			}
 			return;
 		}
