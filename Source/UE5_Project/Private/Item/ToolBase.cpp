@@ -48,19 +48,27 @@ bool AToolBase::UseTool(AActor* Target)
 {
 	// 대상이 '쫓아오는 이상현상'인지 확인
 	AChasingAnomaly* Anomaly = Cast<AChasingAnomaly>(Target);
-	if (Anomaly)
+	if (!Anomaly)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: Used on %s"), *GetName(), *Target->GetName());
-
-		// 이상현상 제거
-		Anomaly->Banish(); // AChasingAnomaly에 Banish() 함수가 있다고 가정
-
-		// 도구 소모 (파괴)
-		Destroy();
-		return true;
+		UE_LOG(LogTemp, Warning, TEXT("%s: Target is not a Chasing Anomaly."), *GetName());
+		return false;
 	}
 
-	return false;
+	// 이 도구의 타입과 이상현상이 요구하는 타입이 일치하는지 확인
+	if (Anomaly->GetRequiredToolType() == ToolType)
+	{
+		UE_LOG(LogTemp, Log, TEXT("%s: 올바른 도구를 %s에게 사용했습니다. (퇴치 성공)"), *GetName(), *Target->GetName());
+
+		Anomaly->Banish(); // 이상현상 제거
+		return true; // PlayerCharacter에게 "사용 성공" 알림
+	}
+	else
+	{
+		// '잘못된 도구'를 사용함
+		UE_LOG(LogTemp, Warning, TEXT("%s: 잘못된 도구를 %s에게 사용했습니다. (퇴치 실패)"), *GetName(), *Target->GetName());
+		// (옵션) 여기에 "실패" 사운드나 효과를 추가할 수 있음
+		return false; // PlayerCharacter에게 "사용 실패" 알림 (도구가 소모되지 않음)
+	}
 }
 
 

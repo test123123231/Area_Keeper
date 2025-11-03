@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Item/ItemBase.h"
+#include "Anomaly/AnomalyTypes.h"
 #include "ToolBase.generated.h"
 
 
@@ -33,6 +34,11 @@ public:
 
 	virtual FString GetInteractText_Implementation() override;
 
+	/**
+	 * BP_Tool 블루프린트의 Class Defaults에서 설정
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Tool")
+	EToolType ToolType;
 
 protected:
 	virtual void BeginPlay() override;

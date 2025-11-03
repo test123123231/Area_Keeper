@@ -33,3 +33,19 @@ enum class EAnomalyState : uint8
 	// 플레이어를 감지하고 쫓아가는 상태
 	EAS_Chasing UMETA(DisplayName = "Chasing")
 };
+
+
+/**
+ * 도구의 종류를 정의
+ * BP_Tool 블루프린트에서 이 타입을 설정하여 다양한 도구를 만듬
+ */
+UENUM(BlueprintType)
+enum class EToolType : uint8
+{
+	// (예시) BP_CameraTool은 ETT_Camera로 설정
+	ETT_None		UMETA(DisplayName = "None"),
+	ETT_Bat 		UMETA(DisplayName = "Bat Tool"),
+	ETT_Salt		UMETA(DisplayName = "Salt Tool"),
+	ETT_EMFReader	UMETA(DisplayName = "EMF Reader Tool")
+	// ... 필요한 만큼 도구 추가 ...
+};

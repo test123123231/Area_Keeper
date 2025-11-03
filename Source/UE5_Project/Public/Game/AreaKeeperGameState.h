@@ -83,12 +83,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Game State | Timer")
 	void SetPlayState(EAreaKeeperPlayState NewState) { CurrentPlayState = NewState; }
 
+	// 통계(Stats) 함수
+	// (AStationaryAnomaly가 호출) '소지' 성공 시 카운트 1 증가
+	UFUNCTION(BlueprintCallable, Category = "Game State | Stats")
+	void IncrementAnomaliesSolved();
+
+	// [수정됨] (AChasingAnomaly가 호출) 쫓아오는 이상현상에게 피격 시 카운트 1 증가
+	UFUNCTION(BlueprintCallable, Category = "Game State | Stats")
+	void IncrementChasingHits();
+
+	// (GameMode가 호출) '소지'로 해결한 총 개수 반환
+	UFUNCTION(BlueprintPure, Category = "Game State | Stats")
+	int32 GetAnomaliesSolved() const { return AnomaliesSolvedCount; }
+
+	// [수정됨] (GameMode가 호출) 쫓아오는 이상현상에게 피격당한 총 횟수 반환
+	UFUNCTION(BlueprintPure, Category = "Game State | Stats")
+	int32 GetChasingHits() const { return ChasingHitCount; }
+
 protected:
 	// 현재 패널티 스택. 0~5 사이 값
 	UPROPERTY(VisibleInstanceOnly, Category = "Game State | Penalty")
 	int32 CurrentPenaltyStack;
 
-	// 서버와 클라이언트 모두에서 델리게이트를 브로드캐스트합니다.
+	// 패널티 변경 시 스택 델리게이트를 브로드캐스트
 	void BroadcastPenaltyStackChange();
 
 	// 현재 게임 플레이 상태를 반환
@@ -131,6 +148,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Config")
 	int32 MaxPenaltyStack = 5;
+
+	// '소지'로 해결한 총 이상현상 개수
+	UPROPERTY(VisibleInstanceOnly, Category = "Game State | Stats")
+	int32 AnomaliesSolvedCount;
+
+	// '쫓아오는 이상현상'에게 당한 횟수
+	UPROPERTY(VisibleInstanceOnly, Category = "Game State | Stats")
+	int32 ChasingHitCount;
 
 	// 헬퍼
 private:

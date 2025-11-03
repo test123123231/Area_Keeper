@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "Anomaly/ChasingAnomaly.h"
+﻿#include "Anomaly/ChasingAnomaly.h"
 #include "Character/PlayerCharacter.h"
 #include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Game/AreaKeeperGameState.h"
 
 
 AChasingAnomaly::AChasingAnomaly()
@@ -41,6 +40,8 @@ AChasingAnomaly::AChasingAnomaly()
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AChasingAnomaly::OnAnomalyOverlap);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+	RequiredToolType = EToolType::ETT_None;
 }
 
 
@@ -65,6 +66,8 @@ void AChasingAnomaly::BeginPlay()
 	{
 		ChasingSpeed = 300.f;
 	}
+
+	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
 }
 
 
@@ -202,6 +205,7 @@ void AChasingAnomaly::OnAnomalyOverlap(UPrimitiveComponent* OverlappedComponent,
 	}
 }
 
+
 void AChasingAnomaly::OnPlayerInvincibilityEnd(APlayerCharacter* Player)
 {
     if (!Player) return;
@@ -226,6 +230,7 @@ void AChasingAnomaly::ApplyDamageToPlayer(APlayerCharacter* Player)
 
 	Player->HandleDamage(1.0f);
 	Banish();
+	GameStateRef->IncrementChasingHits();
 }
 
 
@@ -240,7 +245,6 @@ void AChasingAnomaly::Banish()
 
 
 // IInteractableInterface 구현
-
 void AChasingAnomaly::Highlight_Implementation(bool bOn)
 {
 	// 메쉬의 머티리얼 또는 외곽선 효과 적용 (구현 필요)

@@ -469,15 +469,16 @@ void APlayerCharacter::UseTool()
 	AToolBase* Tool = Cast<AToolBase>(HeldItem);
 	if (!Tool) return;
 
-	// (SRS 9.2.2) 쫓아오는 이상현상에게 사용
+	// 쫓아오는 이상현상에게 사용
 	AChasingAnomaly* TargetAnomaly = Cast<AChasingAnomaly>(CurrentFocusedInteractable.GetObject());
 	if (TargetAnomaly)
 	{
 		if (Tool->UseTool(TargetAnomaly)) // ToolBase.cpp의 UseTool 호출
 		{
-			// (SRS 9.2.3) 사용 성공 시 손에서 제거
+			// 사용 성공 시 손에서 제거
 			QuickSlotRef->RemoveItemAt(QuickSlotRef->GetCurrentSlotIndex());
 			HeldItem = nullptr;
+			Tool->Destroy();
 		}
 	}
 }

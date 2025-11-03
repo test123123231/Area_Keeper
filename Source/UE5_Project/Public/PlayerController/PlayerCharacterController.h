@@ -60,7 +60,7 @@ protected:
     TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
 
     UPROPERTY()
-    UQuickSlot* QuickSlotWidget;
+	TObjectPtr<UQuickSlot> QuickSlotWidget;
 
     void SelectSlot1();
     void SelectSlot2();
@@ -113,5 +113,11 @@ public:
     void UpdateText(const FString& Text, uint8 TextLocation);
 
     FTimerHandle& GetHideHandle(uint8 TextLocation);
+
+	// HUD 위젯 참조 반환
+	UHUDWidget* GetHUDWidget() const { return HUDRef; }
+
+	// 퀵슬롯 위젯 참조 반환
+	UQuickSlot* GetQuickSlotWidget() const { return QuickSlotWidget; }
 
 };
