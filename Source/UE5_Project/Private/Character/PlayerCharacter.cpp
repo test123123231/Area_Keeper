@@ -109,8 +109,7 @@ void APlayerCharacter::Die()
 
 	if (GameStateRef.IsValid())
 	{
-		GameStateRef->SetPlayState(EAreaKeeperPlayState::EPS_GameFinished);
-		GameStateRef->OnGameOver.Broadcast(true); // (true: 체력 0)
+		GameStateRef->GameOver(true);
 	}
 }
 
