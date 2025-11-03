@@ -71,6 +71,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Game State | Penalty")
 	FOnPenaltyStackChanged OnPenaltyStackChanged;
 
+	//CurrentPlayState 반환
+	UFUNCTION(BlueprintPure, Category = "Game State | Timer")
+	EAreaKeeperPlayState GetPlayState() const { return CurrentPlayState; }
+
+	// CurrentPlayState 설정
+	UFUNCTION(BlueprintCallable, Category = "Game State | Timer")
+	void SetPlayState(EAreaKeeperPlayState NewState) { CurrentPlayState = NewState; }
+
 protected:
 	// 현재 패널티 스택. 0~5 사이 값
 	UPROPERTY(VisibleInstanceOnly, Category = "Game State | Penalty")

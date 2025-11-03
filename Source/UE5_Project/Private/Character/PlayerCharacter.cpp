@@ -16,6 +16,8 @@
 #include "Interfaces/InteractableInterface.h"
 #include "Components/CapsuleComponent.h"
 #include "TimerManager.h"
+#include "Game/AreaKeeperGameState.h"
+#include "Game/GameTypes.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -73,6 +75,8 @@ void APlayerCharacter::BeginPlay()
 		GetAttributes()->SetHealth(3.f);
 		GetAttributes()->SetTalisman(5.f);
 	}
+
+	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
 }
 
 
@@ -103,12 +107,11 @@ void APlayerCharacter::Die()
 {
 	Super::Die();
 
-	// 플레이어 입력 비활성화
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	if (GameStateRef.IsValid())
 	{
-		DisableInput(PC);
+		GameStateRef->SetPlayState(EAreaKeeperPlayState::EPS_GameFinished);
+		GameStateRef->OnGameOver.Broadcast(true); // (true: 체력 0)
 	}
-	// (밑에 구현 필요) GameMode에 게임오버 알림
 }
 
 
@@ -492,9 +495,9 @@ void APlayerCharacter::HandleDamage(float DamageAmount)
 
 	if (Attributes)
 	{
-		Attributes->ReceiveDamage(DamageAmount); // (SRS 7.2.2)
+		Attributes->ReceiveDamage(DamageAmount);
 
-		// (SRS 7.2.4) 1초간 무적 상태로 만듦
+		// 1초간 무적 상태로 만듦
 		bIsInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(
 			InvincibilityTimerHandle,
@@ -504,10 +507,18 @@ void APlayerCharacter::HandleDamage(float DamageAmount)
 			false
 		);
 
-		// (SRS 7.2.3) 피격 시각 효과
+		// 피격 시각 효과
 		// (구현 필요) APlayerCharacterController* PC = Cast<APlayerCharacterController>(GetController());
 		// if (PC) { PC->PlayHitEffect(); }
+
+		// 체력 0 이 됐는 지 확인 후 Die() 호출
+		if (!Attributes->IsAlive())
+		{
+			Die();
+		}
 	}
+
+
 }
 
 

@@ -6,6 +6,7 @@
 #include "Anomaly/AnomalyTypes.h"
 #include "PlayerCharacter.generated.h"
 
+
 class UQuickSlot;
 class AItemBase;
 class UInputAction;
@@ -13,6 +14,8 @@ class USpringArmComponent;
 class UCameraComponent;
 class USpotLightComponent;
 class IInteractableInterface; // 인터페이스 참조
+class AAreaKeeperGameState;
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityEnd, APlayerCharacter*, Player);
 
@@ -45,6 +48,10 @@ protected:
 	FTimerHandle InvincibilityTimerHandle;
 	void ResetInvincibility();
 	// ---
+
+	// GameState 캐시
+	UPROPERTY()
+	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
 
 	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
