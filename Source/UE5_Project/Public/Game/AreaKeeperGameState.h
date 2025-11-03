@@ -36,6 +36,8 @@ public:
 	// AGameStateBase 오버라이드
 	virtual void Tick(float DeltaTime) override;
 
+	void GameClear();
+
 
 	// (BP용) 게임 오버 시 호출됩니다. BP GameMode에서 이 이벤트를 바인딩
 	UPROPERTY(BlueprintAssignable, Category = "Game Events")
@@ -57,6 +59,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Game State | Penalty")
 	void IncrementPenaltyStack();
 
+	void GameOver(bool PlayerDied);
+
 	/**
 	 * (AStationaryAnomaly가 호출) '소지' 성공으로 패널티 스택을 1 감소
 	 */
@@ -70,6 +74,14 @@ public:
 	// 패널티 스택 변경 시 브로드캐스트
 	UPROPERTY(BlueprintAssignable, Category = "Game State | Penalty")
 	FOnPenaltyStackChanged OnPenaltyStackChanged;
+
+	//CurrentPlayState 반환
+	UFUNCTION(BlueprintPure, Category = "Game State | Timer")
+	EAreaKeeperPlayState GetPlayState() const { return CurrentPlayState; }
+
+	// CurrentPlayState 설정
+	UFUNCTION(BlueprintCallable, Category = "Game State | Timer")
+	void SetPlayState(EAreaKeeperPlayState NewState) { CurrentPlayState = NewState; }
 
 protected:
 	// 현재 패널티 스택. 0~5 사이 값

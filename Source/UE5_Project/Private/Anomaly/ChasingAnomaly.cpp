@@ -16,6 +16,8 @@ AChasingAnomaly::AChasingAnomaly()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 	CurrentState = EAnomalyState::EAS_Idle;
 	PlayerTarget = nullptr;
 
