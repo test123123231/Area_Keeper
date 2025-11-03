@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -91,5 +89,10 @@ protected:
 
 	void ApplyDamageToPlayer(APlayerCharacter* Player);
 	void ResetDamageFlag();
+	
+	// 무적이 끝났을 때 실행
+	UFUNCTION()
+	void OnPlayerInvincibilityEnd(APlayerCharacter* Player);
+	
 };
 
