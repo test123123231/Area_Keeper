@@ -15,6 +15,10 @@ AAreaKeeperGameState::AAreaKeeperGameState()
 	GameTimer = 0.0f;
 	CurrentAnomalySpawnInterval = InitialAnomalySpawnInterval;
 	CurrentPlayState = EAreaKeeperPlayState::EPS_WaitingToStart;
+
+	AnomaliesSolvedCount = 0;
+	ChasingHitCount = 0;
+	//MimicEncountersCount = 0;
 }
 
 
@@ -190,3 +194,14 @@ void AAreaKeeperGameState::CacheManagerReferences()
 	}
 }
 
+
+void AAreaKeeperGameState::IncrementAnomaliesSolved()
+{
+	AnomaliesSolvedCount++;
+}
+
+
+void AAreaKeeperGameState::IncrementChasingHits()
+{
+	ChasingHitCount++;
+}
