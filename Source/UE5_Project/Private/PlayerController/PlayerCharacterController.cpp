@@ -250,11 +250,25 @@ void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
 
 
 //텍스트 출력 관련 함수들
+FTimerHandle& APlayerCharacterController::GetHideHandle(uint8 TextLocation)
+{
+    switch(TextLocation)
+    {
+        case 0:
+            return HideCenterTextTimerHandle;
+        case 1:
+            return HideTimeTextTimerHandle;
+        default:
+            UE_LOG(LogTemp, Display, TEXT("Invalid TextLocation"));
+            return HideCenterTextTimerHandle;
+    }
+}
+
 void APlayerCharacterController::ShowText(uint8 TextLocation)
 {
     if(HUDRef)
     {
-        GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
+        GetWorldTimerManager().ClearTimer(GetHideHandle(TextLocation));
         switch(TextLocation)
         {
             case 0:
@@ -270,22 +284,18 @@ void APlayerCharacterController::ShowText(uint8 TextLocation)
 }
 
 
-void APlayerCharacterController::ShowAutoText(float Seconds)
+void APlayerCharacterController::ShowAutoText(float Seconds, uint8 TextLocation)
 {
     if (HUDRef)
     {
-        HUDRef->ShowCenterText();
-        GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
+        ShowText(TextLocation);
+        FTimerHandle& Handle = GetHideHandle(TextLocation);
+        GetWorldTimerManager().ClearTimer(Handle);
 
         FTimerDelegate Del;
-        Del.BindUObject(this, &APlayerCharacterController::HideText, static_cast<uint8>(0));
+        Del.BindUObject(this, &APlayerCharacterController::HideText, TextLocation);
 
-        GetWorldTimerManager().SetTimer(
-            HideTextTimerHandle,
-            Del,
-            Seconds,
-            false
-        );
+        GetWorldTimerManager().SetTimer(Handle, Del, Seconds, false);
     }
 }
 
@@ -304,6 +314,7 @@ void APlayerCharacterController::HideText(uint8 TextLocation)
             default:
                 break;
         }
+        GetWorldTimerManager().ClearTimer(GetHideHandle(TextLocation));
     }
 }
 

@@ -84,7 +84,9 @@ protected:
     UUserWidget* TalismanInstance;
 
 private:
-    FTimerHandle HideTextTimerHandle;
+    FTimerHandle HideCenterTextTimerHandle; // enum : 0
+    FTimerHandle HideTimeTextTimerHandle; // enum : 1
+
 
 public:
     void TogglePauseMenu();
@@ -102,12 +104,14 @@ public:
     void ShowText(uint8 TextLocation);
     
     UFUNCTION(BlueprintCallable, Category="UI")
-    void ShowAutoText(float Seconds);
+    void ShowAutoText(float Seconds, uint8 TextLocation);
 
     UFUNCTION(BlueprintCallable, Category="UI")
     void HideText(uint8 TextLocation);
 
     UFUNCTION(BlueprintCallable, Category="UI")
     void UpdateText(const FString& Text, uint8 TextLocation);
+
+    FTimerHandle& GetHideHandle(uint8 TextLocation);
 
 };

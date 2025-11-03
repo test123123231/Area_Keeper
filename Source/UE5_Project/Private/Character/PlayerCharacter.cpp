@@ -366,7 +366,7 @@ void APlayerCharacter::HandleCharging(float DeltaTime)
 	if (ChargingTarget->bIsCharged)
     {
         const float Remain = FMath::Max(0.f, ChargingTarget->RechargeCooldown - ChargingTarget->Cooldown);
-		Pcc -> ShowAutoText(2.0f);
+		Pcc -> ShowAutoText(2.0f, 0);
 		Pcc -> UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain), 0);
         return;
     }
@@ -380,7 +380,7 @@ void APlayerCharacter::HandleCharging(float DeltaTime)
     if (ChargeTime >= RequiredChargeTime)
     {
 		Pcc -> UpdateText(TEXT("충전 완료"), 0);
-		Pcc -> ShowAutoText(2.0f);
+		Pcc -> ShowAutoText(2.0f, 0);
         bIsCharging = false;
 
 		bool ChargeSuccess = ChargingTarget->OnCharged(); // 쿨타임 시작
@@ -410,7 +410,7 @@ void APlayerCharacter::TalismanRitual(AStationaryAnomaly* Anomaly)
 			auto* PC = Cast<APlayerCharacterController>(GetController());
 			if (PC)
 			{
-				PC->ShowAutoText(2.0f);
+				PC->ShowAutoText(2.0f, 0);
 				PC->UpdateText(TEXT("지방이 부족합니다."), 0);
 			}
 			return;
