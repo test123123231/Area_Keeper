@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "HUD/HUDWidget.h"   
 #include "HUD/TalismanWidget.h"
+#include "HUD/PauseMenuWidget.h"
 #include "Components/AttributeComponent.h"
 #include "GameFramework/Pawn.h"
 #include "HUD/QuickSlot.h"
@@ -103,7 +104,7 @@ void APlayerCharacterController::SelectSlot2()
 void APlayerCharacterController::TogglePauseMenu()
 {
     // 설정 메뉴가 이미 화면에 있는지 확인
-    if (SettingsMenuInstance && SettingsMenuInstance->IsInViewport())
+    if (PauseMenuInstance && PauseMenuInstance->IsInViewport())
     {
         ClosePauseMenu();
     }
@@ -117,17 +118,17 @@ void APlayerCharacterController::TogglePauseMenu()
 
 void APlayerCharacterController::OpenPauseMenu()
 {
-    if (SettingsMenuWidgetClass)
+    if (PauseMenuWidgetClass)
     {
         // 위젯 생성
-        SettingsMenuInstance = CreateWidget<UUserWidget>(this, SettingsMenuWidgetClass);
-        if (SettingsMenuInstance)
+        PauseMenuInstance = CreateWidget<UPauseMenuWidget>(this, PauseMenuWidgetClass);
+        if (PauseMenuInstance)
         {
-            SettingsMenuInstance->AddToViewport(); // 화면에 추가
+            PauseMenuInstance->AddToViewport(); // 화면에 추가
 
             // 입력 모드를 게임 및 UI 겸용으로 변경
             FInputModeGameAndUI InputModeData;
-            InputModeData.SetWidgetToFocus(SettingsMenuInstance->TakeWidget()); // 포커스를 위젯으로
+            InputModeData.SetWidgetToFocus(PauseMenuInstance->TakeWidget()); // 포커스를 위젯으로
             InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
             SetInputMode(InputModeData);
 
@@ -142,8 +143,8 @@ void APlayerCharacterController::ClosePauseMenu()
 {
     UE_LOG(LogTemp, Warning, TEXT("CloseSettingMenu called"));
     // 메뉴 닫기
-    SettingsMenuInstance->RemoveFromParent();
-    SettingsMenuInstance = nullptr; // 포인터 정리
+    PauseMenuInstance->RemoveFromParent();
+    PauseMenuInstance = nullptr; // 포인터 정리
 
     // 입력 모드를 게임 전용으로 변경
     FInputModeGameOnly InputModeData;
