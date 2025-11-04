@@ -3,9 +3,10 @@
 #include "EnhancedInputComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "HUD/HUDWidget.h"   
+#include "HUD/TalismanWidget.h"
 #include "Components/AttributeComponent.h"
 #include "GameFramework/Pawn.h"
-#include "HUD/QuickSlot.h"   // QuickSlot 위젯 헤더
+#include "HUD/QuickSlot.h"
 #include "TimerManager.h"
 #include "Character/PlayerCharacter.h"
 
@@ -158,7 +159,7 @@ void APlayerCharacterController::OpenTalismanUI(AStationaryAnomaly* Anomaly)
     if (TalismanWidgetClass)
     {
         // 위젯 생성
-        TalismanInstance = CreateWidget<UUserWidget>(this, TalismanWidgetClass);
+        TalismanInstance = CreateWidget<UTalismanWidget>(this, TalismanWidgetClass);
         if (TalismanInstance)
         {
             TalismanInstance->AddToViewport(); // 화면에 추가
