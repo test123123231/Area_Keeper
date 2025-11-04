@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "PlayerCharacterController.generated.h"
+
+
 class APlayerCharacter;
 class UQuickSlot;
 class UInputMappingContext;
@@ -10,6 +12,7 @@ class UHUDWidget;
 class UAttributeComponent;
 class UInputAction;
 class AStationaryAnomaly;
+class UTalismanWidget;
 
 
 UCLASS()
@@ -78,10 +81,10 @@ protected:
 
     // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장
     UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSubclassOf<UUserWidget> TalismanWidgetClass;
+    TSubclassOf<UTalismanWidget> TalismanWidgetClass;
 
     // 실제로 생성된 위젯 인스턴스를 저장할 포인터
-    UUserWidget* TalismanInstance;
+    UTalismanWidget* TalismanInstance;
 
 private:
     FTimerHandle HideCenterTextTimerHandle; // enum : 0
