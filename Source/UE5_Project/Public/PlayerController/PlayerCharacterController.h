@@ -12,6 +12,7 @@ class UHUDWidget;
 class UAttributeComponent;
 class UInputAction;
 class AStationaryAnomaly;
+class UPauseMenuWidget;
 class UTalismanWidget;
 
 
@@ -74,17 +75,17 @@ protected:
 
     // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장
     UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSubclassOf<UUserWidget> SettingsMenuWidgetClass;
+    TSubclassOf<UPauseMenuWidget> PauseMenuWidgetClass;
 
     // 실제로 생성된 위젯 인스턴스를 저장할 포인터
-    UUserWidget* SettingsMenuInstance;
+    TObjectPtr<UPauseMenuWidget> PauseMenuInstance;
 
     // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<UTalismanWidget> TalismanWidgetClass;
 
     // 실제로 생성된 위젯 인스턴스를 저장할 포인터
-    UTalismanWidget* TalismanInstance;
+	TObjectPtr<UTalismanWidget> TalismanInstance;
 
 private:
     FTimerHandle HideCenterTextTimerHandle; // enum : 0
