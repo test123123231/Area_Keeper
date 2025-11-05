@@ -3,7 +3,9 @@
 #include "CoreMinimal.h"
 #include "Character/BaseCharacter.h"
 #include "InputActionValue.h"
+#include "Anomaly/AnomalyTypes.h"
 #include "PlayerCharacter.generated.h"
+
 
 class UQuickSlot;
 class AItemBase;
@@ -12,6 +14,10 @@ class USpringArmComponent;
 class UCameraComponent;
 class USpotLightComponent;
 class IInteractableInterface; // 인터페이스 참조
+class AAreaKeeperGameState;
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityEnd, APlayerCharacter*, Player);
 
 UCLASS()
 class UE5_PROJECT_API APlayerCharacter : public ABaseCharacter
@@ -30,6 +36,9 @@ public:
 	virtual void Die() override;
 
 	virtual void HandleDamage(float DamageAmount) override;
+	bool getIsInvincible();
+	UPROPERTY(BlueprintAssignable, Category="State")
+	FOnInvincibilityEnd OnInvincibilityEnd;
 
 protected:
 	virtual void BeginPlay() override;
@@ -39,6 +48,10 @@ protected:
 	FTimerHandle InvincibilityTimerHandle;
 	void ResetInvincibility();
 	// ---
+
+	// GameState 캐시
+	UPROPERTY()
+	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
 
 	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
@@ -73,8 +86,8 @@ protected:
 	// 입력 처리 함수 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void StartCrouch();
-	void StopCrouch();
+	/*void StartCrouch();
+	void StopCrouch();*/
 
 	// 상호작용 및 아이템
 private:
@@ -111,7 +124,11 @@ public:
 	void SelectQuickSlot(int32 SlotIndex);
 
 	// '소지' (이상현상 해결) 로직 
-	void StartExorcism(class AStationaryAnomaly* Anomaly);
+	void TalismanRitual(class AStationaryAnomaly* Anomaly);
+
+	// '소지' UI가 닫힐 때 (UI의 OnClose 버튼 등에서 호출)
+	UFUNCTION(BlueprintCallable, Category = "TalismanRitual")
+	void FinishTalismanRitual(EAnomalyCategory SelectedCategory);
 
 	// '지방' 충전 로직
 private:
@@ -127,7 +144,7 @@ private:
 	void HandleCharging(float DeltaTime);
 
 	// 소지 UI가 열려있는지 여부, 틱 및 입력 차단용
-	bool bIsExorcismUIOpen = false;
+	bool bIsTalismanRitualUIOpen = false;
 
 	// 도구 사용 로직 
 	void UseTool();

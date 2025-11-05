@@ -27,6 +27,10 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* CenterText;
 
+	// 상단 시간 텍스트
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* TimeText;
+
 public:
 	// HealthText를 업데이트한다
     UFUNCTION(BlueprintCallable)
@@ -47,4 +51,14 @@ public:
 	// 중앙 텍스트 업데이트
 	UFUNCTION(BlueprintCallable)
 	void UpdateCenterText(const FString& Text);
+
+	UFUNCTION(BlueprintCallable)
+	void ShowTimeText();
+
+	UFUNCTION(BlueprintCallable)
+	void HideTimeText();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateTimeText(const FString& Text);
+
 };

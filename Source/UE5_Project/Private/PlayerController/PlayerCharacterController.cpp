@@ -3,9 +3,12 @@
 #include "EnhancedInputComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "HUD/HUDWidget.h"   
+#include "HUD/TalismanWidget.h"
+#include "HUD/PauseMenuWidget.h"
 #include "Components/AttributeComponent.h"
 #include "GameFramework/Pawn.h"
-#include "HUD/QuickSlot.h"   // QuickSlot 위젯 헤더
+#include "HUD/QuickSlot.h"
+#include "TimerManager.h"
 #include "Character/PlayerCharacter.h"
 
 
@@ -43,7 +46,7 @@ void APlayerCharacterController::BeginPlay()
     if(HUDRef && BoundAttribute)
     {
         HUDRef -> UpdateHealth(BoundAttribute -> GetHelath());
-        HUDRef -> UpdateAmulet(BoundAttribute -> GetAmulet());
+        HUDRef -> UpdateAmulet(BoundAttribute -> GetTalisman());
     }
 
     if (QuickSlotWidgetClass)
@@ -81,12 +84,14 @@ void APlayerCharacterController::SetupInputComponent()
     }
 }
 
+
 void APlayerCharacterController::SelectSlot1()
 {
     APlayerCharacter* PlayerChar2 = Cast<APlayerCharacter>(GetPawn());
     if (PlayerChar2)
         PlayerChar2->SelectQuickSlot(0);
 }
+
 
 void APlayerCharacterController::SelectSlot2()
 {
@@ -95,10 +100,11 @@ void APlayerCharacterController::SelectSlot2()
         PlayerChar3->SelectQuickSlot(1);
 }
 
+
 void APlayerCharacterController::TogglePauseMenu()
 {
     // 설정 메뉴가 이미 화면에 있는지 확인
-    if (SettingsMenuInstance && SettingsMenuInstance->IsInViewport())
+    if (PauseMenuInstance && PauseMenuInstance->IsInViewport())
     {
         ClosePauseMenu();
     }
@@ -112,17 +118,17 @@ void APlayerCharacterController::TogglePauseMenu()
 
 void APlayerCharacterController::OpenPauseMenu()
 {
-    if (SettingsMenuWidgetClass)
+    if (PauseMenuWidgetClass)
     {
         // 위젯 생성
-        SettingsMenuInstance = CreateWidget<UUserWidget>(this, SettingsMenuWidgetClass);
-        if (SettingsMenuInstance)
+        PauseMenuInstance = CreateWidget<UPauseMenuWidget>(this, PauseMenuWidgetClass);
+        if (PauseMenuInstance)
         {
-            SettingsMenuInstance->AddToViewport(); // 화면에 추가
+            PauseMenuInstance->AddToViewport(); // 화면에 추가
 
             // 입력 모드를 게임 및 UI 겸용으로 변경
             FInputModeGameAndUI InputModeData;
-            InputModeData.SetWidgetToFocus(SettingsMenuInstance->TakeWidget()); // 포커스를 위젯으로
+            InputModeData.SetWidgetToFocus(PauseMenuInstance->TakeWidget()); // 포커스를 위젯으로
             InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
             SetInputMode(InputModeData);
 
@@ -137,8 +143,8 @@ void APlayerCharacterController::ClosePauseMenu()
 {
     UE_LOG(LogTemp, Warning, TEXT("CloseSettingMenu called"));
     // 메뉴 닫기
-    SettingsMenuInstance->RemoveFromParent();
-    SettingsMenuInstance = nullptr; // 포인터 정리
+    PauseMenuInstance->RemoveFromParent();
+    PauseMenuInstance = nullptr; // 포인터 정리
 
     // 입력 모드를 게임 전용으로 변경
     FInputModeGameOnly InputModeData;
@@ -146,6 +152,43 @@ void APlayerCharacterController::ClosePauseMenu()
 
     bShowMouseCursor = false; // 마우스 커서 숨기기
     SetPause(false); // 게임 일시정지 해제
+}
+
+
+void APlayerCharacterController::OpenTalismanUI(AStationaryAnomaly* Anomaly)
+{
+    if (TalismanWidgetClass)
+    {
+        // 위젯 생성
+        TalismanInstance = CreateWidget<UTalismanWidget>(this, TalismanWidgetClass);
+        if (TalismanInstance)
+        {
+            TalismanInstance->AddToViewport(); // 화면에 추가
+            // 입력 모드를 게임 및 UI 겸용으로 변경
+            FInputModeGameAndUI InputModeData;
+            InputModeData.SetWidgetToFocus(TalismanInstance->TakeWidget()); // 포커스를 위젯으로
+            InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
+            SetInputMode(InputModeData);
+            bShowMouseCursor = true; // 마우스 커서 보이기
+            SetPause(true);
+        }
+    }
+}
+
+
+void APlayerCharacterController::CloseTalismanUI()
+{
+    if (TalismanInstance)
+    {
+        // 메뉴 닫기
+        TalismanInstance->RemoveFromParent();
+        TalismanInstance = nullptr; // 포인터 정리
+        // 입력 모드를 게임 전용으로 변경
+        FInputModeGameOnly InputModeData;
+        SetInputMode(InputModeData);
+        bShowMouseCursor = false; // 마우스 커서 숨기기
+        SetPause(false);
+    }
 }
 
 
@@ -161,28 +204,29 @@ void APlayerCharacterController::OnUnPossess()
     Super::OnUnPossess();
 }
 
+
 // bind
 void APlayerCharacterController::BindToPawnDelegates(APawn* InPawn)
 {
     // 중복 방지용 unbind
     UnbindFromPawnDelegates();
     if(!InPawn){ return; }
-    // OnHealthChanged/OnAmuletChanged와 HandleHelathChanged/HandleAmuletChanged를 연결
+    // OnHealthChanged/OnTalismanChanged와 HandleHelathChanged/HandleTalismanChanged를 연결
     BoundAttribute = InPawn -> FindComponentByClass<UAttributeComponent>();
     if(BoundAttribute)
     {
         BoundAttribute -> OnHealthChanged.AddDynamic(this, &APlayerCharacterController::HandleHealthChanged);
-        BoundAttribute -> OnAmuletChanged.AddDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
+        BoundAttribute -> OnTalismanChanged.AddDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
     }
 }
 
 void APlayerCharacterController::UnbindFromPawnDelegates()
 {
-    // OnHealthChanged/OnAmuletChanged와 HandleHelathChanged/HandleAmuletChanged를 연결 해제
+    // OnHealthChanged/OnTalismanChanged와 HandleHelathChanged/HandleTalismanChanged를 연결 해제
 	if (BoundAttribute)
 	{
 		BoundAttribute->OnHealthChanged.RemoveDynamic(this, &APlayerCharacterController::HandleHealthChanged);
-        BoundAttribute->OnAmuletChanged.RemoveDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
+        BoundAttribute->OnTalismanChanged.RemoveDynamic(this, &APlayerCharacterController::HandleAmuletChanged);
 		BoundAttribute = nullptr;
 	}
 }
@@ -197,6 +241,7 @@ void APlayerCharacterController::HandleHealthChanged(float NewHealth)
     }
 }
 
+
 void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
 {
     if(HUDRef)
@@ -205,45 +250,91 @@ void APlayerCharacterController::HandleAmuletChanged(float NewAmulet)
     }
 }
 
-//중앙 텍스트 관련 함수들
-void APlayerCharacterController::ShowText()
+
+//텍스트 출력 관련 함수들
+FTimerHandle& APlayerCharacterController::GetHideHandle(uint8 TextLocation)
 {
-    if(HUDRef)
+    switch(TextLocation)
     {
-        GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
-        HUDRef -> ShowCenterText();
+        case 0:
+            return HideCenterTextTimerHandle;
+        case 1:
+            return HideTimeTextTimerHandle;
+        default:
+            UE_LOG(LogTemp, Display, TEXT("Invalid TextLocation"));
+            return HideCenterTextTimerHandle;
     }
 }
 
-void APlayerCharacterController::ShowAutoText(float Seconds)
+void APlayerCharacterController::ShowText(uint8 TextLocation)
+{
+    if(HUDRef)
+    {
+        GetWorldTimerManager().ClearTimer(GetHideHandle(TextLocation));
+        switch(TextLocation)
+        {
+            case 0:
+                HUDRef -> ShowCenterText();
+                break;
+            case 1:
+                HUDRef -> ShowTimeText();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+
+void APlayerCharacterController::ShowAutoText(float Seconds, uint8 TextLocation)
 {
     if (HUDRef)
     {
-        HUDRef->ShowCenterText();
-        GetWorldTimerManager().ClearTimer(HideTextTimerHandle);
-        GetWorldTimerManager().SetTimer(
-            HideTextTimerHandle,
-            this,
-            &APlayerCharacterController::HideText,
-            Seconds,
-            false
-        );
+        ShowText(TextLocation);
+        FTimerHandle& Handle = GetHideHandle(TextLocation);
+        GetWorldTimerManager().ClearTimer(Handle);
+
+        FTimerDelegate Del;
+        Del.BindUObject(this, &APlayerCharacterController::HideText, TextLocation);
+
+        GetWorldTimerManager().SetTimer(Handle, Del, Seconds, false);
     }
 }
 
-void APlayerCharacterController::HideText()
+void APlayerCharacterController::HideText(uint8 TextLocation)
 {
     if(HUDRef)
     {
-        HUDRef -> HideCenterText();
+        switch(TextLocation)
+        {
+            case 0:
+                HUDRef -> HideCenterText();
+                break;
+            case 1:
+                HUDRef -> HideTimeText();
+                break;
+            default:
+                break;
+        }
+        GetWorldTimerManager().ClearTimer(GetHideHandle(TextLocation));
     }
 }
 
-void APlayerCharacterController::UpdateText(const FString& Text)
+void APlayerCharacterController::UpdateText(const FString& Text, uint8 TextLocation)
 {
     if(HUDRef)
     {
-        HUDRef -> UpdateCenterText(Text);
+        switch(TextLocation)
+        {
+            case 0:
+                HUDRef -> UpdateCenterText(Text);
+                break;
+            case 1:
+                HUDRef -> UpdateTimeText(Text);
+                break;
+            default:
+                break;
+        }
     }
 }
 

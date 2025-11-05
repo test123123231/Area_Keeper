@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -9,9 +7,12 @@
 #include "Anomaly/AnomalyTypes.h"
 #include "ChasingAnomaly.generated.h"
 
+
 class UAISenseConfig_Sight;
 class AAIController;
 class APlayerCharacter;
+class AAreaKeeperGameState;
+
 
 UCLASS()
 class UE5_PROJECT_API AChasingAnomaly : public ACharacter, public IInteractableInterface
@@ -29,6 +30,12 @@ public:
 	// 이 이상현상을 제거
 	UFUNCTION(BlueprintCallable, Category = "Anomaly")
 	void Banish();
+
+	/**
+	* 이 이상현상을 퇴치하는 데 필요한 도구 타입을 반환합니다.
+	*/
+	UFUNCTION(BlueprintPure, Category = "Anomaly")
+	EToolType GetRequiredToolType() const { return RequiredToolType; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -51,6 +58,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	TObjectPtr<AActor> PlayerTarget;
 
+	/**
+	*이상현상을 퇴치하는 데 필요한 도구 타입
+	* BP_ChasingAnomaly 블루프린트의 Class Defaults에서 설정
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Anomaly")
+	EToolType RequiredToolType;
+
 	// AI 속성
 
 	// 추적 속도
@@ -71,6 +85,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	float LoseChaseRange = 1200.f;
 
+	// GameState 참조 변수
+	UPROPERTY()
+	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
+
 	// AI 행동 함수
 	UFUNCTION()
 	void OnSeePawn(AActor* SeenActor, FAIStimulus Stimulus);
@@ -90,6 +108,10 @@ protected:
 	void OnAnomalyOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	void ApplyDamageToPlayer(APlayerCharacter* Player);
-	void ResetDamageFlag();
+	
+	// 무적이 끝났을 때 실행
+	UFUNCTION()
+	void OnPlayerInvincibilityEnd(APlayerCharacter* Player);
+	
 };
 

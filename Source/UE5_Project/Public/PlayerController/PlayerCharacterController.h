@@ -3,12 +3,17 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "PlayerCharacterController.generated.h"
+
+
 class APlayerCharacter;
 class UQuickSlot;
 class UInputMappingContext;
 class UHUDWidget;
 class UAttributeComponent;
 class UInputAction;
+class AStationaryAnomaly;
+class UPauseMenuWidget;
+class UTalismanWidget;
 
 
 UCLASS()
@@ -55,13 +60,11 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bind", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
-
-
     UPROPERTY(EditAnywhere, Category = "UI") // 퀵슬롯 ui추가
-        TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
+    TSubclassOf<UQuickSlot> QuickSlotWidgetClass;
 
     UPROPERTY()
-    UQuickSlot* QuickSlotWidget;
+	TObjectPtr<UQuickSlot> QuickSlotWidget;
 
     void SelectSlot1();
     void SelectSlot2();
@@ -70,27 +73,55 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* IA_ToggleSettingsMenu;
 
-    // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장합니다.
+    // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장
     UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSubclassOf<UUserWidget> SettingsMenuWidgetClass;
+    TSubclassOf<UPauseMenuWidget> PauseMenuWidgetClass;
 
     // 실제로 생성된 위젯 인스턴스를 저장할 포인터
-    UUserWidget* SettingsMenuInstance;
+    TObjectPtr<UPauseMenuWidget> PauseMenuInstance;
+
+    // 생성할 위젯 블루프린트 클래스. TSubclassOf는 클래스 자체를 저장
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    TSubclassOf<UTalismanWidget> TalismanWidgetClass;
+
+    // 실제로 생성된 위젯 인스턴스를 저장할 포인터
+	TObjectPtr<UTalismanWidget> TalismanInstance;
 
 private:
-    FTimerHandle HideTextTimerHandle;
+    FTimerHandle HideCenterTextTimerHandle; // enum : 0
+    FTimerHandle HideTimeTextTimerHandle; // enum : 1
+
 
 public:
     void TogglePauseMenu();
     void OpenPauseMenu();
+	void OpenTalismanUI(AStationaryAnomaly* Anomaly);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void CloseTalismanUI();
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     void ClosePauseMenu();
 
     // 중앙 텍스트 관련 함수들
-    void ShowText();
-    void ShowAutoText(float Seconds);
-    void HideText();
-    void UpdateText(const FString& Text);
+    UFUNCTION(BlueprintCallable, Category="UI")
+    void ShowText(uint8 TextLocation);
+    
+    UFUNCTION(BlueprintCallable, Category="UI")
+    void ShowAutoText(float Seconds, uint8 TextLocation);
+
+    UFUNCTION(BlueprintCallable, Category="UI")
+    void HideText(uint8 TextLocation);
+
+    UFUNCTION(BlueprintCallable, Category="UI")
+    void UpdateText(const FString& Text, uint8 TextLocation);
+
+    FTimerHandle& GetHideHandle(uint8 TextLocation);
+
+	// HUD 위젯 참조 반환
+	UHUDWidget* GetHUDWidget() const { return HUDRef; }
+
+	// 퀵슬롯 위젯 참조 반환
+	UQuickSlot* GetQuickSlotWidget() const { return QuickSlotWidget; }
 
 };

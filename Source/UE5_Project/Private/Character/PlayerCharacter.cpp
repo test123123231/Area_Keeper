@@ -15,13 +15,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interfaces/InteractableInterface.h"
 #include "Components/CapsuleComponent.h"
+#include "TimerManager.h"
+#include "Game/AreaKeeperGameState.h"
+#include "Game/GameTypes.h"
 
 
 APlayerCharacter::APlayerCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true; // 틱 사용
+	PrimaryActorTick.bCanEverTick = true;
 
-	// 'AreaKeeper'의 3인칭 카메라/이동 설정
+	// 3인칭 카메라 설정
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->TargetArmLength = 300.f;
@@ -30,13 +33,19 @@ APlayerCharacter::APlayerCharacter()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(SpringArm);
 
-	// 1인칭으로 변경 시 추가 코드
-	// ViewCamera->SetupAttachment(GetMesh(), FName("head")); // 1인칭
-	// ViewCamera->bUsePawnControlRotation = true;
-	// SpringArm->Deactivate();
+	// 손전등
+	//Flashlight = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
+	//Flashlight->SetupAttachment(ViewCamera); // 1인칭 시 카메라에 부착
+	//Flashlight->SetIntensity(5000.0f);
+	//Flashlight->SetOuterConeAngle(25.0f);
+	//Flashlight->bVisible = true;
 
 	CurrentFocusedInteractable = nullptr;
 	HeldItem = nullptr;
+	bIsInvincible = false;
+	bIsTalismanRitualUIOpen = false;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
 
@@ -45,7 +54,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// '소지' UI가 열려있으면 플레이어 틱(추적, 충전)을 멈춤
-	if (bIsExorcismUIOpen || !IsAlive()) return;
+	if (bIsTalismanRitualUIOpen || !IsAlive()) return;
 
 	HandleCharging(DeltaTime);
 	TraceForInteractable();
@@ -58,10 +67,16 @@ void APlayerCharacter::BeginPlay()
 
 	Tags.Add(FName("PlayerCharacter"));
 
-	GetAttributes()->SetMaxHealth(3.f);
-	GetAttributes()->SetMaxAmulet(5.f);
-	GetAttributes()->SetHealth(3.f);
-	GetAttributes()->SetAmulet(5.f);
+	// AttributeComponent에 기본 값을 할당 함
+	if (GetAttributes())
+	{
+		GetAttributes()->SetMaxHealth(3.f);
+		GetAttributes()->SetMaxTalisman(5.f);
+		GetAttributes()->SetHealth(3.f);
+		GetAttributes()->SetTalisman(5.f);
+	}
+
+	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
 }
 
 
@@ -74,20 +89,16 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 
-		// E키 바인딩
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::OnInteractPressed);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APlayerCharacter::OnInteractReleased);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled, this, &APlayerCharacter::OnInteractReleased);
 
-		// G키 바인딩
 		EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &APlayerCharacter::OnDropItem);
 
-		// F키 바인딩
-		//EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &APlayerCharacter::ToggleFlashlight);
-
-		// Ctrl키 바인딩
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &APlayerCharacter::StartCrouch);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopCrouch);
+		// 손전등, 웅크리기 바인딩
+		/*EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &APlayerCharacter::OnFlashlightPressed);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &APlayerCharacter::OnCrouchPressed);*/
+		// EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopCrouch); // (주석) 토글 방식이므로 Started만 사용
 	}
 }
 
@@ -96,13 +107,10 @@ void APlayerCharacter::Die()
 {
 	Super::Die();
 
-	// 플레이어 입력 비활성화
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	if (GameStateRef.IsValid())
 	{
-		DisableInput(PC);
+		GameStateRef->GameOver(true);
 	}
-
-	// 게임오버 UI 띄우기 (GameMode 또는 PlayerController에서 처리)
 }
 
 
@@ -133,20 +141,30 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 }
 
 
-void APlayerCharacter::StartCrouch()
-{
-	Crouch();
-}
+//void APlayerCharacter::OnFlashlightPressed()
+//{
+//	// (SRS 20.1.3) 손전등 끄고 켜기
+//	if (Flashlight)
+//	{
+//		Flashlight->SetVisibility(!Flashlight->IsVisible());
+//	}
+//}
+//
+//void APlayerCharacter::OnCrouchPressed()
+//{
+//	// (SRS 12.2.1) 웅크리기 토글
+//	if (bIsCrouched)
+//	{
+//		UnCrouch();
+//	}
+//	else
+//	{
+//		Crouch();
+//	}
+//}
 
 
-void APlayerCharacter::StopCrouch()
-{
-	UnCrouch();
-}
-
-
-// 상호작용 마스터 로직
-// 매 틱 호출: IInteractableInterface를 구현한 객체를 찾음
+//  상호작용 마스터 로직
 void APlayerCharacter::TraceForInteractable()
 {
 	FVector Start = ViewCamera->GetComponentLocation();
@@ -181,7 +199,7 @@ void APlayerCharacter::TraceForInteractable()
 }
 
 
-// E키를 눌렀을 때: 모든 상호작용의 분기점
+// OnInteractPressed 로직 단순화
 void APlayerCharacter::OnInteractPressed()
 {
 	// 쫓아오는 이상현상을 바라보고 있고, 손에 '도구'를 들고 있는가?
@@ -198,31 +216,18 @@ void APlayerCharacter::OnInteractPressed()
 		return;
 	}
 
-	// '정지된 이상현상'을 바라보고 있는가?
-	if (AStationaryAnomaly* Anomaly = Cast<AStationaryAnomaly>(CurrentFocusedInteractable.GetObject()))
+	// AStationaryAnomaly, AItemBase 등 모든 나머지 IInteractableInterface 객체는 이 범용 로직을 따름
+	if (CurrentFocusedInteractable)
 	{
-		StartExorcism(Anomaly);
-		return;
-	}
-
-	// '아이템' 또는 '도구'를 바라보고 있는가?
-	if (Cast<AItemBase>(CurrentFocusedInteractable.GetObject()))
-	{
-		// 인터페이스의 Interact 함수 호출 (ItemBase.cpp 또는 ToolBase.cpp의 줍기 로직 실행)
+		// AStationaryAnomaly -> Interact_Implementation -> Player->StartExorcism(this)
+		// AItemBase -> Interact_Implementation -> Player->PickupItem(this)
 		IInteractableInterface::Execute_Interact(CurrentFocusedInteractable.GetObject(), this);
 		return;
 	}
 
-	// 아무것도 바라보지 않지만, 손에 '도구'를 들고 있는가? (허공에 사용)
-	if (!CurrentFocusedInteractable && HeldItem && Cast<AToolBase>(HeldItem))
-	{
-		UseTool();
-		return;
-	}
 }
 
 
-// E키를 뗐을 때
 void APlayerCharacter::OnInteractReleased()
 {
 	if (bIsCharging)
@@ -240,7 +245,6 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
 	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
 
-	// 손에 다른 아이템이 있으면 교체
 	if (HeldItem && HeldItem != Item)
 	{
 		QuickSlotRef->RemoveItemAt(TargetSlotIndex);
@@ -249,14 +253,13 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 		HeldItem = nullptr;
 	}
 
-	// 새 아이템 줍기 (ItemBase의 OnPickedUp 호출)
 	Item->OnPickedUp(GetMesh(), HandSocketName);
 	HeldItem = Item;
 	QuickSlotRef->AssignItemToSlot(TargetSlotIndex, Item);
 
 	if (CurrentFocusedInteractable.GetObject() == Item)
 	{
-		IInteractableInterface::Execute_Highlight(Item, false);
+		IInteractableInterface::Execute_Highlight(CurrentFocusedInteractable.GetObject(), false);
 		CurrentFocusedInteractable = nullptr;
 	}
 }
@@ -278,7 +281,7 @@ void APlayerCharacter::OnDropItem()
 	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
 	AItemBase* ItemInSlot = QuickSlotRef->GetItemAt(TargetSlotIndex);
 
-	if (!ItemInSlot || HeldItem != ItemInSlot) return; // 손에 든 것과 슬롯이 다르면 무시
+	if (!ItemInSlot || HeldItem != ItemInSlot) return;
 
 	QuickSlotRef->RemoveItemAt(TargetSlotIndex);
 
@@ -296,7 +299,6 @@ void APlayerCharacter::SetQuickSlotRef(UQuickSlot* NewRef)
 {
 	QuickSlotRef = NewRef;
 }
-
 
 void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 {
@@ -320,14 +322,14 @@ void APlayerCharacter::SelectQuickSlot(int32 SlotIndex)
 		HeldItem->SetActorHiddenInGame(true);
 	}
 
-	ItemToEquip->OnPickedUp(GetMesh(), HandSocketName); // ItemBase.h에 OnPickedUp 시그니처 필요
+	ItemToEquip->OnPickedUp(GetMesh(), HandSocketName);
 	ItemToEquip->SetActorHiddenInGame(false);
 	HeldItem = ItemToEquip;
 }
 // ---
 
 
-// '지방' 충전 
+// '지방' 충전
 void APlayerCharacter::StartCharge(AChargeableItem* Target)
 {
 	if (!Target) return;
@@ -343,7 +345,7 @@ void APlayerCharacter::StopCharge()
 	if (!bIsCharging) return;
 	if (auto* Pcc = Cast<APlayerCharacterController>(GetController()))
 	{
-		 Pcc->HideText();
+		Pcc -> HideText(0);
 	}
 	bIsCharging = false;
 	ChargeTime = 0.0f;
@@ -355,76 +357,110 @@ void APlayerCharacter::HandleCharging(float DeltaTime)
 {
 	if (!bIsCharging) return;
 
-	// 여전히 같은 오브젝트를 보고 있는지(TraceForItems가 유지)
 	if (!ChargingTarget.IsValid() || CurrentFocusedInteractable.GetObject() != ChargingTarget.Get())
 	{
-		// 시선을 벗어나면 취소
 		StopCharge();
 		return;
 	}
 	auto* Pcc = Cast<APlayerCharacterController>(GetController());
 
-	//쿨타임인지 판정
+	// 쿨타임 중일 때
 	if (ChargingTarget->bIsCharged)
-	{
-		const float Remain = FMath::Max(0.f, ChargingTarget->RechargeCooldown - ChargingTarget->Cooldown);
-		Pcc->ShowAutoText(2.0f);
-		Pcc->UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain));
-		return;
-	}
-
-	Pcc->ShowText();
-	Pcc->UpdateText(FString::Printf(TEXT("충전 중.. %.1f초"), (2.0f - ChargeTime)));
-	ChargeTime += DeltaTime;
+    {
+        const float Remain = FMath::Max(0.f, ChargingTarget->RechargeCooldown - ChargingTarget->Cooldown);
+		Pcc -> ShowAutoText(2.0f, 0);
+		Pcc -> UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain), 0);
+        return;
+    }
+	
+	Pcc -> ShowText(0);
+	Pcc -> UpdateText(FString::Printf(TEXT("충전 중.. %.1f초"), (2.0f - ChargeTime)), 0);
+    ChargeTime += DeltaTime;
 
 
 	//충전 시간이 지난후 실행
-	if (ChargeTime >= RequiredChargeTime)
-	{
-		Pcc->UpdateText(TEXT("충전 완료"));
-		Pcc->ShowAutoText(2.0f);
-		bIsCharging = false;
+    if (ChargeTime >= RequiredChargeTime)
+    {
+		Pcc -> UpdateText(TEXT("충전 완료"), 0);
+		Pcc -> ShowAutoText(2.0f, 0);
+        bIsCharging = false;
 
-		bool ChargeSuccess = ChargingTarget->OnCharged();
+		bool ChargeSuccess = ChargingTarget->OnCharged(); // 쿨타임 시작
 
-		if (ChargeSuccess)
+		if (ChargeSuccess && GetAttributes())
 		{
-			if (UAttributeComponent* Attr = FindComponentByClass<UAttributeComponent>())
-			{
-				Attr->SetAmulet(5.0f);   //최대로 충전
-			}
-
+			GetAttributes()->SetTalisman(GetAttributes()->GetMaxTalisman()); //최대로 충전
 		}
 
 		ChargingTarget.Reset();
 		ChargeTime = 0.0f;
 	}
 }
+// ---
 
 
-// '소지'
-void APlayerCharacter::StartExorcism(AStationaryAnomaly* Anomaly)
+// '소지' 
+void APlayerCharacter::TalismanRitual(AStationaryAnomaly* Anomaly)
 {
-	if (bIsExorcismUIOpen || !Anomaly) return;
+	if (bIsTalismanRitualUIOpen || !Anomaly) return;
 
-	// (SRS 4.1.6) 게임 일시 정지
-	bIsExorcismUIOpen = true;
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	if (PC)
+	// Talisman이 부족할 경우 Text 표시 후 종료
+	if (GetAttributes())
 	{
-		PC->SetPause(true);
-		// 플레이어 입력은 막되, UI 조작은 가능해야 함
-		PC->SetInputMode(FInputModeGameAndUI());
-		PC->bShowMouseCursor = true;
+		if (GetAttributes()->GetTalisman() < 1.f)
+		{
+			auto* PC = Cast<APlayerCharacterController>(GetController());
+			if (PC)
+			{
+				PC->ShowAutoText(2.0f, 0);
+				PC->UpdateText(TEXT("지방이 부족합니다."), 0);
+			}
+			return;
+		}
 	}
 
-	// '지방' UI 표시
-	// Anomaly->ShowExorcismUI(this); // AStationaryAnomaly에 UI 표시 함수 구현 필요
-	UE_LOG(LogTemp, Warning, TEXT("'소지' 시작. UI를 엽니다..."));
+	// 게임 일시 정지
+	bIsTalismanRitualUIOpen = true;
+	auto* PC = Cast<APlayerCharacterController>(GetController());
+	if (PC)
+	{
+		// '지방' UI 표시
+		PC->OpenTalismanUI(Anomaly);
+	}
 
-	// 참고: UI가 닫힐 때(성공/실패/취소) APlayerCharacter의 함수를 호출하여
-	// bIsExorcismUIOpen = false; PC->SetPause(false); 등을 실행해야 함
 }
+
+
+// '소지' UI가 닫힐 때 (UI의 버튼 등에서 호출)
+void APlayerCharacter::FinishTalismanRitual(EAnomalyCategory SelectedCategory)
+{
+	if (!bIsTalismanRitualUIOpen) return;
+
+	bIsTalismanRitualUIOpen = false;
+	auto* PC = Cast<APlayerCharacterController>(GetController());
+	if (PC)
+	{
+		PC->CloseTalismanUI();
+	}
+
+	if (SelectedCategory == EAnomalyCategory::AC_None) return;
+
+	// Talisman Count 감소
+	if (GetAttributes())
+	{
+		float CurrentTalisman = GetAttributes()->GetTalisman();
+		GetAttributes()->SetTalisman(CurrentTalisman - 1.f);
+	}
+
+	AStationaryAnomaly* Anomaly = Cast<AStationaryAnomaly>(CurrentFocusedInteractable.GetObject());
+	if (Anomaly)
+	{
+		Anomaly->OnTalismanRitualFinished(SelectedCategory);
+		CurrentFocusedInteractable = nullptr;
+	}
+
+}
+// ---
 
 
 // 도구 사용
@@ -437,50 +473,62 @@ void APlayerCharacter::UseTool()
 	AChasingAnomaly* TargetAnomaly = Cast<AChasingAnomaly>(CurrentFocusedInteractable.GetObject());
 	if (TargetAnomaly)
 	{
-		if (Tool->UseTool(TargetAnomaly)) // ToolBase.h/cpp에 UseTool 구현 필요
+		if (Tool->UseTool(TargetAnomaly)) // ToolBase.cpp의 UseTool 호출
 		{
-			// (SRS 9.2.3) 사용 성공 시 손에서 제거
+			// 사용 성공 시 손에서 제거
 			QuickSlotRef->RemoveItemAt(QuickSlotRef->GetCurrentSlotIndex());
 			HeldItem = nullptr;
+			Tool->Destroy();
 		}
 	}
 }
+// ---
 
 
-// 플레이어 피해 처리 (무적 시간 로직 포함)
+// 플레이어 피해 처리
 void APlayerCharacter::HandleDamage(float DamageAmount)
 {
 	if (bIsInvincible)
 	{
-		// 무적 상태일 때는 데미지를 받지 않음
-		return;
+		return; // 무적 상태일 때는 데미지를 받지 않음
 	}
 
 	if (Attributes)
 	{
 		Attributes->ReceiveDamage(DamageAmount);
 
-		// 피해를 입었으므로 1초간 무적 상태로 만듦
+		// 1초간 무적 상태로 만듦
 		bIsInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(
 			InvincibilityTimerHandle,
 			this,
 			&APlayerCharacter::ResetInvincibility,
-			1.0f, // 1초 무적
+			1.0f,
 			false
 		);
 
-		// 피격 시각 효과 (예: 화면 붉어짐)
-		// APlayerCharacterController* PC = Cast<APlayerCharacterController>(GetController());
-		// if (PC)
-		// {
-		// 	PC->PlayHitEffect(); 
-		// }
+		// 피격 시각 효과
+		// (구현 필요) APlayerCharacterController* PC = Cast<APlayerCharacterController>(GetController());
+		// if (PC) { PC->PlayHitEffect(); }
+
+		// 체력 0 이 됐는 지 확인 후 Die() 호출
+		if (!Attributes->IsAlive())
+		{
+			Die();
+		}
 	}
+
+
 }
 
 
 void APlayerCharacter::ResetInvincibility()
 {
-	bIsInvincible = false;
+    bIsInvincible = false;
+    OnInvincibilityEnd.Broadcast(this);
+}
+
+bool APlayerCharacter::getIsInvincible()
+{
+	return bIsInvincible;
 }

@@ -45,3 +45,27 @@ void UHUDWidget::UpdateCenterText(const FString& Text)
         CenterText->SetText(FText::FromString(Text));
     }
 }
+
+void UHUDWidget::ShowTimeText()
+{
+    if (TimeText)
+    {
+        TimeText->SetVisibility(ESlateVisibility::Visible);
+    }
+}
+
+void UHUDWidget::HideTimeText()
+{
+    if (TimeText)
+    {
+        TimeText->SetVisibility(ESlateVisibility::Hidden);
+    }
+}
+
+void UHUDWidget::UpdateTimeText(const FString& Text)
+{
+    if (TimeText)
+    {
+        TimeText->SetText(FText::FromString(Text));
+    }
+}

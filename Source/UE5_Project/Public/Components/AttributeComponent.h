@@ -6,7 +6,7 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHPChanged, float, NewHealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmuletChanged, float, NewAmulet);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTalismanChanged, float, NewTalisman);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UE5_PROJECT_API UAttributeComponent : public UActorComponent
@@ -27,33 +27,35 @@ private:
 	// 현재 MaxHealth
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
 	float MaxHealth;
-	// 현재 Amulet
+	// 현재 talisman
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
-	float Amulet;
-	// 현재 MaxAmulet
+	float Talisman;
+	// 현재 Maxtalisman
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes")
-	float MaxAmulet;
+	float MaxTalisman;
 
 public:
 	void ReceiveDamage(float DamageAmount);
 	float GetHealthPercent();
 	bool IsAlive();
 	void HealthInit(float MaxHealth, float NewHealth);
+	
 	void SetHealth(float NewHealth);
 	void SetMaxHealth(float NewMaxHealth);
+	void SetTalisman(float NewTalisman);
+	void SetMaxTalisman(float NewMaxTalisman);
+	
 	float GetHelath();
-	float GetAmulet();
-	void SetAmulet(float NewAmulet);
-	void SetMaxAmulet(float NewMaxAmulet);
 	float GetMaxHelath();
-	float GetMaxAmulet();
+	float GetTalisman();
+	float GetMaxTalisman();
 
 //event
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHPChanged OnHealthChanged;
 	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnAmuletChanged OnAmuletChanged;
+	FOnTalismanChanged OnTalismanChanged;
 
 
 //test용도 (추후 삭제)
