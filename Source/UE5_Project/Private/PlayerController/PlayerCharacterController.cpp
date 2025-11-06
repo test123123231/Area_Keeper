@@ -10,6 +10,10 @@
 #include "HUD/QuickSlot.h"
 #include "TimerManager.h"
 #include "Character/PlayerCharacter.h"
+#include "Game/AreaKeeperGameState.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 void APlayerCharacterController::BeginPlay()
@@ -65,6 +69,22 @@ void APlayerCharacterController::BeginPlay()
 
             UE_LOG(LogTemp, Log, TEXT("QuickSlot UI added to viewport."));
         }
+    }
+
+    // GameState 참조를 캐시
+    GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
+
+    // GameState가 유효하면, OnPenaltyStackChanged 델리게이트에 우리 함수를 바인딩
+    if (GameStateRef.IsValid())
+    {
+        GameStateRef->OnPenaltyStackChanged.AddDynamic(this, &APlayerCharacterController::OnPenaltyStackUpdated);
+    }
+
+    // 플레이어의 '기본' 이동 속도를 가져와서 저장(패널티 해제 시 필요)
+    APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn());
+    if (PlayerChar && PlayerChar->GetCharacterMovement())
+    {
+        DefaultWalkSpeed = PlayerChar->GetCharacterMovement()->MaxWalkSpeed;
     }
 }
 
@@ -338,3 +358,112 @@ void APlayerCharacterController::UpdateText(const FString& Text, uint8 TextLocat
     }
 }
 
+
+/**
+ * GameState에서 패널티 스택이 변경될 때마다 콜백 함수
+ */
+void APlayerCharacterController::OnPenaltyStackUpdated(int32 NewStackCount)
+{
+    ApplyPenaltyEffects(NewStackCount);
+}
+
+
+void APlayerCharacterController::ApplyPenaltyEffects(int32 NewStackCount)
+{
+    APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn());
+    if (!PlayerChar) return;
+    ApplyMovementPenalty(PlayerChar, NewStackCount);
+    ApplyVignettePenalty(PlayerChar, NewStackCount);
+    ApplySoundPenalty(NewStackCount);
+}
+
+
+void APlayerCharacterController::ApplySoundPenalty(int32 NewStackCount)
+{
+    // --- 2스택: 청각 패널티 (주기적인 사운드 재생) ---
+    if (NewStackCount >= 2)
+    {
+        // 타이머가 이미 실행 중인지 확인 (중복 실행 방지)
+        if (!GetWorld()->GetTimerManager().IsTimerActive(PenaltySoundTimerHandle))
+        {
+            // 타이머 시작: WhisperInterval마다 PlayWhisperSound 함수를, 반복(true) 실행
+            GetWorld()->GetTimerManager().SetTimer(
+                PenaltySoundTimerHandle,
+                this,
+                &APlayerCharacterController::PlayWhisperSound,
+                WhisperInterval,
+                true);
+
+            // 즉시 1회 재생
+            PlayWhisperSound();
+        }
+    }
+    else
+    {
+        // 2스택 미만이면 반복 타이머를 즉시 정지
+        GetWorld()->GetTimerManager().ClearTimer(PenaltySoundTimerHandle);
+    }
+}
+
+
+void APlayerCharacterController::ApplyVignettePenalty(APlayerCharacter* PlayerChar, int32 NewStackCount)
+{
+    // --- 3스택: 시각 패널티 (비네트 효과) ---
+    UCameraComponent* Camera = PlayerChar->GetViewCamera(); // 추가한 Getter로 카메라 가져오기
+    if (Camera)
+    {
+        // PostProcessSettings 값을 덮어씀
+        Camera->PostProcessSettings.bOverride_VignetteIntensity = true;
+
+        if (NewStackCount >= 3)
+        {
+            Camera->PostProcessSettings.VignetteIntensity = 1.0f; // 비네트 최대
+        }
+        else
+        {
+            Camera->PostProcessSettings.VignetteIntensity = 0.0f; // 비네트 제거
+        }
+    }
+}
+
+
+void APlayerCharacterController::ApplyMovementPenalty(APlayerCharacter* PlayerChar, int32 NewStackCount)
+{
+    // --- 4스택: 이동 속도 패널티 (10~20% 감소) ---
+    UCharacterMovementComponent* Movement = PlayerChar->GetCharacterMovement();
+    if (Movement)
+    {
+        if (NewStackCount >= 4)
+        {
+            Movement->MaxWalkSpeed = DefaultWalkSpeed * 0.8f; // 20% 감소
+        }
+        else
+        {
+            Movement->MaxWalkSpeed = DefaultWalkSpeed; // 기본 속도로 복원
+        }
+    }
+}
+
+
+/**
+ * 2스택 패널티 사운드 재생 (타이머가 호출)
+ * [수정] 배열에서 랜덤하게 사운드를 선택하여 재생
+ */
+void APlayerCharacterController::PlayWhisperSound()
+{
+    // 1. BP에서 사운드 배열이 채워졌는지, 비어있지 않은지 확인
+    if (WhisperSounds.Num() > 0)
+    {
+        // 2. 0부터 (배열 크기 - 1) 사이의 랜덤 인덱스를 구합니다.
+        int32 RandomIndex = FMath::RandRange(0, WhisperSounds.Num() - 1);
+
+        // 3. 해당 인덱스의 사운드 에셋을 가져옵니다.
+        //    (IsValidIndex 체크는 RandRange가 범위를 보장하므로 생략 가능)
+        USoundBase* SoundToPlay = WhisperSounds[RandomIndex];
+
+        // 4. 해당 사운드 에셋이 유효한지(nullptr이 아닌지) 확인하고 재생
+        if (SoundToPlay) {
+            UGameplayStatics::PlaySound2D(GetWorld(), SoundToPlay);
+        }
+    }
+}
