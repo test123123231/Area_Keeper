@@ -1,3 +1,5 @@
+테스트
+
 | **Use case #1 : GameStart** |  |
 |:---:|:---:|
 | **GENERAL CHARACTERISTICS** |  |
