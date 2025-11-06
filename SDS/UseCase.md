@@ -1,31 +1,31 @@
 <h2>2. Use case analysis</h2>
  
-이번 장은 'Area Keeper' 게임의 Use case diagram과 Use case description을 제공한다. Diagram 및 description에 관한 고려 사항은 다음과 같다.
-Use case diagram은 description에 대한 부가적인 결과물이다. 따라서 본 문서를 읽는 독자는 Use case diagram보다 Use case description에서 Use case에 대한 충분한 정보를 얻어야 한다.
-Use case diagram에 나타난 Use case는 모두 user-level use case이다.
-Player는 게임을 플레이하는 User이다.
+이번 장은 'Area Keeper' 게임의 Use case diagram과 Use case description을 제공한다. Diagram 및 description에 관한 고려 사항은 다음과 같다.<br/>
+Use case diagram은 description에 대한 부가적인 결과물이다. 따라서 본 문서를 읽는 독자는 Use case diagram보다 Use case description에서 Use case에 대한 충분한 정보를 얻어야 한다.<br/>
+Use case diagram에 나타난 Use case는 모두 user-level use case이다.<br/>
+Player는 게임을 플레이하는 User이다.<br/>
  
-본 프로젝트의 Use case 목록은 다음과 같다.
-GameStart: 게임 시작하기 (메인 메뉴에서 시작 및 준비 구역에서 스테이지 진입 포함)
-KeyMovement: 플레이어 키보드 조작을 제공한다.
-MouseMovement: 플레이어 시점 조작을 제공한다.
-FlashlightControl: 손전등 켜고 끄기
-InventoryManagement : 인벤토리 퀵슬롯
-GetItem : 도구를 습득하는 기능
-DropItem : 도구를 버리는 기능
-AnormalyManagement : 이상 현상 생성 관리
-UnsolvedManagement : 미해결이상현상관리
-ChasingInteraction : 쫓아오는 이상 현상 상호작용
-StationaryInteraction : 사라지는 이상 현상 상호작용
-PenaltyManagement : 이상현상 패널티에 대한 상호작용
-CharacterHealthManagement : 캐릭터체력에 대한 기능
-ToolUsage: 도구 사용 (쫓아오는 이상 현상 제거)
-TalismanRitual: 소지 수행 (정지된 이상 현상 해결 시도 및 취소)
-TalismanCharge: 지방 충전
-PauseGame: 일시 정지 메뉴 사용 (게임 일시 정지 및 메뉴 조작)
-ConfigureSettings: 옵션 설정 (메인 메뉴 또는 일시 정지 메뉴에서 설정 변경)
-GameOver: 게임 오버 조건 충족
-GameClear: 게임 클리어 조건 충족
+본 프로젝트의 Use case 목록은 다음과 같다.<br/>
+GameStart: 게임 시작하기 (메인 메뉴에서 시작 및 준비 구역에서 스테이지 진입 포함)<br/>
+KeyMovement: 플레이어 키보드 조작을 제공한다.<br/>
+MouseMovement: 플레이어 시점 조작을 제공한다.<br/>
+FlashlightControl: 손전등 켜고 끄기<br/>
+InventoryManagement : 인벤토리 퀵슬롯<br/>
+GetItem : 도구를 습득하는 기능<br/>
+DropItem : 도구를 버리는 기능<br/>
+AnormalyManagement : 이상 현상 생성 관리<br/>
+UnsolvedManagement : 미해결이상현상관리<br/>
+ChasingInteraction : 쫓아오는 이상 현상 상호작용<br/>
+StationaryInteraction : 사라지는 이상 현상 상호작용<br/>
+PenaltyManagement : 이상현상 패널티에 대한 상호작용<br/>
+CharacterHealthManagement : 캐릭터체력에 대한 기능<br/>
+ToolUsage: 도구 사용 (쫓아오는 이상 현상 제거)<br/>
+TalismanRitual: 소지 수행 (정지된 이상 현상 해결 시도 및 취소)<br/>
+TalismanCharge: 지방 충전<br/>
+PauseGame: 일시 정지 메뉴 사용 (게임 일시 정지 및 메뉴 조작)<br/>
+ConfigureSettings: 옵션 설정 (메인 메뉴 또는 일시 정지 메뉴에서 설정 변경)<br/>
+GameOver: 게임 오버 조건 충족<br/>
+GameClear: 게임 클리어 조건 충족<br/>
 
 <p align="center">
  <img src = "./UseCaseDiagram.png">
