@@ -1,0 +1,21 @@
+# 9. Reference
+
+**[1] 에픽 게임즈 언리얼 엔진 코딩 표준:**
+
+https://dev.epicgames.com/documentation/ko-kr/unreal-engine/epic-cplusplus-coding-standard-for-unreal-engine
+
+**[2] 에픽 게임즈 언리얼 엔진 사용자 매뉴얼:**
+
+https://dev.epicgames.com/documentation/ko-kr/unreal-engine/programming-with-cplusplus-in-unreal-engine
+
+**[3] PlantUML, "PlantUML Sequence Diagram Documentation":** 
+
+https://plantuml.com/sequence-diagram
+
+**[4] PlantUML, "PlantUML Class Diagram Documentation":** 
+
+https://plantuml.com/class-diagram
+
+**[5] Object Management Group (OMG), "OMG Unified Modeling Language (UML) v2.5.1 Specification":** 
+
+https://www.omg.org/spec/UML/2.5.1/
