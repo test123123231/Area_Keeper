@@ -1,0 +1,13 @@
+# 7. Implementation requirements
+
+**H/W platform requirements**
+- CPU	: 최소 Intel Core i5 11세대
+- VGA : 최소 NVIDIA GeForce GTX 1070 (8GB)
+- 16 GB RAM
+***
+**S/W platform requirements**
+- OS : Windows 10 64-bit
+- Unreal Engine 5.3 이상
+- 개발 도구 (IDE) : Visual Studio 2022 (C++ 게임 개발 워크로드 포함)
+- 형상 관리: Git, GitDesktop
+- 문서화 도구: PlantUML, graphviz (클래스 및 시퀀스 다이어그램 작성용)
