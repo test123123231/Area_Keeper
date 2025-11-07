@@ -128,7 +128,7 @@ void AAreaKeeperGameState::GameOver(bool PlayerDied)
 	CurrentPlayState = EAreaKeeperPlayState::EPS_GameFinished;
 
 	// BP GameMode가 바인딩할 수 있도록 이벤트를 브로드캐스트
-	OnGameOver.Broadcast(false); // (false: 체력 0 아님)
+	OnGameOver.Broadcast(PlayerDied);
 }
 
 
