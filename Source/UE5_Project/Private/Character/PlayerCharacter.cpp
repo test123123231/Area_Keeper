@@ -194,7 +194,45 @@ void APlayerCharacter::TraceForInteractable()
 		{
 			IInteractableInterface::Execute_Highlight(HitInteractable.GetObject(), true);
 		}
+
+		APlayerCharacterController* Pcc = Cast<APlayerCharacterController>(GetController());
+        if (Pcc)
+		{
+			FString InteractText;
+			bool bTextShow = false;
+			if(HitInteractable)
+			{
+				UObject* FocusedObj = HitInteractable.GetObject();
+				if(AChasingAnomaly* Chasing = Cast<AChasingAnomaly>(FocusedObj))
+				{
+  					if (HeldItem && Cast<AToolBase>(HeldItem))
+                    {
+                        InteractText = IInteractableInterface::Execute_GetInteractText(FocusedObj);
+						bTextShow = true;
+                    }
+					else
+					{
+						bTextShow = false;
+					}
+				}
+				else
+				{
+					InteractText = IInteractableInterface::Execute_GetInteractText(HitInteractable.GetObject());
+					bTextShow = true;
+				}
+			}
+
+			if(bTextShow)
+			{
+				Pcc -> ShowText(0);
+				Pcc -> UpdateText(InteractText, 0);
+			}
+			else
+			{
+				Pcc -> HideText(0);
+			}
 		CurrentFocusedInteractable = HitInteractable;
+		}
 	}
 }
 
