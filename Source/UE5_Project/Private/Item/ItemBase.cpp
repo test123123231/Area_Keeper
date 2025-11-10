@@ -25,6 +25,11 @@ void AItemBase::BeginPlay()
 	if (ItemMesh)
 	{
 		DynamicMaterial = ItemMesh->CreateAndSetMaterialInstanceDynamic(0);
+		// 초기화: 검은색으로 설정
+		if (DynamicMaterial)
+		{
+			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.f, 0.f, 0.f, 1.f));
+		}
 	}
 }
 
@@ -35,7 +40,8 @@ void AItemBase::Highlight_Implementation(bool bIsLooking)
 	if (DynamicMaterial)
 	{
 		// 머티리얼에 "Color"라는 파라미터가 있어야 작동함
-		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor::Red : FLinearColor::White);
+		//DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor::Red : FLinearColor::White);
+		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor::Red : FLinearColor(0.f, 0.f, 0.f, 1.f));
 	}
 }
 

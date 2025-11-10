@@ -64,13 +64,24 @@ void UQuickSlot::SetCurrentSlot(int32 NewIndex)
 
 void UQuickSlot::UpdateSlotHighlight()
 {
-    FLinearColor NormalColor = FLinearColor::White;
+    /*FLinearColor NormalColor = FLinearColor::White;
     FLinearColor HighlightColor = FLinearColor::Yellow;
 
     if (Img_Icon1)
         Img_Icon1->SetColorAndOpacity(CurrentSlotIndex == 0 ? HighlightColor : NormalColor);
     if (Img_Icon2)
-        Img_Icon2->SetColorAndOpacity(CurrentSlotIndex == 1 ? HighlightColor : NormalColor);
+        Img_Icon2->SetColorAndOpacity(CurrentSlotIndex == 1 ? HighlightColor : NormalColor);*/
+
+    if (Img_Icon1)
+        Img_Icon1->SetColorAndOpacity(FLinearColor::White);
+    if (Img_Icon2)
+        Img_Icon2->SetColorAndOpacity(FLinearColor::White);
+
+
+    if (Border_Highlight1)
+        Border_Highlight1->SetVisibility(CurrentSlotIndex == 0 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+    if (Border_Highlight2)
+        Border_Highlight2->SetVisibility(CurrentSlotIndex == 1 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
 }
 
 void UQuickSlot::UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon)
