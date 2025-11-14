@@ -14,6 +14,7 @@ class UInputAction;
 class AStationaryAnomaly;
 class UPauseMenuWidget;
 class UTalismanWidget;
+class AAreaKeeperGameState;
 
 
 UCLASS()
@@ -87,10 +88,46 @@ protected:
     // 실제로 생성된 위젯 인스턴스를 저장할 포인터
 	TObjectPtr<UTalismanWidget> TalismanInstance;
 
+    /**
+     * GameState의 OnPenaltyStackChanged 델리게이트에 바인딩될 함수
+     * @param NewStackCount 새로 변경된 패널티 스택 수 (0~5)
+     */
+    UFUNCTION()
+    void OnPenaltyStackUpdated(int32 NewStackCount);
+
+    void ApplyPenaltyEffects(int32 NewStackCount);
+
+    void ApplySoundPenalty(int32 NewStackCount);
+
+    void ApplyVignettePenalty(APlayerCharacter* PlayerChar, int32 NewStackCount);
+
+    void ApplyMovementPenalty(APlayerCharacter* PlayerChar, int32 NewStackCount);
+
+    /** 2스택 패널티 사운드를 주기적으로 재생하기 위한 타이머 콜백 함수 */
+    void PlayWhisperSound();
+
+
 private:
     FTimerHandle HideCenterTextTimerHandle; // enum : 0
     FTimerHandle HideTimeTextTimerHandle; // enum : 1
 
+    // GameState 참조를 캐시하기 위한 변수
+    UPROPERTY()
+    TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
+
+    // 플레이어의 기본 이동 속도 (패널티 해제 시 복구용)
+    float DefaultWalkSpeed;
+
+    // 2스택 패널티 사운드 반복 재생 타이머
+    FTimerHandle PenaltySoundTimerHandle;
+
+    // (BP에서 설정) 2스택일 때 재생할 속삭임 사운드들
+    UPROPERTY(EditDefaultsOnly, Category = "Penalty|Audio")
+    TArray<TObjectPtr<USoundBase>> WhisperSounds;
+
+    // (BP에서 설정) 속삭임 사운드 재생 주기 (예: 15초)
+    UPROPERTY(EditDefaultsOnly, Category = "Penalty|Audio")
+    float WhisperInterval = 15.0f;
 
 public:
     void TogglePauseMenu();

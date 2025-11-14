@@ -40,6 +40,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="State")
 	FOnInvincibilityEnd OnInvincibilityEnd;
 
+	UCameraComponent* GetViewCamera() const { return ViewCamera; }
+
 protected:
 	virtual void BeginPlay() override;
 
