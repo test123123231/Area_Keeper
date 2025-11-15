@@ -58,6 +58,7 @@
 | RequiredChargeTime | float | private | 지방 충전을 완료하는 데 필요한 홀드 시간이다. (기본값: 2.0초) (EditAnywhere) |
 | ChargingTarget | TWeakObjectPtr<AChargeableItem> | private | 현재 충전 중인 대상(AChargeableItem)의 참조이다. |
 | bIsTalismanRitualUIOpen | bool | private | '소지' UI가 열려있는 동안 Tick 로직을 차단하기 위한 플래그이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | 플레이어 컨트롤러 참조이다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
@@ -87,6 +88,7 @@
 | HandleCharging | void | private | bIsCharging이 true일 때 매 틱 실행된다. 충전 대상(ChargingTarget)을 계속 바라보는지, 쿨타임 중인지 확인하고, RequiredChargeTime 도달 시 AChargeableItem::OnCharged를 호출하며 UAttributeComponent::SetTalisman으로 지방을 가득 채운다. |
 | UseTool | void | private | OnInteractPressed에 의해 호출된다. HeldItem이 AToolBase인지 확인하고, 대상 AChasingAnomaly에 UseTool을 실행하고 성공 시 아이템을 파괴(소모)한다. |
 | GetViewCamera | UCameraComponent* | public | UCameraComponent를 반환한다. |
+| UpdateInteractionPrompt | void | private | 플레이어가 바라보는 대상에 맞춰 '줍기', '소지하기', '도구 사용' 같은 상호작용 안내 텍스트를 HUD에 표시하거나 숨긴다. |
 
 ***
 
