@@ -15,6 +15,7 @@ class UCameraComponent;
 class USpotLightComponent;
 class IInteractableInterface; // 인터페이스 참조
 class AAreaKeeperGameState;
+class APlayerCharacterController;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityEnd, APlayerCharacter*, Player);
@@ -103,6 +104,8 @@ private:
 	// 매 틱마다 상호작용 가능한 객체를 찾음
 	void TraceForInteractable();
 
+	void UpdateInteractionPrompt(TScriptInterface<IInteractableInterface>& HitInteractable);
+
 	// 현재 바라보고 있는 상호작용 가능한 객체
 	UPROPERTY()
 	TScriptInterface<IInteractableInterface> CurrentFocusedInteractable;
@@ -140,6 +143,9 @@ private:
 	float RequiredChargeTime = 2.0f; // E키 홀드 시간
 
 	TWeakObjectPtr<class AChargeableItem> ChargingTarget;
+
+	UPROPERTY()
+	TObjectPtr<APlayerCharacterController> PlayerControllerRef;
 
 	void StartCharge(AChargeableItem* Target);
 	void StopCharge();

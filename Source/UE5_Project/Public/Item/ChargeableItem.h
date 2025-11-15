@@ -30,7 +30,9 @@ public:
 
 	// 누적 시간
 	float Cooldown = 0.0f;
+	virtual FString GetInteractText_Implementation() override;
 
 protected:
 	virtual void Highlight_Implementation(bool bOn) override;
+
 };
