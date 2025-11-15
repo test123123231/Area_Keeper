@@ -1,5 +1,6 @@
 #include "Item/ChargeableItem.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "PlayerController/PlayerCharacterController.h"
 
 AChargeableItem::AChargeableItem()
 {
@@ -60,4 +61,9 @@ void AChargeableItem::Highlight_Implementation(bool bOn)
             DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.f, 0.f, 0.f, 1.f));
 		}
     }
+}
+
+FString AChargeableItem::GetInteractText_Implementation()
+{
+    return FString(TEXT("충전하기"));
 }

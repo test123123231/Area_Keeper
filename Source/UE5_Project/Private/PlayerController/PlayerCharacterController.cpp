@@ -58,7 +58,7 @@ void APlayerCharacterController::BeginPlay()
         QuickSlotWidget = CreateWidget<UQuickSlot>(this, QuickSlotWidgetClass);
         if (QuickSlotWidget)
         {
-            QuickSlotWidget->AddToViewport(1);
+            QuickSlotWidget->AddToViewport(0);
 
             // PlayerCharacter에 QuickSlot 위젯 참조 설정
             APlayerCharacter* PlayerChar1 = Cast<APlayerCharacter>(GetPawn());

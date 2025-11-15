@@ -77,6 +77,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
+	PlayerControllerRef = Cast<APlayerCharacterController>(GetController());
 }
 
 
@@ -233,9 +234,56 @@ void APlayerCharacter::TraceForInteractable()
 				IInteractableInterface::Execute_Highlight(CurrentFocusedInteractable.GetObject(), false);
 			}
 		}
+
+		UpdateInteractionPrompt(HitInteractable);
 		CurrentFocusedInteractable = HitInteractable;
 	}
 	
+}
+
+
+void APlayerCharacter::UpdateInteractionPrompt(TScriptInterface<IInteractableInterface>& HitInteractable)
+{
+	
+	if (!PlayerControllerRef)
+	{
+		return;
+	}
+
+	FString InteractText;
+	bool bTextShow = false;
+
+	if (HitInteractable)
+	{
+		UObject* FocusedObj = HitInteractable.GetObject();
+		if (AChasingAnomaly* Chasing = Cast<AChasingAnomaly>(FocusedObj))
+		{
+			if (HeldItem && Cast<AToolBase>(HeldItem))
+			{
+				InteractText = IInteractableInterface::Execute_GetInteractText(FocusedObj);
+				bTextShow = true;
+			}
+			else
+			{
+				bTextShow = false;
+			}
+		}
+		else
+		{
+			InteractText = IInteractableInterface::Execute_GetInteractText(HitInteractable.GetObject());
+			bTextShow = true;
+		}
+	}
+
+	if (bTextShow)
+	{
+		PlayerControllerRef->ShowText(0);
+		PlayerControllerRef->UpdateText(InteractText, 0);
+	}
+	else
+	{
+		PlayerControllerRef->HideText(0);
+	}
 }
 
 

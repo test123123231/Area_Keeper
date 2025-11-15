@@ -47,17 +47,16 @@ void AItemBase::Highlight_Implementation(bool bIsLooking)
 // 플레이어가 상호작용(E)할 때
 void AItemBase::Interact_Implementation(APlayerCharacter* Interactor)
 {
-	if (Interactor)
+	if (!Interactor)
 	{
-		// 플레이어의 '아이템 줍기' 로직을 호출
-		Interactor->PickupItem(this);
+		return;
 	}
 }
 
 
 FString AItemBase::GetInteractText_Implementation()
 {
-	return FString(TEXT("줍기"));
+	return FString(TEXT("상호작용하기"));
 }
 
 
