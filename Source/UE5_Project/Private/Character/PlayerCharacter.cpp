@@ -184,18 +184,58 @@ void APlayerCharacter::TraceForInteractable()
 		HitInteractable = TScriptInterface<IInteractableInterface>(HitResult.GetActor());
 	}
 
+	
+
+	if (HitInteractable)
+	{
+		AChasingAnomaly* TargetAnomaly = Cast<AChasingAnomaly>(HitInteractable.GetObject());
+
+		if (TargetAnomaly)
+		{
+			// 쫓아오는 이상현상을 바라보고 있을 때
+			if (HeldItem)
+			{
+				AToolBase* Tool = Cast<AToolBase>(HeldItem);
+				if (Tool)
+				{
+					// 도구면 타입 비교 - 일치하면 파란색, 불일치하면 빨간색
+					bool bIsCompatible = (Tool->ToolType == TargetAnomaly->GetRequiredToolType());
+					TargetAnomaly->SetHighlightColor(bIsCompatible);
+				}
+				else
+				{
+					// 도구가 아니면 빨간색
+					TargetAnomaly->SetHighlightColor(false);
+				}
+			}
+		}
+		else
+		{
+			// 일반 상호작용 객체는 기본 하이라이트
+			IInteractableInterface::Execute_Highlight(HitInteractable.GetObject(), true);
+		}
+	}
+
 	if (CurrentFocusedInteractable != HitInteractable)
 	{
 		if (CurrentFocusedInteractable)
 		{
-			IInteractableInterface::Execute_Highlight(CurrentFocusedInteractable.GetObject(), false);
-		}
-		if (HitInteractable)
-		{
-			IInteractableInterface::Execute_Highlight(HitInteractable.GetObject(), true);
+			// 이전에 포커스되어 있던 객체의 하이라이트 해제
+			AChasingAnomaly* OldAnomaly = Cast<AChasingAnomaly>(CurrentFocusedInteractable.GetObject());
+			if (OldAnomaly)
+			{
+				// 쫓아오는 이상현상은 ClearHighlight로 원래 색상으로 되돌림
+				OldAnomaly->ClearHighlight();
+			}
+			else
+			{
+				// 일반 상호작용 객체는 기본 하이라이트 해제
+				IInteractableInterface::Execute_Highlight(CurrentFocusedInteractable.GetObject(), false);
+			}
 		}
 		CurrentFocusedInteractable = HitInteractable;
 	}
+	
 }
 
 

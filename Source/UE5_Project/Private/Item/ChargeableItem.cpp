@@ -54,10 +54,9 @@ void AChargeableItem::Highlight_Implementation(bool bOn)
     if (DynamicMaterial)
     {
 		if(bOn){
-			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor::Green);
+			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.5f, 3.0f, 0.5f, 1.0f));
 		}
 		else{
-			//DynamicMaterial->SetVectorParameterValue("Color", FLinearColor::White);
             DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.f, 0.f, 0.f, 1.f));
 		}
     }

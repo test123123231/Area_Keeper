@@ -64,13 +64,6 @@ void UQuickSlot::SetCurrentSlot(int32 NewIndex)
 
 void UQuickSlot::UpdateSlotHighlight()
 {
-    /*FLinearColor NormalColor = FLinearColor::White;
-    FLinearColor HighlightColor = FLinearColor::Yellow;
-
-    if (Img_Icon1)
-        Img_Icon1->SetColorAndOpacity(CurrentSlotIndex == 0 ? HighlightColor : NormalColor);
-    if (Img_Icon2)
-        Img_Icon2->SetColorAndOpacity(CurrentSlotIndex == 1 ? HighlightColor : NormalColor);*/
 
     if (Img_Icon1)
         Img_Icon1->SetColorAndOpacity(FLinearColor::White);

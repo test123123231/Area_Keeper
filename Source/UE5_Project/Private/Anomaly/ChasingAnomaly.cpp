@@ -262,3 +262,54 @@ FString AChasingAnomaly::GetInteractText_Implementation()
 	return FString(TEXT("도구 사용"));
 }
 
+void AChasingAnomaly::SetHighlightColor(bool bIsCompatible)
+{
+	USkeletalMeshComponent* SkeletalMesh = GetMesh();
+
+	if (SkeletalMesh)
+	{
+		UMaterialInterface* BaseMaterial = SkeletalMesh->GetMaterial(0);
+		if (BaseMaterial)
+		{
+			UMaterialInstanceDynamic* DynMat = Cast<UMaterialInstanceDynamic>(BaseMaterial);
+
+			if (!DynMat)
+			{
+				DynMat = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+				SkeletalMesh->SetMaterial(0, DynMat);
+			}
+
+			if (DynMat)
+			{
+				if (bIsCompatible)
+				{
+					// 파란색 외곽선
+					DynMat->SetVectorParameterValue(FName("Color"), FLinearColor(0.5f, 0.5f, 3.0f, 1.0f));
+				}
+				else
+				{
+					// 빨간색 외곽선
+					DynMat->SetVectorParameterValue(FName("Color"), FLinearColor(3.0f, 0.5f, 0.5f, 1.0f));
+				}
+			}
+		}
+	}
+}
+
+void AChasingAnomaly::ClearHighlight()
+{
+	USkeletalMeshComponent* SkeletalMesh = GetMesh();
+	if (SkeletalMesh)
+	{
+		UMaterialInterface* BaseMaterial = SkeletalMesh->GetMaterial(0);
+		if (BaseMaterial)
+		{
+			UMaterialInstanceDynamic* DynMat = Cast<UMaterialInstanceDynamic>(BaseMaterial);
+			if (DynMat)
+			{
+				// 검은색(0,0,0) = 외곽선 꺼짐
+				DynMat->SetVectorParameterValue(FName("Color"), FLinearColor(0.0f, 0.0f, 0.0f, 1.0f));
+			}
+		}
+	}
+}

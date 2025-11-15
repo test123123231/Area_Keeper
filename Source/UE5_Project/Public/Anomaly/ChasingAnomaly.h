@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Anomaly")
 	EToolType GetRequiredToolType() const { return RequiredToolType; }
 
+	void SetHighlightColor(bool bIsCompatible);
+	void ClearHighlight();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
