@@ -102,3 +102,4 @@
 | Tick | void | public | bIsCharged가 true일 때만 실행되어 Cooldown을 증가시킨다. RechargeCooldown에 도달하면 bIsCharged를 false로 리셋하고 Tick을 비활성화한다. (Override) |
 | OnCharged | bool | public | APlayerCharacter의 HandleCharging에 의해 호출된다. bIsCharged가 false일 때만 bIsCharged = true로 설정, Tick을 활성화하고 true를 반환한다. ( BlueprintCallable) |
 | Highlight_Implementation | void | public | 플레이어가 바라볼 때 호출된다. bIsCharged(쿨타임 중)이면 하얀색, 아니면(충전 가능) 초록색으로 하이라이트 색상을 변경한다. (Override) |
+| GetInteractText_Implementation | FString | public | 상호작용 UI에 충전기 텍스트를 반환한다. (Override) |
