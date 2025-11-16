@@ -12,6 +12,7 @@ class UStaticMeshComponent;
 class AAnomalyManager;
 class AChasingAnomaly;
 class AAreaKeeperGameState;
+class UAnomalousPropertyComponent;
 
 
 /**
@@ -41,6 +42,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Anomaly")
 	void OnTalismanRitualFinished(EAnomalyCategory SelectedCategory);
 
+	// AnomalyManager가 스폰 직후 이 함수를 호출하여 연결
+	void SetLinkedComponent(UAnomalousPropertyComponent* CompToLink);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -64,6 +68,10 @@ protected:
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicMaterial;
 
+	// 정지된 이상현상 해결/만료될 때 원상복구시켜야 할 컴포넌트
+	UPROPERTY()
+	TObjectPtr<UAnomalousPropertyComponent> LinkedComponent;
+
 private:
 	// 패널티 스택 증가
 	void IncrementPenaltyStack();
@@ -74,6 +82,8 @@ private:
 	// 소지 실패 시 새 이상현상 스폰
 	void SpawnFailedAnomaly();
 
+	void ReturnLinkedActorToManager();
+
 	// GameState 캐시
 	UPROPERTY()
 	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
@@ -81,4 +91,5 @@ private:
 	// AnomalyManager 캐시
 	UPROPERTY()
 	TWeakObjectPtr<AAnomalyManager> AnomalyManagerRef;
+
 };

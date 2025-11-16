@@ -6,6 +6,8 @@
 #include "Anomaly/ChasingAnomaly.h"
 #include "Game/AreaKeeperGameState.h"
 #include "Game/AnomalyManager.h"
+#include "Components/AnomalousPropertyComponent.h"
+#include "Engine/StaticMeshActor.h"
 
 
 AStationaryAnomaly::AStationaryAnomaly()
@@ -78,6 +80,23 @@ FString AStationaryAnomaly::GetInteractText_Implementation()
 }
 
 
+void AStationaryAnomaly::ReturnLinkedActorToManager()
+{
+	if (LinkedComponent && AnomalyManagerRef.IsValid())
+	{
+		LinkedComponent->ResetToNormal();
+
+		// 컴포넌트의 오너(AStaticMeshActor)를 가져옴
+		AStaticMeshActor* OwnerActor = Cast<AStaticMeshActor>(LinkedComponent->GetOwner());
+		if (OwnerActor)
+		{
+			// Manager에 액터를 "반납"
+			AnomalyManagerRef->ReturnActorToAvailableList(OwnerActor);
+		}
+	}
+}
+
+
 // '소지' (TalismanRitual) 로직 
 // '소지' UI에서 플레이어가 선택을 완료했을 때 호출됨
 void AStationaryAnomaly::OnTalismanRitualFinished(EAnomalyCategory SelectedCategory)
@@ -87,6 +106,8 @@ void AStationaryAnomaly::OnTalismanRitualFinished(EAnomalyCategory SelectedCateg
 		// '소지' 성공
 		// 패널티 스택 감소
 		DecrementPenaltyStack();
+
+		ReturnLinkedActorToManager();
 
 		GetWorld()->GetTimerManager().ClearTimer(ResolveTimerHandle);
 		Destroy();
@@ -105,7 +126,7 @@ void AStationaryAnomaly::OnTalismanRitualFinished(EAnomalyCategory SelectedCateg
 // 미해결 타이머 만료
 void AStationaryAnomaly::OnResolveTimerExpired()
 {
-	if (AnomalyType == EAnomalyType::AT_Chasing && AnomalyManagerRef.IsValid())
+	if (AnomalyType == EAnomalyType::EAT_Chasing && AnomalyManagerRef.IsValid())
 	{
 		AnomalyManagerRef->SpawnChasingAnomaly(GetActorLocation());
 	}
@@ -114,6 +135,8 @@ void AStationaryAnomaly::OnResolveTimerExpired()
 		// 패널티 스택 증가
 		IncrementPenaltyStack();
 	}
+
+	ReturnLinkedActorToManager();
 	Destroy();
 }
 
@@ -145,4 +168,13 @@ void AStationaryAnomaly::SpawnFailedAnomaly()
 	{
 		AnomalyManagerRef->SpawnStationaryAnomaly();
 	}
+}
+
+
+/**
+ * AnomalyManager가 호출하여, 이 퍼즐과 환경 변조 컴포넌트를 연결합니다.
+ */
+void AStationaryAnomaly::SetLinkedComponent(UAnomalousPropertyComponent* CompToLink)
+{
+	LinkedComponent = CompToLink;
 }
