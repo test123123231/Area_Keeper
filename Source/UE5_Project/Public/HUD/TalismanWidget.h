@@ -28,16 +28,16 @@ private:
 	//--- BP 위젯 변수 바인딩 ---
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Button_VisualSense;
+	TObjectPtr<UButton> Button_Gigantism; // 거대화 버튼
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Button_AuditorySense;
+	TObjectPtr<UButton> Button_Levitation; // 공중 부양 버튼
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Button_Object;
+	TObjectPtr<UButton> Button_Peculiarity; // 물체 특이사항 버튼
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UButton> Button_Environment;
+	TObjectPtr<UButton> Button_Intrusion; // 새로운 물체 버튼
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> Button_GoBack;
@@ -46,16 +46,16 @@ private:
 	// BP의 OnClicked 이벤트를 대체
 
 	UFUNCTION()
-	void OnVisualSenseClicked();
+	void OnGigantismClicked(); // 거대화
 
 	UFUNCTION()
-	void OnAuditorySenseClicked();
+	void OnLevitationClicked(); // 공중 부양
 
 	UFUNCTION()
-	void OnObjectClicked();
+	void OnPeculiarityClicked(); // 물체 특이사항
 
 	UFUNCTION()
-	void OnEnvironmentClicked();
+	void OnIntrusionClicked(); // 새로운 물체
 
 	UFUNCTION()
 	void OnGoBackClicked();
