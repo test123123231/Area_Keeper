@@ -491,7 +491,7 @@ void APlayerCharacter::FinishTalismanRitual(EAnomalyCategory SelectedCategory)
 		PC->CloseTalismanUI();
 	}
 
-	if (SelectedCategory == EAnomalyCategory::AC_None) return;
+	if (SelectedCategory == EAnomalyCategory::EAC_None) return;
 
 	// Talisman Count 감소
 	if (GetAttributes())
