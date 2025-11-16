@@ -218,13 +218,6 @@ FVector AAnomalyManager::GetRandomSpawnLocation()
 }
 
 
-EAnomalyType AAnomalyManager::GetRandomAnomalyType() const
-{
-	// 단순 50:50 확률로 결정
-	return (FMath::RandBool()) ? EAnomalyType::EAT_Disappearing : EAnomalyType::EAT_Chasing;
-}
-
-
 EAnomalyCategory AAnomalyManager::GetRandomAnomalyCategory() const
 {
 	// EAnomalyCategory에 정의된 범주 중 랜덤 선택

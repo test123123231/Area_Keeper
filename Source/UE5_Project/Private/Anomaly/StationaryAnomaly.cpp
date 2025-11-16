@@ -338,13 +338,3 @@ void AStationaryAnomaly::DecrementPenaltyStack()
 		GameStateRef->DecrementPenaltyStack();
 	}
 }
-
-
-void AStationaryAnomaly::SpawnFailedAnomaly()
-{
-	UE_LOG(LogTemp, Warning, TEXT("소지 실패로 새 정지 이상 현상 추가"));
-	if (AnomalyManagerRef.IsValid())
-	{
-		AnomalyManagerRef->SpawnStationaryAnomaly();
-	}
-}

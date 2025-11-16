@@ -80,11 +80,6 @@ private:
 	FVector GetRandomSpawnLocation();
 
 	/**
-	 * 스폰될 이상현상의 유형 (사라지는/쫓아오는)을 랜덤하게 결정
-	 */
-	EAnomalyType GetRandomAnomalyType() const;
-
-	/**
 	 * 스폰될 이상현상의 범주 (시각, 청각 등)를 랜덤하게 결정
 	 */
 	EAnomalyCategory GetRandomAnomalyCategory() const;

@@ -87,9 +87,6 @@ private:
 	// 패널티 스택 감소
 	void DecrementPenaltyStack();
 
-	// 소지 실패 시 새 이상현상 스폰
-	void SpawnFailedAnomaly();
-
 	// --- [새로 추가] 원본 액터 정보 ---
 	// 'OriginalActor'가 원본 액터의 '시각'과 '물리'를 모두 제어
 	UPROPERTY()
