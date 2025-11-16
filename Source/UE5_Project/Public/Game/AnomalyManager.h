@@ -9,7 +9,6 @@
 class AStationaryAnomaly;
 class AChasingAnomaly;
 class AAreaKeeperGameState;
-class UAnomalousPropertyComponent;
 
 
 /**
@@ -28,17 +27,13 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditInstanceOnly, Category = "Anomaly Config")
-	TArray<TObjectPtr<AStaticMeshActor>> ModifiableMeshActors;
+	TArray<TObjectPtr<AActor>> ModifiableActors;
 
 	UPROPERTY()
-	TArray<TObjectPtr<AStaticMeshActor>> AvailableModifiableActors;
+	TArray<TObjectPtr<AActor>> AvailableModifiableActors;
 
 	// 핵심 스폰 API
 public:
-	// [새로 추가]
-	// AnomalyManager가 스폰 직후 이 함수를 호출하여 연결
-	void SetLinkedComponent(UAnomalousPropertyComponent* CompToLink);
-
 	/**
 	 * (GameMode/GameState가 호출) 준비 구역 타이머 종료 시 주기적인 스폰을 시작
 	 */
@@ -64,7 +59,7 @@ public:
 	void SpawnStationaryAnomaly();
 
 	UFUNCTION()
-	void ReturnActorToAvailableList(AStaticMeshActor* ActorToReturn);
+	void ReturnActorToAvailableList(AActor* ActorToReturn);
 
 private:
 	// 생성 유지 시간 (초)
@@ -82,7 +77,7 @@ private:
 	 * param OutLocation 찾은 위치
 	 * return 위치 찾기 성공 여부
 	 */
-	bool GetRandomSpawnLocation(FVector& OutLocation);
+	FVector GetRandomSpawnLocation();
 
 	/**
 	 * 스폰될 이상현상의 유형 (사라지는/쫓아오는)을 랜덤하게 결정
@@ -99,24 +94,6 @@ private:
 
 	// ChasingAnomalyClassList 목록 중 랜덤하게 하나를 선택
 	TSubclassOf<AChasingAnomaly> GetRandomChasingAnomalyClass();
-
-	/**
-	 * 이상현상의 "시각적" 부분을 준비 (환경 변조 또는 새 물체)
-	 */
-	bool SetupAnomalyVisuals(
-		EAnomalyCategory AnomalyEffect,
-		FVector& OutSpawnLocation,
-		UAnomalousPropertyComponent*& OutAnomalousComp
-	);
-
-	/**
-	 * 이상현상의 "논리적" 부분 (AStationaryAnomaly)을 스폰
-	 */
-	void SpawnAnomalyLogic(
-		EAnomalyCategory AnomalyEffect,
-		const FVector& SpawnLocation,
-		UAnomalousPropertyComponent* AnomalousComp
-	);
 
 	void InitializeAvailableActorList();
 

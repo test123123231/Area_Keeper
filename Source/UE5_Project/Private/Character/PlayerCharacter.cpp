@@ -182,6 +182,7 @@ void APlayerCharacter::TraceForInteractable()
 	TScriptInterface<IInteractableInterface> HitInteractable = nullptr;
 	if (bHit)
 	{
+		UE_LOG(LogTemp, Log, TEXT("TraceForInteractable: Focused interactable changed."));
 		HitInteractable = TScriptInterface<IInteractableInterface>(HitResult.GetActor());
 	}
 
