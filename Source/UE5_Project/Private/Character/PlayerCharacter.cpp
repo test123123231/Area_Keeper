@@ -257,14 +257,7 @@ void APlayerCharacter::OnInteractPressed()
 		return;
 	}
 
-	// '충전기'를 바라보고 있는가?
-	if (AChargeableItem* Charger = Cast<AChargeableItem>(CurrentFocusedInteractable.GetObject()))
-	{
-		StartCharge(Charger);
-		return;
-	}
-
-	// AStationaryAnomaly, AItemBase 등 모든 나머지 IInteractableInterface 객체는 이 범용 로직을 따름
+	// AStationaryAnomaly, AItemBase, AChargeableItem 등 모든 나머지 IInteractableInterface 객체는 이 범용 로직을 따름
 	if (CurrentFocusedInteractable)
 	{
 		// AStationaryAnomaly -> Interact_Implementation -> Player->StartExorcism(this)
