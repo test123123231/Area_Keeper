@@ -70,11 +70,19 @@ void UQuickSlot::UpdateSlotHighlight()
     if (Img_Icon2)
         Img_Icon2->SetColorAndOpacity(FLinearColor::White);
 
-
+    // Border_Highlight1: 선택되면 노란색, 아니면 검은색
     if (Border_Highlight1)
-        Border_Highlight1->SetVisibility(CurrentSlotIndex == 0 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+    {
+        Border_Highlight1->SetVisibility(ESlateVisibility::HitTestInvisible);
+        Border_Highlight1->SetBrushColor(CurrentSlotIndex == 0 ? FLinearColor::Yellow : FLinearColor::Black);
+    }
+
+    // Border_Highlight2: 선택되면 노란색, 아니면 검은색
     if (Border_Highlight2)
-        Border_Highlight2->SetVisibility(CurrentSlotIndex == 1 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+    {
+        Border_Highlight2->SetVisibility(ESlateVisibility::HitTestInvisible);
+        Border_Highlight2->SetBrushColor(CurrentSlotIndex == 1 ? FLinearColor::Yellow : FLinearColor::Black);
+    }
 }
 
 void UQuickSlot::UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon)
