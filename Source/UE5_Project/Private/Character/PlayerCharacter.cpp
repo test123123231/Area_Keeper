@@ -386,7 +386,7 @@ void APlayerCharacter::StopCharge()
 	if (!bIsCharging) return;
 	if (auto* Pcc = Cast<APlayerCharacterController>(GetController()))
 	{
-		Pcc -> HideText(0);
+		Pcc -> UpdateText(TEXT("충전하기"), 0);
 	}
 	bIsCharging = false;
 	ChargeTime = 0.0f;
