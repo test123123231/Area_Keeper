@@ -282,7 +282,7 @@ void APlayerCharacter::OnInteractReleased()
 void APlayerCharacter::PickupItem(AItemBase* Item)
 {
 	if (!Item || !QuickSlotRef) return;
-
+	PlayerControllerRef -> HideText(0);
 	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
 	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
 
