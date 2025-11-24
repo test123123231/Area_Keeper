@@ -94,6 +94,10 @@ private:
 
 	// 설정 프로퍼티 (에디터에서 설정)
 protected:
+	// (Blueprint) 스폰할 '정지된 이상현상'의 베이스 블루프린트 클래스 목록
+	UPROPERTY(EditDefaultsOnly, Category = "Anomaly Config")
+	TSubclassOf<AStationaryAnomaly> BaseStationaryAnomalyClass;
+
 	// (Blueprint) 스폰할 '정지된 이상현상'의 블루프린트 클래스 목록
 	UPROPERTY(EditDefaultsOnly, Category = "Anomaly Config")
 	TArray<TSubclassOf<AStationaryAnomaly>> StationaryAnomalyClassList;

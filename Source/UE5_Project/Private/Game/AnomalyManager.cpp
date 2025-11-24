@@ -109,14 +109,13 @@ void AAnomalyManager::SpawnStationaryAnomaly()
 
 	// 스폰 준비
 	UWorld* World = GetWorld();
-	if (!World || StationaryAnomalyClassList.Num() == 0)
+	if (!World)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AnomalyManager: World 또는 StationaryAnomalyClassList가 비어있습니다."));
+		UE_LOG(LogTemp, Error, TEXT("AnomalyManager: World가 비어있습니다."));
 		return;
 	}
 
-	TSubclassOf<AStationaryAnomaly> AnomalyClass = GetRandomStationaryAnomalyClass();
-	if (!AnomalyClass) return;
+	TSubclassOf<AStationaryAnomaly> AnomalyClass;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -131,6 +130,9 @@ void AAnomalyManager::SpawnStationaryAnomaly()
 			UE_LOG(LogTemp, Warning, TEXT("AnomalyManager: '새 물체' 스폰 위치를 찾는 데 실패했습니다."));
 			return;
 		}
+
+		AnomalyClass = GetRandomStationaryAnomalyClass();
+		if (!AnomalyClass) return;
 
 		AStationaryAnomaly* NewAnomaly = World->SpawnActor<AStationaryAnomaly>(
 			AnomalyClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams
@@ -159,6 +161,7 @@ void AAnomalyManager::SpawnStationaryAnomaly()
 		}
 
 		// AStationaryAnomaly를 스폰 (위치는 TargetActor의 위치지만, InitializeFromActor가 덮어쓸 것임)
+		AnomalyClass = BaseStationaryAnomalyClass;
 		AStationaryAnomaly* NewAnomaly = World->SpawnActor<AStationaryAnomaly>(
 			AnomalyClass, TargetActor->GetActorLocation(), TargetActor->GetActorRotation(), SpawnParams
 		);
@@ -231,7 +234,8 @@ EAnomalyCategory AAnomalyManager::GetRandomAnomalyCategory() const
 	}
 
 	int32 RandomIndex = FMath::RandRange(1, MaxCategoryIndex);
-	return static_cast<EAnomalyCategory>(RandomIndex);
+	//return static_cast<EAnomalyCategory>(RandomIndex);
+	return EAnomalyCategory::EAC_Peculiarity; // 테스트용으로 항상 Peculiarity 반환
 }
 
 
