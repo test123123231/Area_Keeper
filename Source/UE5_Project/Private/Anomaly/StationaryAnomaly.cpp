@@ -191,24 +191,49 @@ void AStationaryAnomaly::StartPeculiarity()
 	UE_LOG(LogTemp, Warning, TEXT("Starting Peculiarity..."));
 	if (!OriginalActor) return;
 
-	// [수정] '자신'이 아닌 'OriginalActor'의 머티리얼을 변경
-	TArray<UStaticMeshComponent*> MeshComponents;
-	OriginalActor->GetComponents<UStaticMeshComponent>(MeshComponents);
-
-	for (UStaticMeshComponent* MeshComp : MeshComponents)
+	// OriginalActor에 인터페이스 함수 Interact 구현되어 있으면 해당 함수 타이머를 등록해서 주기적으로 호출해서 상호작용 애니메이션 재생
+	if (IInteractableInterface* Interactable = Cast<IInteractableInterface>(OriginalActor))
 	{
-		if (MeshComp)
+		// 타이머 설정 (0.5초 간격으로 반복)
+		GetWorld()->GetTimerManager().SetTimer(
+			PeculiarityTimerHandle,
+			this,
+			&AStationaryAnomaly::TriggerPeculiarityInteraction,
+			2.f, // 반복 간격 (초)
+			true  // 반복 여부 (Loop)
+		);
+		return;
+	}
+
+	// 오버레이 머티리얼 리스트에서 랜덤하게 적용
+	if (BloodOverlayMaterialList.Num() > 0)
+	{
+		int32 RandomIndex = FMath::RandRange(0, BloodOverlayMaterialList.Num() - 1);
+		TArray<UStaticMeshComponent*> MeshComponents;
+		OriginalActor->GetComponents<UStaticMeshComponent>(MeshComponents);
+
+		for (UStaticMeshComponent* MeshComp : MeshComponents)
 		{
-			for (int32 i = 0; i < MeshComp->GetNumMaterials(); ++i)
+			if (MeshComp)
 			{
-				// (AnomalousPropertyComponent의 로직과 동일)
-				DynamicMaterial = MeshComp->CreateAndSetMaterialInstanceDynamic(i);
-				if (DynamicMaterial)
-				{
-					DynamicMaterial->SetVectorParameterValue("Color", FLinearColor::Red);
-				}
+				// 기존 머티리얼을 건드리지 않고, 그 위에 덮어씌웁니다.
+				MeshComp->SetOverlayMaterial(BloodOverlayMaterialList[RandomIndex]);
 			}
 		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BloodOverlayMaterial이 설정되지 않았습니다! BP_StationaryAnomaly에서 설정해주세요."));
+	}
+}
+
+
+// 타이머가 호출하는 함수
+void AStationaryAnomaly::TriggerPeculiarityInteraction()
+{
+	if (OriginalActor && OriginalActor->GetClass()->ImplementsInterface(UInteractableInterface::StaticClass()))
+	{
+		IInteractableInterface::Execute_Interact(OriginalActor, nullptr);
 	}
 }
 
@@ -217,6 +242,10 @@ void AStationaryAnomaly::StartPeculiarity()
 void AStationaryAnomaly::ResetToNormal()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Resetting to Normal..."));
+
+	// 특이사항 타이머가 돌아가고 있다면 정지
+	GetWorld()->GetTimerManager().ClearTimer(PeculiarityTimerHandle);
+
 	if (OriginalActor)
 	{
 		UPrimitiveComponent* RootComp = Cast<UPrimitiveComponent>(OriginalActor->GetRootComponent());
@@ -233,9 +262,16 @@ void AStationaryAnomaly::ResetToNormal()
 		// 2. 만약 '특이사항'이었다면 머티리얼도 복원
 		if (CorrectCategory == EAnomalyCategory::EAC_Peculiarity)
 		{
-			// (머티리얼 복원 로직 필요 - AnomalousPropertyComponent의 OriginalMaterials 캐시 참조)
-			// 간단하게는, OriginalActor를 Destroy()하고 새 인스턴스를 스폰할 수도 있습니다.
-			// 여기서는 일단 생략합니다.
+			TArray<UStaticMeshComponent*> MeshComponents;
+			OriginalActor->GetComponents<UStaticMeshComponent>(MeshComponents);
+			for (UStaticMeshComponent* MeshComp : MeshComponents)
+			{
+				if (MeshComp)
+				{
+					// 오버레이 머티리얼 제거
+					MeshComp->SetOverlayMaterial(nullptr);
+				}
+			}
 		}
 
 		if (AnomalyManagerRef.IsValid())
