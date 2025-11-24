@@ -26,6 +26,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditInstanceOnly, Category = "Anomaly Config")
+	TArray<TObjectPtr<AActor>> ModifiableActors;
+
+	UPROPERTY()
+	TArray<TObjectPtr<AActor>> AvailableModifiableActors;
+
 	// 핵심 스폰 API
 public:
 	/**
@@ -52,10 +58,13 @@ public:
 	 */
 	void SpawnStationaryAnomaly();
 
+	UFUNCTION()
+	void ReturnActorToAvailableList(AActor* ActorToReturn);
+
 private:
 	// 생성 유지 시간 (초)
 	UPROPERTY(EditAnywhere, Category = "Anomaly Config")
-	float StationaryAnomalyLifespan = 45.0f;
+	float StationaryAnomalyLifespan = 25.0f;
 
 private:
 	/**
@@ -68,12 +77,7 @@ private:
 	 * param OutLocation 찾은 위치
 	 * return 위치 찾기 성공 여부
 	 */
-	bool GetRandomSpawnLocation(FVector& OutLocation);
-
-	/**
-	 * 스폰될 이상현상의 유형 (사라지는/쫓아오는)을 랜덤하게 결정
-	 */
-	EAnomalyType GetRandomAnomalyType() const;
+	FVector GetRandomSpawnLocation();
 
 	/**
 	 * 스폰될 이상현상의 범주 (시각, 청각 등)를 랜덤하게 결정
@@ -86,8 +90,14 @@ private:
 	// ChasingAnomalyClassList 목록 중 랜덤하게 하나를 선택
 	TSubclassOf<AChasingAnomaly> GetRandomChasingAnomalyClass();
 
+	void InitializeAvailableActorList();
+
 	// 설정 프로퍼티 (에디터에서 설정)
 protected:
+	// (Blueprint) 스폰할 '정지된 이상현상'의 베이스 블루프린트 클래스 목록
+	UPROPERTY(EditDefaultsOnly, Category = "Anomaly Config")
+	TSubclassOf<AStationaryAnomaly> BaseStationaryAnomalyClass;
+
 	// (Blueprint) 스폰할 '정지된 이상현상'의 블루프린트 클래스 목록
 	UPROPERTY(EditDefaultsOnly, Category = "Anomaly Config")
 	TArray<TSubclassOf<AStationaryAnomaly>> StationaryAnomalyClassList;
