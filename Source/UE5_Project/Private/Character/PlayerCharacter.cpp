@@ -77,6 +77,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
+	PlayerControllerRef = Cast<APlayerCharacterController>(GetController());
 }
 
 
@@ -194,7 +195,54 @@ void APlayerCharacter::TraceForInteractable()
 		{
 			IInteractableInterface::Execute_Highlight(HitInteractable.GetObject(), true);
 		}
+
+		UpdateInteractionPrompt(HitInteractable);
 		CurrentFocusedInteractable = HitInteractable;
+	}
+}
+
+
+void APlayerCharacter::UpdateInteractionPrompt(TScriptInterface<IInteractableInterface>& HitInteractable)
+{
+	
+	if (!PlayerControllerRef)
+	{
+		return;
+	}
+
+	FString InteractText;
+	bool bTextShow = false;
+
+	if (HitInteractable)
+	{
+		UObject* FocusedObj = HitInteractable.GetObject();
+		if (AChasingAnomaly* Chasing = Cast<AChasingAnomaly>(FocusedObj))
+		{
+			if (HeldItem && Cast<AToolBase>(HeldItem))
+			{
+				InteractText = IInteractableInterface::Execute_GetInteractText(FocusedObj);
+				bTextShow = true;
+			}
+			else
+			{
+				bTextShow = false;
+			}
+		}
+		else
+		{
+			InteractText = IInteractableInterface::Execute_GetInteractText(HitInteractable.GetObject());
+			bTextShow = true;
+		}
+	}
+
+	if (bTextShow)
+	{
+		PlayerControllerRef->ShowText(0);
+		PlayerControllerRef->UpdateText(InteractText, 0);
+	}
+	else
+	{
+		PlayerControllerRef->HideText(0);
 	}
 }
 
@@ -209,14 +257,7 @@ void APlayerCharacter::OnInteractPressed()
 		return;
 	}
 
-	// '충전기'를 바라보고 있는가?
-	if (AChargeableItem* Charger = Cast<AChargeableItem>(CurrentFocusedInteractable.GetObject()))
-	{
-		StartCharge(Charger);
-		return;
-	}
-
-	// AStationaryAnomaly, AItemBase 등 모든 나머지 IInteractableInterface 객체는 이 범용 로직을 따름
+	// AStationaryAnomaly, AItemBase, AChargeableItem 등 모든 나머지 IInteractableInterface 객체는 이 범용 로직을 따름
 	if (CurrentFocusedInteractable)
 	{
 		// AStationaryAnomaly -> Interact_Implementation -> Player->StartExorcism(this)
@@ -240,8 +281,8 @@ void APlayerCharacter::OnInteractReleased()
 // 아이템 줍기/버리기
 void APlayerCharacter::PickupItem(AItemBase* Item)
 {
-	if (!Item || !QuickSlotRef) return;
-
+	if (!Item || !QuickSlotRef || !PlayerControllerRef) return;
+	PlayerControllerRef -> HideText(0);
 	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
 	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
 
@@ -342,11 +383,9 @@ void APlayerCharacter::StartCharge(AChargeableItem* Target)
 
 void APlayerCharacter::StopCharge()
 {
-	if (!bIsCharging) return;
-	if (auto* Pcc = Cast<APlayerCharacterController>(GetController()))
-	{
-		Pcc -> HideText(0);
-	}
+	if (!bIsCharging||!PlayerControllerRef) return;
+	
+	PlayerControllerRef -> UpdateText(TEXT("충전하기"), 0);
 	bIsCharging = false;
 	ChargeTime = 0.0f;
 	ChargingTarget.Reset();
@@ -355,34 +394,33 @@ void APlayerCharacter::StopCharge()
 
 void APlayerCharacter::HandleCharging(float DeltaTime)
 {
-	if (!bIsCharging) return;
+	if (!bIsCharging || !PlayerControllerRef) return;
 
 	if (!ChargingTarget.IsValid() || CurrentFocusedInteractable.GetObject() != ChargingTarget.Get())
 	{
 		StopCharge();
 		return;
 	}
-	auto* Pcc = Cast<APlayerCharacterController>(GetController());
 
 	// 쿨타임 중일 때
 	if (ChargingTarget->bIsCharged)
     {
         const float Remain = FMath::Max(0.f, ChargingTarget->RechargeCooldown - ChargingTarget->Cooldown);
-		Pcc -> ShowAutoText(2.0f, 0);
-		Pcc -> UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain), 0);
+		PlayerControllerRef -> ShowAutoText(2.0f, 0);
+		PlayerControllerRef -> UpdateText(FString::Printf(TEXT("아직 쿨타임입니다. 남은 시간 : %.1f 초"), Remain), 0);
         return;
     }
 	
-	Pcc -> ShowText(0);
-	Pcc -> UpdateText(FString::Printf(TEXT("충전 중.. %.1f초"), (2.0f - ChargeTime)), 0);
+	PlayerControllerRef -> ShowText(0);
+	PlayerControllerRef -> UpdateText(FString::Printf(TEXT("충전 중.. %.1f초"), (2.0f - ChargeTime)), 0);
     ChargeTime += DeltaTime;
 
 
 	//충전 시간이 지난후 실행
     if (ChargeTime >= RequiredChargeTime)
     {
-		Pcc -> UpdateText(TEXT("충전 완료"), 0);
-		Pcc -> ShowAutoText(2.0f, 0);
+		PlayerControllerRef -> UpdateText(TEXT("충전 완료"), 0);
+		PlayerControllerRef -> ShowAutoText(2.0f, 0);
         bIsCharging = false;
 
 		bool ChargeSuccess = ChargingTarget->OnCharged(); // 쿨타임 시작
@@ -443,7 +481,7 @@ void APlayerCharacter::FinishTalismanRitual(EAnomalyCategory SelectedCategory)
 		PC->CloseTalismanUI();
 	}
 
-	if (SelectedCategory == EAnomalyCategory::AC_None) return;
+	if (SelectedCategory == EAnomalyCategory::EAC_None) return;
 
 	// Talisman Count 감소
 	if (GetAttributes())

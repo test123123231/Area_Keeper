@@ -1,6 +1,6 @@
 #include "PlayerController/MainMenuPlayerController.h"
 #include "EnhancedInputSubsystems.h"
-#include "Blueprint/UserWidget.h"
+#include "HUD/MainMenuWidget.h"
 
 
 void AMainMenuPlayerController::BeginPlay()
@@ -16,7 +16,7 @@ void AMainMenuPlayerController::OpenMainMenu()
 	if (MainMenuWidgetClass)
 	{
 		// 위젯 인스턴스를 생성하고 MainMenuWidgetInstance 변수에 저장합니다.
-		MainMenuWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
+		MainMenuWidgetInstance = CreateWidget<UMainMenuWidget>(this, MainMenuWidgetClass);
 
 		// 위젯 생성이 성공했는지 다시 한번 확인합니다.
 		if (MainMenuWidgetInstance)

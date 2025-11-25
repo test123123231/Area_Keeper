@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Game/AreaKeeperGameState.h"
+#include "Engine/StaticMeshActor.h"
 
 
 AAnomalyManager::AAnomalyManager()
@@ -20,6 +21,36 @@ void AAnomalyManager::BeginPlay()
 
 	// GameState 참조 캐시 (주기적으로 타이머 간격을 가져오기 위함)
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
+
+	// 디자이너가 액터를 할당했는지 확인
+	if (ModifiableActors.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AnomalyManager: ModifiableMeshActors 배열이 비어있습니다! 에디터에서 액터를 할당해야 합니다."));
+	}
+
+	InitializeAvailableActorList();
+}
+
+
+void AAnomalyManager::InitializeAvailableActorList()
+{
+	// 마스터 리스트를 사용 가능 리스트로 그대로 복사
+	AvailableModifiableActors = ModifiableActors;
+
+	if (AvailableModifiableActors.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AnomalyManager: ModifiableActors 배열이 비어있습니다!"));
+	}
+}
+
+
+void AAnomalyManager::ReturnActorToAvailableList(AActor* ActorToReturn)
+{
+	if (ActorToReturn && ModifiableActors.Contains(ActorToReturn))
+	{
+		// 마스터 리스트에 있는 액터가 맞는지 확인 후, '사용 가능' 목록에 다시 추가
+		AvailableModifiableActors.AddUnique(ActorToReturn);
+	}
 }
 
 
@@ -64,48 +95,86 @@ void AAnomalyManager::OnSpawnTimerExpired()
 
 void AAnomalyManager::SpawnStationaryAnomaly()
 {
-	// 리스트가 비어있으면 오류 로그 출력 후 종료
-	if (StationaryAnomalyClassList.Num() == 0)
+	UE_LOG(LogTemp, Log, TEXT("AnomalyManager: '정지된 이상현상' 스폰 시도"));
+
+	// 어떤 이상현상을 스폰할지 랜덤하게 결정
+	EAnomalyCategory AnomalyEffect = GetRandomAnomalyCategory();
+
+	// '환경 변조'가 걸렸는데 사용 가능한 액터가 없으면 '새 물체'로 강제 변경 (폴백)
+	if (AnomalyEffect != EAnomalyCategory::EAC_Intrusion && AvailableModifiableActors.Num() == 0)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AnomalyManager: StationaryAnomalyClassList가 비어있습니다! 에디터에서 설정하세요."));
+		AnomalyEffect = EAnomalyCategory::EAC_Intrusion;
+		UE_LOG(LogTemp, Log, TEXT("AnomalyManager: 변조 가능 액터 없음. '새 물체'로 강제 전환."));
+	}
+
+	// 스폰 준비
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AnomalyManager: World가 비어있습니다."));
 		return;
 	}
 
-	FVector SpawnLocation;
-	if (GetRandomSpawnLocation(SpawnLocation))
+	TSubclassOf<AStationaryAnomaly> AnomalyClass;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	// 4. 로직 분기
+	if (AnomalyEffect == EAnomalyCategory::EAC_Intrusion)
 	{
-		UWorld* World = GetWorld();
-		if (World)
+		// --- 4-A. "새로운 물체" 스폰 ---
+		FVector SpawnLocation;
+		if ((SpawnLocation = GetRandomSpawnLocation()).IsZero())
 		{
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+			UE_LOG(LogTemp, Warning, TEXT("AnomalyManager: '새 물체' 스폰 위치를 찾는 데 실패했습니다."));
+			return;
+		}
 
-			AStationaryAnomaly* NewAnomaly = World->SpawnActor<AStationaryAnomaly>(
-				GetRandomStationaryAnomalyClass(),
-				SpawnLocation,
-				FRotator::ZeroRotator,
-				SpawnParams
-			);
+		AnomalyClass = GetRandomStationaryAnomalyClass();
+		if (!AnomalyClass) return;
 
-			if (NewAnomaly)
-			{
-				// 스폰된 이상현상에 랜덤 속성 부여
-				EAnomalyType Type = GetRandomAnomalyType();
-				EAnomalyCategory Category = GetRandomAnomalyCategory();
+		AStationaryAnomaly* NewAnomaly = World->SpawnActor<AStationaryAnomaly>(
+			AnomalyClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams
+		);
 
-				// 이상현상의 유지 시간 StationaryAnomalyLifespan 멤버 변수 사용
-				float Lifespan = StationaryAnomalyLifespan;
-
-				// (StationaryAnomaly.h 참조) 스폰된 액터 초기화
-				NewAnomaly->InitializeAnomaly(Type, Category, Lifespan);
-
-				UE_LOG(LogTemp, Log, TEXT("AnomalyManager: '정지된 이상현상' 스폰. 유형: %d, 범주: %d"), Type, Category);
-			}
+		if (NewAnomaly)
+		{
+			EAnomalyType Type = EAnomalyType::EAT_Chasing; // '새 물체'는 '추적' 타입
+			float Lifespan = StationaryAnomalyLifespan;
+			NewAnomaly->InitializeAnomaly(Type, AnomalyEffect, Lifespan);
+			UE_LOG(LogTemp, Log, TEXT("AnomalyManager: '새 물체' 이상현상 스폰."));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AnomalyManager: 스폰 위치를 찾는 데 실패했습니다. NavMesh가 빌드되었는지 확인하세요."));
+		// --- 4-B. "환경 변조" 스폰 ---
+		// "사용 가능" 목록에서 랜덤하게 하나를 선택하고 제거
+		int32 RandomIndex = FMath::RandRange(0, AvailableModifiableActors.Num() - 1);
+		AActor* TargetActor = AvailableModifiableActors[RandomIndex];
+		AvailableModifiableActors.RemoveAt(RandomIndex);
+
+		if (!IsValid(TargetActor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AnomalyManager: AvailableModifiableActors 배열에서 유효하지 않은 액터를 선택했습니다."));
+			return;
+		}
+
+		// AStationaryAnomaly를 스폰 (위치는 TargetActor의 위치지만, InitializeFromActor가 덮어쓸 것임)
+		AnomalyClass = BaseStationaryAnomalyClass;
+		AStationaryAnomaly* NewAnomaly = World->SpawnActor<AStationaryAnomaly>(
+			AnomalyClass, TargetActor->GetActorLocation(), TargetActor->GetActorRotation(), SpawnParams
+		);
+
+		if (NewAnomaly)
+		{
+			EAnomalyType Type = EAnomalyType::EAT_Disappearing; // '환경 변조'는 '패널티' 타입
+			float Lifespan = StationaryAnomalyLifespan;
+
+			// 원본 액터 숨김/복사/변조를 한 번에 처리
+			NewAnomaly->InitializeFromActor(TargetActor, Type, AnomalyEffect, Lifespan);
+			UE_LOG(LogTemp, Log, TEXT("AnomalyManager: '환경 변조' 이상현상 스폰. 대상: %s"), *TargetActor->GetName());
+		}
 	}
 }
 
@@ -130,7 +199,7 @@ void AAnomalyManager::SpawnChasingAnomaly(const FVector& Location)
 }
 
 
-bool AAnomalyManager::GetRandomSpawnLocation(FVector& OutLocation)
+FVector AAnomalyManager::GetRandomSpawnLocation()
 {
 	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
 	if (NavSys)
@@ -142,20 +211,13 @@ bool AAnomalyManager::GetRandomSpawnLocation(FVector& OutLocation)
 
 		if (bFound)
 		{
-			OutLocation = RandomLocation.Location;
-			return true;
+			
+			return RandomLocation.Location;
 		}
 	}
 
-	// NavMesh가 없거나 유효한 위치를 찾지 못한 경우
-	return false;
-}
-
-
-EAnomalyType AAnomalyManager::GetRandomAnomalyType() const
-{
-	// 단순 50:50 확률로 결정
-	return (FMath::RandBool()) ? EAnomalyType::AT_Disappearing : EAnomalyType::AT_Chasing;
+	// NavMesh가 없거나 유효한 위치를 찾지 못한 경우 반환값 0 벡터
+	return FVector::ZeroVector;
 }
 
 
@@ -165,14 +227,15 @@ EAnomalyCategory AAnomalyManager::GetRandomAnomalyCategory() const
 	// AC_None (0)을 제외하고 1부터 마지막 항목까지의 범위에서 랜덤 값을 고름
 
 	// EAnomalyCategory::AC_Environmental 값을 가져옵니다 (enum의 마지막 항목이라고 가정).
-	int32 MaxCategoryIndex = static_cast<int32>(EAnomalyCategory::AC_Environmental);
+	int32 MaxCategoryIndex = static_cast<int32>(EAnomalyCategory::EAC_Intrusion);
 	if (MaxCategoryIndex <= 0)
 	{
-		return EAnomalyCategory::AC_None; // enum이 비어있는 경우
+		return EAnomalyCategory::EAC_None; // enum이 비어있는 경우
 	}
 
 	int32 RandomIndex = FMath::RandRange(1, MaxCategoryIndex);
-	return static_cast<EAnomalyCategory>(RandomIndex);
+	//return static_cast<EAnomalyCategory>(RandomIndex);
+	return EAnomalyCategory::EAC_Peculiarity; // 테스트용으로 항상 Peculiarity 반환
 }
 
 

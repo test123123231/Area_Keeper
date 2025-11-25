@@ -15,6 +15,7 @@ class UCameraComponent;
 class USpotLightComponent;
 class IInteractableInterface; // 인터페이스 참조
 class AAreaKeeperGameState;
+class APlayerCharacterController;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityEnd, APlayerCharacter*, Player);
@@ -39,6 +40,8 @@ public:
 	bool getIsInvincible();
 	UPROPERTY(BlueprintAssignable, Category="State")
 	FOnInvincibilityEnd OnInvincibilityEnd;
+
+	UCameraComponent* GetViewCamera() const { return ViewCamera; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -101,6 +104,8 @@ private:
 	// 매 틱마다 상호작용 가능한 객체를 찾음
 	void TraceForInteractable();
 
+	void UpdateInteractionPrompt(TScriptInterface<IInteractableInterface>& HitInteractable);
+
 	// 현재 바라보고 있는 상호작용 가능한 객체
 	UPROPERTY()
 	TScriptInterface<IInteractableInterface> CurrentFocusedInteractable;
@@ -139,15 +144,19 @@ private:
 
 	TWeakObjectPtr<class AChargeableItem> ChargingTarget;
 
-	void StartCharge(AChargeableItem* Target);
-	void StopCharge();
-	void HandleCharging(float DeltaTime);
+	UPROPERTY()
+	TObjectPtr<APlayerCharacterController> PlayerControllerRef;
 
 	// 소지 UI가 열려있는지 여부, 틱 및 입력 차단용
 	bool bIsTalismanRitualUIOpen = false;
 
 	// 도구 사용 로직 
 	void UseTool();
+
+public:
+	void StartCharge(AChargeableItem* Target);
+	void StopCharge();
+	void HandleCharging(float DeltaTime);
 
 };
 

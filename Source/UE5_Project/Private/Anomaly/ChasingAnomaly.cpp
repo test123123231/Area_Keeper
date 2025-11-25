@@ -17,7 +17,7 @@ AChasingAnomaly::AChasingAnomaly()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	CurrentState = EAnomalyState::EAS_Idle;
+	CurrentState = EChasingAnomalyState::EAS_Idle;
 	PlayerTarget = nullptr;
 
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
@@ -76,7 +76,7 @@ void AChasingAnomaly::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 추적 상태일 때만 로직 실행
-	if (CurrentState == EAnomalyState::EAS_Chasing)
+	if (CurrentState == EChasingAnomalyState::EAS_Chasing)
 	{
 		if (PlayerTarget == nullptr)
 		{
@@ -128,9 +128,9 @@ void AChasingAnomaly::ChaseTarget(AActor* Target)
 
 	PlayerTarget = Target;
 
-	if (CurrentState == EAnomalyState::EAS_Idle)
+	if (CurrentState == EChasingAnomalyState::EAS_Idle)
 	{
-		CurrentState = EAnomalyState::EAS_Chasing;
+		CurrentState = EChasingAnomalyState::EAS_Chasing;
 		GetCharacterMovement()->MaxWalkSpeed = ChasingSpeed;
 	}
 }
@@ -138,10 +138,10 @@ void AChasingAnomaly::ChaseTarget(AActor* Target)
 
 void AChasingAnomaly::StopChasing()
 {
-	if (CurrentState == EAnomalyState::EAS_Chasing)
+	if (CurrentState == EChasingAnomalyState::EAS_Chasing)
 	{
 		PlayerTarget = nullptr;
-		CurrentState = EAnomalyState::EAS_Idle;
+		CurrentState = EChasingAnomalyState::EAS_Idle;
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
 
 		if (AnomalyController)
