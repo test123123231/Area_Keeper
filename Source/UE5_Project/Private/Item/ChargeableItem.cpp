@@ -1,6 +1,7 @@
 #include "Item/ChargeableItem.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "PlayerController/PlayerCharacterController.h"
+#include "Character/PlayerCharacter.h" 
 
 AChargeableItem::AChargeableItem()
 {
@@ -17,7 +18,6 @@ void AChargeableItem::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // 충전이 된 상태면 쿨타임 경과
     if (bIsCharged)
     {
         Cooldown += DeltaTime;
@@ -62,4 +62,11 @@ void AChargeableItem::Highlight_Implementation(bool bOn)
 FString AChargeableItem::GetInteractText_Implementation()
 {
     return FString(TEXT("충전하기"));
+}
+
+void AChargeableItem::Interact_Implementation(APlayerCharacter* Interactor)
+{
+    if(!Interactor) return;
+    
+    Interactor -> StartCharge(this);
 }
