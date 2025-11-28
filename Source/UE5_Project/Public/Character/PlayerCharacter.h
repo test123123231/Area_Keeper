@@ -57,11 +57,14 @@ protected:
 	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
 
 	// 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = "Camera")
-	USpringArmComponent* SpringArm;
+	/*UPROPERTY(VisibleAnywhere, Category = "Camera")
+	USpringArmComponent* SpringArm;*/
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	UCameraComponent* ViewCamera;
+
+	UPROPERTY(VisibleAnywhere, Category = "Light")
+	USpotLightComponent* FlashLightComponent;
 
 	// 입력 액션
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -100,6 +103,8 @@ private:
 	void OnInteractReleased();
 	// 아이템 버리기(G) 
 	void OnDropItem();
+	// flashlight 토글
+	void OnFlashlightPressed();
 
 	// 매 틱마다 상호작용 가능한 객체를 찾음
 	void TraceForInteractable();

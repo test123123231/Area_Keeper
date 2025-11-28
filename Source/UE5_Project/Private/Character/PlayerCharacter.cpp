@@ -25,20 +25,41 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// 3인칭 카메라 설정
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	/*SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->TargetArmLength = 300.f;
-	SpringArm->bUsePawnControlRotation = true;
+	SpringArm->bUsePawnControlRotation = true;*/
+
+	//// 'AreaKeeper'의 3인칭 이동 설정을 가져옴 (APlayerCharacter가 오버라이드할 수 있음)
+	//GetCharacterMovement()->bOrientRotationToMovement = true;
+	//GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
+	//bUseControllerRotationYaw = false;
+	//bUseControllerRotationPitch = false;
+	//bUseControllerRotationRoll = false;
+
+	// 컨트롤러(마우스)가 회전할 때 캐릭터 몸통도 같이 회전하도록 설정
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
+
+	// 이동 방향으로 캐릭터가 자동으로 회전하는 것을 방지
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
-	ViewCamera->SetupAttachment(SpringArm);
+	ViewCamera->SetupAttachment(GetRootComponent());
+	ViewCamera->bUsePawnControlRotation = true;
 
-	// 손전등
-	//Flashlight = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
-	//Flashlight->SetupAttachment(ViewCamera); // 1인칭 시 카메라에 부착
-	//Flashlight->SetIntensity(5000.0f);
-	//Flashlight->SetOuterConeAngle(25.0f);
-	//Flashlight->bVisible = true;
+	FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("FlashLightComponent"));
+	FlashLightComponent->SetupAttachment(ViewCamera); // 1인칭 시 카메라에 부착
+	FlashLightComponent->SetIntensity(8000.0f);
+	FlashLightComponent->SetIntensityUnits(ELightUnits::Unitless);
+	FlashLightComponent->SetLightColor(FLinearColor::White);
+	FlashLightComponent->SetAttenuationRadius(2500.0f);
+	FlashLightComponent->SetInnerConeAngle(15.0f);
+	FlashLightComponent->SetOuterConeAngle(25.0f);
+	FlashLightComponent->bAffectsWorld = true;
+	FlashLightComponent->SetCastShadows(true);
+	FlashLightComponent->SetVisibility(false); // 기본적으로 꺼져있음
 
 	CurrentFocusedInteractable = nullptr;
 	HeldItem = nullptr;
@@ -97,8 +118,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(DropAction, ETriggerEvent::Started, this, &APlayerCharacter::OnDropItem);
 
 		// 손전등, 웅크리기 바인딩
-		/*EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &APlayerCharacter::OnFlashlightPressed);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &APlayerCharacter::OnCrouchPressed);*/
+		EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &APlayerCharacter::OnFlashlightPressed);
+		//EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &APlayerCharacter::OnCrouchPressed);
 		// EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopCrouch); // (주석) 토글 방식이므로 Started만 사용
 	}
 }
@@ -142,14 +163,15 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 }
 
 
-//void APlayerCharacter::OnFlashlightPressed()
-//{
-//	// (SRS 20.1.3) 손전등 끄고 켜기
-//	if (Flashlight)
-//	{
-//		Flashlight->SetVisibility(!Flashlight->IsVisible());
-//	}
-//}
+void APlayerCharacter::OnFlashlightPressed()
+{
+	// 손전등 끄고 켜기
+	if (FlashLightComponent)
+	{
+		bool bIsVisible = FlashLightComponent->IsVisible();
+		FlashLightComponent->SetVisibility(!bIsVisible);
+	}
+}
 //
 //void APlayerCharacter::OnCrouchPressed()
 //{
