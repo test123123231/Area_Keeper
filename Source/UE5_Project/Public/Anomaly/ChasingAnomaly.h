@@ -47,7 +47,7 @@ protected:
 	// AI 상태 및 컴포넌트
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
-	EAnomalyState CurrentState;
+	EChasingAnomalyState CurrentState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	UAIPerceptionComponent* AIPerception;

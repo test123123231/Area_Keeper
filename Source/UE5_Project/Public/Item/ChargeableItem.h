@@ -33,6 +33,8 @@ public:
 	virtual FString GetInteractText_Implementation() override;
 
 protected:
+	virtual void Interact_Implementation(APlayerCharacter* Interactor) override;
+
 	virtual void Highlight_Implementation(bool bOn) override;
 
 };

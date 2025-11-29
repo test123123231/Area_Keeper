@@ -147,15 +147,16 @@ private:
 	UPROPERTY()
 	TObjectPtr<APlayerCharacterController> PlayerControllerRef;
 
-	void StartCharge(AChargeableItem* Target);
-	void StopCharge();
-	void HandleCharging(float DeltaTime);
-
 	// 소지 UI가 열려있는지 여부, 틱 및 입력 차단용
 	bool bIsTalismanRitualUIOpen = false;
 
 	// 도구 사용 로직 
 	void UseTool();
+
+public:
+	void StartCharge(AChargeableItem* Target);
+	void StopCharge();
+	void HandleCharging(float DeltaTime);
 
 };
 
