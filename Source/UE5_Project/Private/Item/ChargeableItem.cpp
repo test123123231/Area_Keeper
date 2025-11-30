@@ -12,10 +12,6 @@ AChargeableItem::AChargeableItem()
 void AChargeableItem::BeginPlay()
 {
     Super::BeginPlay();
-    if (DynamicMaterial)
-    {
-        DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.f, 0.f, 0.f, 1.f));
-    }
 }
 
 void AChargeableItem::Tick(float DeltaTime)
@@ -54,12 +50,7 @@ void AChargeableItem::Highlight_Implementation(bool bOn)
 {
     if (DynamicMaterial)
     {
-		if(bOn){
-			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.5f, 3.0f, 0.5f, 1.0f));
-		}
-		else{
-            DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.f, 0.f, 0.f, 1.f));
-		}
+		DynamicMaterial->SetVectorParameterValue("Color", bOn ? FLinearColor(0.5f, 3.0f, 0.5f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
     }
 }
 
