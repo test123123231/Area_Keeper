@@ -67,6 +67,7 @@ void AChasingAnomaly::BeginPlay()
 		ChasingSpeed = 300.f;
 	}
 
+	DynamicMaterial = GetMesh()->CreateAndSetMaterialInstanceDynamic(0);
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
 }
 
@@ -247,26 +248,8 @@ void AChasingAnomaly::Banish()
 // IInteractableInterface 구현
 void AChasingAnomaly::Highlight_Implementation(bool bOn)
 {
-	USkeletalMeshComponent* SkeletalMesh = GetMesh();
-
-	if (SkeletalMesh)
-	{
-		UMaterialInterface* BaseMaterial = SkeletalMesh->GetMaterial(0);
-		if (BaseMaterial)
-		{
-			UMaterialInstanceDynamic* DynMat = Cast<UMaterialInstanceDynamic>(BaseMaterial);
-
-			if (!DynMat)
-			{
-				DynMat = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-				SkeletalMesh->SetMaterial(0, DynMat);
-			}
-
-			if (DynMat)
-			{
-				DynMat->SetVectorParameterValue(FName("Color"), bOn ? FLinearColor(0.5f, 0.5f, 3.0f, 1.0f) : FLinearColor(0.0f, 0.0f, 0.0f, 1.0f));
-			}
-		}
+	if (DynamicMaterial) {
+		DynamicMaterial->SetVectorParameterValue("Color", bOn ? FLinearColor(0.5f, 0.5f, 3.0f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
 	}
 }
 
