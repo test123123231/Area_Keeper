@@ -247,23 +247,6 @@ void AChasingAnomaly::Banish()
 // IInteractableInterface 구현
 void AChasingAnomaly::Highlight_Implementation(bool bOn)
 {
-	// 메쉬의 머티리얼 또는 외곽선 효과 적용 (구현 필요)
-}
-
-
-void AChasingAnomaly::Interact_Implementation(APlayerCharacter* Interactor)
-{
-	// PlayerCharacter::OnInteractPressed에서 로직을 처리하므로 여기서는 비워둠
-}
-
-
-FString AChasingAnomaly::GetInteractText_Implementation()
-{
-	return FString(TEXT("도구 사용"));
-}
-
-void AChasingAnomaly::SetHighlightColor(bool bIsCompatible)
-{
 	USkeletalMeshComponent* SkeletalMesh = GetMesh();
 
 	if (SkeletalMesh)
@@ -281,35 +264,20 @@ void AChasingAnomaly::SetHighlightColor(bool bIsCompatible)
 
 			if (DynMat)
 			{
-				if (bIsCompatible)
-				{
-					// 파란색 외곽선
-					DynMat->SetVectorParameterValue(FName("Color"), FLinearColor(0.5f, 0.5f, 3.0f, 1.0f));
-				}
-				else
-				{
-					// 빨간색 외곽선
-					DynMat->SetVectorParameterValue(FName("Color"), FLinearColor(3.0f, 0.5f, 0.5f, 1.0f));
-				}
+				DynMat->SetVectorParameterValue(FName("Color"), bOn ? FLinearColor(0.5f, 0.5f, 3.0f, 1.0f) : FLinearColor(0.0f, 0.0f, 0.0f, 1.0f));
 			}
 		}
 	}
 }
 
-void AChasingAnomaly::ClearHighlight()
+
+void AChasingAnomaly::Interact_Implementation(APlayerCharacter* Interactor)
 {
-	USkeletalMeshComponent* SkeletalMesh = GetMesh();
-	if (SkeletalMesh)
-	{
-		UMaterialInterface* BaseMaterial = SkeletalMesh->GetMaterial(0);
-		if (BaseMaterial)
-		{
-			UMaterialInstanceDynamic* DynMat = Cast<UMaterialInstanceDynamic>(BaseMaterial);
-			if (DynMat)
-			{
-				// 검은색(0,0,0) = 외곽선 꺼짐
-				DynMat->SetVectorParameterValue(FName("Color"), FLinearColor(0.0f, 0.0f, 0.0f, 1.0f));
-			}
-		}
-	}
+	// PlayerCharacter::OnInteractPressed에서 로직을 처리하므로 여기서는 비워둠
+}
+
+
+FString AChasingAnomaly::GetInteractText_Implementation()
+{
+	return FString(TEXT("도구 사용"));
 }
