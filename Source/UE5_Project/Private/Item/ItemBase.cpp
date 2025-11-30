@@ -25,11 +25,6 @@ void AItemBase::BeginPlay()
 	if (ItemMesh)
 	{
 		DynamicMaterial = ItemMesh->CreateAndSetMaterialInstanceDynamic(0);
-		// 초기화: 검은색으로 설정
-		if (DynamicMaterial)
-		{
-			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.f, 0.f, 0.f, 1.f));
-		}
 	}
 }
 

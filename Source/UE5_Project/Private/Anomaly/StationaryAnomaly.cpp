@@ -33,10 +33,6 @@ void AStationaryAnomaly::BeginPlay()
 	if (Mesh)
 	{
 		DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamic(0);
-		if (DynamicMaterial)
-		{
-			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0.f, 0.f, 0.f, 1.f));
-		}
 	}
 
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
