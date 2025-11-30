@@ -8,6 +8,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundBase.h"
 #include "Game/AreaKeeperGameState.h"
 
 
@@ -42,6 +44,12 @@ AChasingAnomaly::AChasingAnomaly()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	RequiredToolType = EToolType::ETT_None;
+
+	ChasingAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("ChasingAudioComponent"));
+	ChasingAudioComponent->SetupAttachment(RootComponent);
+	ChasingAudioComponent->bAutoActivate = false;
+	ChasingAudioComponent->bIsUISound = false;
+	ChasingAudioComponent->bAllowSpatialization = true;
 }
 
 
@@ -66,6 +74,12 @@ void AChasingAnomaly::BeginPlay()
 	{
 		ChasingSpeed = 300.f;
 	}
+
+	 if (ChasingAudioComponent && ChasingLoopSound)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Setting Sound = %s"), *ChasingLoopSound->GetName());
+        ChasingAudioComponent->SetSound(ChasingLoopSound);
+    }
 
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
 }
@@ -133,6 +147,11 @@ void AChasingAnomaly::ChaseTarget(AActor* Target)
 		CurrentState = EChasingAnomalyState::EAS_Chasing;
 		GetCharacterMovement()->MaxWalkSpeed = ChasingSpeed;
 	}
+    if (ChasingAudioComponent && !ChasingAudioComponent->IsPlaying())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Play Loop Sound"));
+        ChasingAudioComponent->Play();
+    }
 }
 
 
@@ -149,6 +168,11 @@ void AChasingAnomaly::StopChasing()
 			AnomalyController->StopMovement();
 		}
 	}
+		if (ChasingAudioComponent && ChasingAudioComponent->IsPlaying())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Stop Loop Sound"));
+        ChasingAudioComponent->Stop();
+    }
 }
 
 

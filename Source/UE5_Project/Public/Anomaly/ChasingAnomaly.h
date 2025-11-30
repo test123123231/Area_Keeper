@@ -89,6 +89,13 @@ protected:
 	UPROPERTY()
 	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
 
+	//사운드
+	UPROPERTY(EditAnywhere, Category="Sound")
+	USoundBase* ChasingLoopSound;
+
+	UPROPERTY(VisibleAnywhere, Category="Sound")
+	UAudioComponent* ChasingAudioComponent;
+
 	// AI 행동 함수
 	UFUNCTION()
 	void OnSeePawn(AActor* SeenActor, FAIStimulus Stimulus);
