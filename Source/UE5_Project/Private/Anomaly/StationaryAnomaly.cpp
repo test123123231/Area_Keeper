@@ -290,7 +290,8 @@ void AStationaryAnomaly::Highlight_Implementation(bool bIsLooking)
 	if (DynamicMaterial)
 	{
 		// 머티리얼에 "Color"라는 파라미터가 있어야 작동함
-		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor::Blue : FLinearColor::White);
+		//DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor::Blue : FLinearColor::White);
+		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor::Blue : FLinearColor(0.f, 0.f, 0.f, 1.f));
 	}
 }
 
