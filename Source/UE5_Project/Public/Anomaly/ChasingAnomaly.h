@@ -112,6 +112,10 @@ protected:
 	// 무적이 끝났을 때 실행
 	UFUNCTION()
 	void OnPlayerInvincibilityEnd(APlayerCharacter* Player);
+
+	// 하이라이트용 동적 머티리얼
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynamicMaterial;
 	
 };
 

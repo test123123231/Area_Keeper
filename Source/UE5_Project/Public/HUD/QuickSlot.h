@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Image.h"
+#include "Components/Border.h"
 #include "QuickSlot.generated.h"
 
 
@@ -69,6 +70,12 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     UImage* Img_Icon2;
+
+    UPROPERTY(meta = (BindWidget))
+    class UBorder* Border_Highlight1;
+
+    UPROPERTY(meta = (BindWidget))
+    class UBorder* Border_Highlight2;
 
    
 };

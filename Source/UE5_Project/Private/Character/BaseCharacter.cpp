@@ -11,12 +11,6 @@ ABaseCharacter::ABaseCharacter()
 	// 체력을 관리할 AttributeComponent 생성
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 
-	// 'AreaKeeper'의 3인칭 이동 설정을 가져옴 (APlayerCharacter가 오버라이드할 수 있음)
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.f, 360.f, 0.f);
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationRoll = false;
 }
 
 void ABaseCharacter::BeginPlay()
