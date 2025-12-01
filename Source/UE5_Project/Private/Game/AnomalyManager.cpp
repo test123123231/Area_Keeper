@@ -223,20 +223,27 @@ FVector AAnomalyManager::GetRandomSpawnLocation()
 	// 박스 내 랜덤 위치 할당
 	const float X = FMath::RandRange(Box.Min.X, Box.Max.X);
     const float Y = FMath::RandRange(Box.Min.Y, Box.Max.Y);
-    const float Z = FMath::RandRange(Box.Min.Z, Box.Max.Z);
+    const float Z = Box.Max.Z;
 	FVector RandomPoint(X, Y, Z);
 
-	// RandomPoint에서 가장 가까운 NavMesh 위치로 생성
-    if (NavSys)
-    {
-        FNavLocation NavPoint;
-        if (NavSys->ProjectPointToNavigation(RandomPoint, NavPoint))
-        {
-			UE_LOG(LogTemp, Log, TEXT("박스 콜리전 %d의 랜덤 좌표에서 가까운 NavMesh 위치로 생성"), BoxSelected);
-            return NavPoint.Location;
-        }
-    }
-	UE_LOG(LogTemp, Log, TEXT("Navmesh 위치 못 찾아서 그대로 생성"));
+	if (NavSys)
+	{
+    	FNavLocation NavPoint;
+
+		// 검색 범위 내에서의 가까운 navmesh 찾기
+		if (NavSys->ProjectPointToNavigation(RandomPoint, NavPoint, FVector(300.f,300.f,800.f)))
+		{
+			return NavPoint.Location;
+		}
+
+		// 선택된 존에서 주변에 완전히 랜덤한 nevmesh 위치(위 분기에서 못 찾았을 때)
+		if (NavSys->GetRandomPointInNavigableRadius(Zone->GetActorLocation(), 1500.f, NavPoint))
+		{
+			return NavPoint.Location;
+		}
+	}
+
+	// navmesh가 없으면
 	return RandomPoint;
 }
 
