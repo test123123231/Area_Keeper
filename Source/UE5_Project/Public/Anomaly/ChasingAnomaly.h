@@ -90,10 +90,16 @@ protected:
 	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
 
 	//사운드
-	UPROPERTY(EditAnywhere, Category="Sound")
+	// 메타사운드
+	UPROPERTY(EditAnywhere, Category="Chasing Sound")
 	USoundBase* ChasingLoopSound;
 
-	UPROPERTY(VisibleAnywhere, Category="Sound")
+	// 사운드 애셋
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Chasing Sound")
+	USoundWave* ChasingWaveAsset;
+
+	//오디오 컴포넌트
+	UPROPERTY(VisibleAnywhere, Category="Chasing Sound")
 	UAudioComponent* ChasingAudioComponent;
 
 	// AI 행동 함수

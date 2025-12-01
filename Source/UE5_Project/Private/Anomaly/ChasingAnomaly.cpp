@@ -77,8 +77,12 @@ void AChasingAnomaly::BeginPlay()
 
 	 if (ChasingAudioComponent && ChasingLoopSound)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Setting Sound = %s"), *ChasingLoopSound->GetName());
         ChasingAudioComponent->SetSound(ChasingLoopSound);
+		if (ChasingWaveAsset)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Set Wave Param: %s"), *ChasingWaveAsset->GetName());
+			ChasingAudioComponent->SetWaveParameter(FName("ChasingSound"), ChasingWaveAsset);
+		}
     }
 
 	DynamicMaterial = GetMesh()->CreateAndSetMaterialInstanceDynamic(0);
@@ -148,7 +152,8 @@ void AChasingAnomaly::ChaseTarget(AActor* Target)
 		CurrentState = EChasingAnomalyState::EAS_Chasing;
 		GetCharacterMovement()->MaxWalkSpeed = ChasingSpeed;
 	}
-    if (ChasingAudioComponent && !ChasingAudioComponent->IsPlaying())
+    
+	if (ChasingAudioComponent && !ChasingAudioComponent->IsPlaying())
     {
         UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Play Loop Sound"));
         ChasingAudioComponent->Play();
@@ -169,7 +174,8 @@ void AChasingAnomaly::StopChasing()
 			AnomalyController->StopMovement();
 		}
 	}
-		if (ChasingAudioComponent && ChasingAudioComponent->IsPlaying())
+	
+	if (ChasingAudioComponent && ChasingAudioComponent->IsPlaying())
     {
         UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Stop Loop Sound"));
         ChasingAudioComponent->Stop();
