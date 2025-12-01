@@ -125,4 +125,8 @@ protected:
 	// GameState 캐시
 	UPROPERTY()
 	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
+
+	// 스폰 구역 배열
+	UPROPERTY(EditAnywhere, Category = "SpawnZoneList")
+	TArray<AActor*> SpawnZones;
 };
