@@ -255,7 +255,7 @@ EAnomalyCategory AAnomalyManager::GetRandomAnomalyCategory() const
 
 	int32 RandomIndex = FMath::RandRange(1, MaxCategoryIndex);
 	//return static_cast<EAnomalyCategory>(RandomIndex);
-	return EAnomalyCategory::EAC_Peculiarity; // 테스트용으로 항상 Peculiarity 반환
+	return EAnomalyCategory::EAC_Intrusion; // 테스트용으로 항상 Peculiarity 반환
 }
 
 

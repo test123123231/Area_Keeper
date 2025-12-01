@@ -533,10 +533,18 @@ void APlayerCharacter::FinishTalismanRitual(EAnomalyCategory SelectedCategory)
 	auto* PC = Cast<APlayerCharacterController>(GetController());
 	if (PC)
 	{
+		PC->HideText(0);  
 		PC->CloseTalismanUI();
 	}
 
-	if (SelectedCategory == EAnomalyCategory::EAC_None) return;
+	AStationaryAnomaly* Anomaly = Cast<AStationaryAnomaly>(CurrentFocusedInteractable.GetObject());
+	CurrentFocusedInteractable = nullptr;
+	TraceForInteractable();
+
+	if (SelectedCategory == EAnomalyCategory::EAC_None)
+	{
+		return;
+	}
 
 	// Talisman Count 감소
 	if (GetAttributes())
@@ -545,13 +553,11 @@ void APlayerCharacter::FinishTalismanRitual(EAnomalyCategory SelectedCategory)
 		GetAttributes()->SetTalisman(CurrentTalisman - 1.f);
 	}
 
-	AStationaryAnomaly* Anomaly = Cast<AStationaryAnomaly>(CurrentFocusedInteractable.GetObject());
+
 	if (Anomaly)
 	{
 		Anomaly->OnTalismanRitualFinished(SelectedCategory);
-		CurrentFocusedInteractable = nullptr;
 	}
-
 }
 // ---
 
