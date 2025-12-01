@@ -40,6 +40,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Tool")
 	EToolType ToolType;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Tool")
+	void PlayUseAnimation(); // 새로 추가
+
 protected:
 	virtual void BeginPlay() override;
 
