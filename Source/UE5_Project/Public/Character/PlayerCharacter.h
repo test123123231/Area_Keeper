@@ -89,6 +89,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* CrouchAction;
 
+	// 기본 서 있을 때의 카메라 높이
+	float DefaultCameraHeight;
+
+	// 카메라의 '현재 높이'를 기억할 변수
+	float CurrentCamHeight;
+
+
 	// 입력 처리 함수 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -105,6 +112,8 @@ private:
 	void OnDropItem();
 	// flashlight 토글
 	void OnFlashlightPressed();
+	// 웅크리기 토글
+	void OnCrouchPressed();
 
 	// 매 틱마다 상호작용 가능한 객체를 찾음
 	void TraceForInteractable();

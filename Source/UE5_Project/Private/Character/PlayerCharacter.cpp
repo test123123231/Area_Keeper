@@ -44,6 +44,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// 이동 방향으로 캐릭터가 자동으로 회전하는 것을 방지
 	GetCharacterMovement()->bOrientRotationToMovement = false;
+	
+	// 웅크리기 설정
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(GetRootComponent());
@@ -74,6 +77,17 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (ViewCamera)
+	{
+		float TargetZ = (bIsCrouched) ? (DefaultCameraHeight - 40.f) : DefaultCameraHeight;
+
+		CurrentCamHeight = FMath::FInterpConstantTo(CurrentCamHeight, TargetZ, DeltaTime, 100.f);
+
+		FVector NewLocation = ViewCamera->GetRelativeLocation();
+		NewLocation.Z = CurrentCamHeight; // 계산된 Z값만 덮어씌움
+		ViewCamera->SetRelativeLocation(NewLocation);
+	}
+
 	// '소지' UI가 열려있으면 플레이어 틱(추적, 충전)을 멈춤
 	if (bIsTalismanRitualUIOpen || !IsAlive()) return;
 
@@ -97,8 +111,26 @@ void APlayerCharacter::BeginPlay()
 		GetAttributes()->SetTalisman(5.f);
 	}
 
+	if (ViewCamera)
+	{
+		DefaultCameraHeight = ViewCamera->GetRelativeLocation().Z;
+		// 현재 높이 변수도 초기화합니다.
+		CurrentCamHeight = DefaultCameraHeight;
+	}
+
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
 	PlayerControllerRef = Cast<APlayerCharacterController>(GetController());
+
+	if (PlayerControllerRef && PlayerControllerRef->PlayerCameraManager)
+	{
+		// ViewPitchMin: 아래로 내려다볼 수 있는 최대 각도 (음수 값)
+		// 기본값: -90.0 (바닥과 수직)
+		PlayerControllerRef->PlayerCameraManager->ViewPitchMin = -65.0f;
+
+		// ViewPitchMax: 위로 올려다볼 수 있는 최대 각도 (양수 값)
+		// 기본값: 90.0 (하늘과 수직)
+		PlayerControllerRef->PlayerCameraManager->ViewPitchMax = 65.0f;
+	}
 }
 
 
@@ -119,8 +151,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		// 손전등, 웅크리기 바인딩
 		EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &APlayerCharacter::OnFlashlightPressed);
-		//EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &APlayerCharacter::OnCrouchPressed);
-		// EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopCrouch); // (주석) 토글 방식이므로 Started만 사용
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &APlayerCharacter::OnCrouchPressed);
 	}
 }
 
@@ -172,19 +203,21 @@ void APlayerCharacter::OnFlashlightPressed()
 		FlashLightComponent->SetVisibility(!bIsVisible);
 	}
 }
-//
-//void APlayerCharacter::OnCrouchPressed()
-//{
-//	// (SRS 12.2.1) 웅크리기 토글
-//	if (bIsCrouched)
-//	{
-//		UnCrouch();
-//	}
-//	else
-//	{
-//		Crouch();
-//	}
-//}
+
+
+void APlayerCharacter::OnCrouchPressed()
+{
+	UE_LOG(LogTemp, Display, TEXT("Crouch Pressed"));
+	// 웅크리기 토글
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Crouch();
+	}
+}
 
 
 //  상호작용 마스터 로직
