@@ -67,6 +67,7 @@ void AChasingAnomaly::BeginPlay()
 		ChasingSpeed = 300.f;
 	}
 
+	DynamicMaterial = GetMesh()->CreateAndSetMaterialInstanceDynamic(0);
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
 }
 
@@ -247,7 +248,9 @@ void AChasingAnomaly::Banish()
 // IInteractableInterface 구현
 void AChasingAnomaly::Highlight_Implementation(bool bOn)
 {
-	// 메쉬의 머티리얼 또는 외곽선 효과 적용 (구현 필요)
+	if (DynamicMaterial) {
+		DynamicMaterial->SetVectorParameterValue("Color", bOn ? FLinearColor(0.5f, 0.5f, 3.0f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
+	}
 }
 
 
@@ -261,4 +264,3 @@ FString AChasingAnomaly::GetInteractText_Implementation()
 {
 	return FString(TEXT("도구 사용"));
 }
-
