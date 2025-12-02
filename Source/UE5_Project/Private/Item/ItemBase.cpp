@@ -67,11 +67,12 @@ void AItemBase::OnPickedUp(USceneComponent* AttachTo, FName SocketName)
 	// 부모 컴포넌트에 부착 (스케일은 원본 유지)
 	FAttachmentTransformRules Rules(
 		EAttachmentRule::SnapToTarget,  // Location: 소켓 위치로
-		EAttachmentRule::KeepWorld,  // Rotation: 소켓 회전으로
+		EAttachmentRule::KeepRelative,  // Rotation
 		EAttachmentRule::KeepWorld,     // Scale: 원래 크기 유지
 		true
 	);
 	AttachToComponent(AttachTo, Rules, SocketName);
+	SetActorRelativeRotation(FRotator::ZeroRotator);
 	//AttachToComponent(AttachTo, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), SocketName);
 }
 

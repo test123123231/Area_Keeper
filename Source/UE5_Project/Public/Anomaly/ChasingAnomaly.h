@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Anomaly")
 	EToolType GetRequiredToolType() const { return RequiredToolType; }
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Anomaly")
+	void PlayBanishAnimation();// 새로추가
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

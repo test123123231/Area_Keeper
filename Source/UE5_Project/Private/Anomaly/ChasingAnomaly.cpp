@@ -240,7 +240,12 @@ void AChasingAnomaly::Banish()
 	{
 		AnomalyController->StopMovement();
 	}
-	Destroy();
+	//Destroy();
+
+	// 애니메이션 재생(새로 추가)
+	PlayBanishAnimation();
+	// 2초 후 파괴 (애니메이션 재생 시간)
+	SetLifeSpan(2.0f);
 }
 
 
