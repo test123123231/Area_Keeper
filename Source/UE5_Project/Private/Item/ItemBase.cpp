@@ -25,6 +25,13 @@ void AItemBase::BeginPlay()
 	if (ItemMesh)
 	{
 		DynamicMaterial = ItemMesh->CreateAndSetMaterialInstanceDynamic(0);
+		if (DynamicMaterial)
+		{
+			// 블루프린트에서 설정한 BaseColor를 머티리얼에 적용
+			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0, 0, 0, 1));
+		}
+		//ItemMesh->SetRenderCustomDepth(true);
+		//ItemMesh->SetCustomDepthStencilValue(1);
 	}
 }
 
@@ -35,7 +42,19 @@ void AItemBase::Highlight_Implementation(bool bIsLooking)
 	if (DynamicMaterial)
 	{
 		// 머티리얼에 "Color"라는 파라미터가 있어야 작동함
-		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor(3.0f, 0.5f, 0.5f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
+		//DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor(3.0f, 0.5f, 0.5f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
+		//ItemMesh->SetRenderCustomDepth(bIsLooking);
+
+		if (bIsLooking)
+		{
+			// 하이라이트: 빨간색
+			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+		else
+		{
+			// 원래 색상으로 복구
+			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor(0, 0, 0, 1));
+		}
 	}
 }
 
@@ -72,13 +91,30 @@ void AItemBase::OnPickedUp(USceneComponent* AttachTo, FName SocketName)
 		true
 	);
 	AttachToComponent(AttachTo, Rules, SocketName);
-	if (this->GetName().Contains(TEXT("Spray")) || this->GetName().Contains(TEXT("Torch")))
+	/*if (this->GetName().Contains(TEXT("Spray")) || this->GetName().Contains(TEXT("Torch")))
 	{
-		SetActorRelativeRotation(FRotator(-120.0f, 0.0f, -90.0f));
+		SetActorRelativeRotation(FRotator(-120.0f, 180.0f, -90.0f));
 	}
 	else
 	{
-		SetActorRelativeRotation(FRotator::ZeroRotator);
+		SetActorRelativeRotation(FRotator(180.0f, 180.0f, 0.0f));
+	}*/
+	if (this->GetName().Contains(TEXT("Spray")) || this->GetName().Contains(TEXT("Torch")))
+	{
+		SetActorRelativeLocation(FVector(50.0f, 5.0f, 0.0f));
+		SetActorRelativeRotation(FRotator(60.0f, 125.0f, -90.0f));
+	}
+	else if (this->GetName().Contains(TEXT("Bat")))
+	{
+		// 방망이: 손 앞으로 쭉
+		SetActorRelativeLocation(FVector(0.0f, 0.0f, 0.0f));  // 앞, 약간 오른쪽
+		SetActorRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
+	}
+	else
+	{
+		// 기본 아이템
+		SetActorRelativeLocation(FVector(15.0f, 3.0f, 0.0f));
+		SetActorRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	}
 	//SetActorRelativeRotation(FRotator::ZeroRotator);
 	//AttachToComponent(AttachTo, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), SocketName);

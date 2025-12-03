@@ -43,6 +43,8 @@ public:
 
 	UCameraComponent* GetViewCamera() const { return ViewCamera; }
 
+	
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -132,7 +134,9 @@ private:
 	AItemBase* HeldItem;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
-	FName HandSocketName = "RightHandSocket";
+	FName HandSocketName = "RightHand";
+
+	
 
 	// 퀵슬롯
 	UPROPERTY()
