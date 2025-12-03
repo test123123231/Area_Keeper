@@ -72,7 +72,15 @@ void AItemBase::OnPickedUp(USceneComponent* AttachTo, FName SocketName)
 		true
 	);
 	AttachToComponent(AttachTo, Rules, SocketName);
-	SetActorRelativeRotation(FRotator::ZeroRotator);
+	if (this->GetName().Contains(TEXT("Spray")) || this->GetName().Contains(TEXT("Torch")))
+	{
+		SetActorRelativeRotation(FRotator(-120.0f, 0.0f, -90.0f));
+	}
+	else
+	{
+		SetActorRelativeRotation(FRotator::ZeroRotator);
+	}
+	//SetActorRelativeRotation(FRotator::ZeroRotator);
 	//AttachToComponent(AttachTo, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), SocketName);
 }
 
