@@ -12,21 +12,21 @@ void UTalismanWidget::NativeConstruct()
 	PlayerCharacterRef = Cast<APlayerCharacter>(GetOwningPlayer()->GetPawn());
 
 	// C++ 함수와 BP 버튼의 OnClicked 이벤트를 바인딩(연결)
-	if (Button_VisualSense)
+	if (Button_Gigantism)
 	{
-		Button_VisualSense->OnClicked.AddDynamic(this, &UTalismanWidget::OnVisualSenseClicked);
+		Button_Gigantism->OnClicked.AddDynamic(this, &UTalismanWidget::OnGigantismClicked);
 	}
-	if (Button_AuditorySense)
+	if (Button_Levitation)
 	{
-		Button_AuditorySense->OnClicked.AddDynamic(this, &UTalismanWidget::OnAuditorySenseClicked);
+		Button_Levitation->OnClicked.AddDynamic(this, &UTalismanWidget::OnLevitationClicked);
 	}
-	if (Button_Object)
+	if (Button_Peculiarity)
 	{
-		Button_Object->OnClicked.AddDynamic(this, &UTalismanWidget::OnObjectClicked);
+		Button_Peculiarity->OnClicked.AddDynamic(this, &UTalismanWidget::OnPeculiarityClicked);
 	}
-	if (Button_Environment)
+	if (Button_Intrusion)
 	{
-		Button_Environment->OnClicked.AddDynamic(this, &UTalismanWidget::OnEnvironmentClicked);
+		Button_Intrusion->OnClicked.AddDynamic(this, &UTalismanWidget::OnIntrusionClicked);
 	}
 	if (Button_GoBack)
 	{
@@ -54,32 +54,32 @@ void UTalismanWidget::HandleSelection(EAnomalyCategory SelectedCategory)
 
 //--- 각 버튼이 클릭되었을 때 헬퍼 함수를 호출 ---
 
-void UTalismanWidget::OnVisualSenseClicked()
+void UTalismanWidget::OnGigantismClicked()
 {
 	// '시각' 범주 전달
-	HandleSelection(EAnomalyCategory::AC_Visual);
+	HandleSelection(EAnomalyCategory::EAC_Gigantism);
 }
 
-void UTalismanWidget::OnAuditorySenseClicked()
+void UTalismanWidget::OnLevitationClicked()
 {
 	// '청각' 범주 전달
-	HandleSelection(EAnomalyCategory::AC_Auditory);
+	HandleSelection(EAnomalyCategory::EAC_Levitation);
 }
 
-void UTalismanWidget::OnObjectClicked()
+void UTalismanWidget::OnPeculiarityClicked()
 {
 	// '물체' 범주 전달
-	HandleSelection(EAnomalyCategory::AC_Object);
+	HandleSelection(EAnomalyCategory::EAC_Peculiarity);
 }
 
-void UTalismanWidget::OnEnvironmentClicked()
+void UTalismanWidget::OnIntrusionClicked()
 {
 	// '환경' 범주 전달
-	HandleSelection(EAnomalyCategory::AC_Environmental);
+	HandleSelection(EAnomalyCategory::EAC_Intrusion);
 }
 
 void UTalismanWidget::OnGoBackClicked()
 {
 	// '소지' 취소 (None 범주 전달)
-	HandleSelection(EAnomalyCategory::AC_None);
+	HandleSelection(EAnomalyCategory::EAC_None);
 }

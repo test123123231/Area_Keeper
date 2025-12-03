@@ -57,11 +57,14 @@ protected:
 	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
 
 	// 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = "Camera")
-	USpringArmComponent* SpringArm;
+	/*UPROPERTY(VisibleAnywhere, Category = "Camera")
+	USpringArmComponent* SpringArm;*/
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	UCameraComponent* ViewCamera;
+
+	UPROPERTY(VisibleAnywhere, Category = "Light")
+	USpotLightComponent* FlashLightComponent;
 
 	// 입력 액션
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -86,6 +89,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* CrouchAction;
 
+	// 기본 서 있을 때의 카메라 높이
+	float DefaultCameraHeight;
+
+	// 카메라의 '현재 높이'를 기억할 변수
+	float CurrentCamHeight;
+
+
 	// 입력 처리 함수 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -100,6 +110,10 @@ private:
 	void OnInteractReleased();
 	// 아이템 버리기(G) 
 	void OnDropItem();
+	// flashlight 토글
+	void OnFlashlightPressed();
+	// 웅크리기 토글
+	void OnCrouchPressed();
 
 	// 매 틱마다 상호작용 가능한 객체를 찾음
 	void TraceForInteractable();
@@ -147,15 +161,16 @@ private:
 	UPROPERTY()
 	TObjectPtr<APlayerCharacterController> PlayerControllerRef;
 
-	void StartCharge(AChargeableItem* Target);
-	void StopCharge();
-	void HandleCharging(float DeltaTime);
-
 	// 소지 UI가 열려있는지 여부, 틱 및 입력 차단용
 	bool bIsTalismanRitualUIOpen = false;
 
 	// 도구 사용 로직 
 	void UseTool();
+
+public:
+	void StartCharge(AChargeableItem* Target);
+	void StopCharge();
+	void HandleCharging(float DeltaTime);
 
 };
 

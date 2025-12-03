@@ -47,7 +47,7 @@ protected:
 	// AI 상태 및 컴포넌트
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
-	EAnomalyState CurrentState;
+	EChasingAnomalyState CurrentState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	UAIPerceptionComponent* AIPerception;
@@ -92,6 +92,19 @@ protected:
 	UPROPERTY()
 	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
 
+	//사운드
+	// 메타사운드
+	UPROPERTY(EditAnywhere, Category="Chasing Sound")
+	USoundBase* ChasingLoopSound;
+
+	// 사운드 애셋
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Chasing Sound")
+	USoundWave* ChasingWaveAsset;
+
+	//오디오 컴포넌트
+	UPROPERTY(VisibleAnywhere, Category="Chasing Sound")
+	UAudioComponent* ChasingAudioComponent;
+
 	// AI 행동 함수
 	UFUNCTION()
 	void OnSeePawn(AActor* SeenActor, FAIStimulus Stimulus);
@@ -115,6 +128,10 @@ protected:
 	// 무적이 끝났을 때 실행
 	UFUNCTION()
 	void OnPlayerInvincibilityEnd(APlayerCharacter* Player);
+
+	// 하이라이트용 동적 머티리얼
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynamicMaterial;
 	
 };
 
