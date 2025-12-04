@@ -35,7 +35,7 @@ void AItemBase::Highlight_Implementation(bool bIsLooking)
 	if (DynamicMaterial)
 	{
 		// 머티리얼에 "Color"라는 파라미터가 있어야 작동함
-		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor(3.0f, 0.5f, 0.5f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
+		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor(1.0f, 0.0f, 0.0f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
 	}
 }
 
@@ -63,9 +63,6 @@ void AItemBase::OnPickedUp(USceneComponent* AttachTo, FName SocketName)
 	// 물리 및 충돌 비활성화
 	ItemMesh->SetSimulatePhysics(false);
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// 부모 컴포넌트에 부착
-	AttachToComponent(AttachTo, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), SocketName);
 }
 
 
