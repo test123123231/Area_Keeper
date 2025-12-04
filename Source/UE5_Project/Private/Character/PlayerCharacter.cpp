@@ -579,8 +579,6 @@ void APlayerCharacter::UseTool()
 	{
 		if (Tool->UseTool(TargetAnomaly)) // ToolBase.cpp의 UseTool 호출
 		{
-			Tool->PlayUseAnimation(); // 새로 추가
-
 			// 사용 성공 시 손에서 제거
 			QuickSlotRef->RemoveItemAt(QuickSlotRef->GetCurrentSlotIndex());
 			HeldItem = nullptr;

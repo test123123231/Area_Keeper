@@ -44,9 +44,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Equip")
 	FName EquipSocketName;
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Tool")
-	void PlayUseAnimation(); // 새로 추가
-
 protected:
 	virtual void BeginPlay() override;
 

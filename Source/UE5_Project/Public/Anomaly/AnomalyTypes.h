@@ -45,9 +45,7 @@ enum class EToolType : uint8
 	// (예시) BP_CameraTool은 ETT_Camera로 설정
 	ETT_None		UMETA(DisplayName = "None"),
 	ETT_Bat 		UMETA(DisplayName = "Bat Tool"),
-	ETT_Torch		UMETA(DisplayName = "Torch Tool"),       // 토치 (새로 추가)
-	ETT_Spray		UMETA(DisplayName = "Spray Tool"),       // 스프레이 (새로 추가)
-	ETT_Salt		UMETA(DisplayName = "Salt Tool"),
-	ETT_EMFReader	UMETA(DisplayName = "EMF Reader Tool")
-	// ... 필요한 만큼 도구 추가 ...
+	ETT_Torch		UMETA(DisplayName = "Torch Tool"),       // 토치
+	ETT_Spray		UMETA(DisplayName = "Spray Tool"),       // 스프레이
+	// 필요한 만큼 도구 추가
 };
