@@ -64,7 +64,7 @@ public:
 private:
 	// 생성 유지 시간 (초)
 	UPROPERTY(EditAnywhere, Category = "Anomaly Config")
-	float StationaryAnomalyLifespan = 25.0f;
+	float StationaryAnomalyLifespan = 45.0f;
 
 private:
 	/**
@@ -108,10 +108,6 @@ protected:
 
 	// 스폰 타이머 핸들 */
 	FTimerHandle SpawnTimerHandle;
-
-	// 이상현상을 스폰할 반경 (Manager 액터 기준)
-	UPROPERTY(EditAnywhere, Category = "Anomaly Config")
-	float SpawnRadius = 10000.0f; // 100m
 
 	/** 최초 이상현상 생성 주기 (초)
 	 * 이 값은 GameState에 의해 점진적으로 감소
