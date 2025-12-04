@@ -19,6 +19,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	UTexture2D* ItemIcon;
 
+
 	// 아이템 줍기/내려놓기 로직
 	virtual void OnPickedUp(USceneComponent* AttachTo, FName SocketName);
 	virtual void OnDropped();

@@ -202,22 +202,49 @@ void AAnomalyManager::SpawnChasingAnomaly(const FVector& Location)
 FVector AAnomalyManager::GetRandomSpawnLocation()
 {
 	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+	
+	// SpawnZone 비어 있는 경우 대비
+    if (SpawnZones.Num() == 0)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SpawnZone 비어있음"));
+		return FVector::ZeroVector;
+	}
+
+	 // SpawnZone 하나를 랜덤으로 선택
+	int32 BoxSelected = FMath::RandRange(0, SpawnZones.Num() - 1);
+    AActor* Zone = SpawnZones[BoxSelected];
+    if (!Zone)
+	{
+		UE_LOG(LogTemp, Log, TEXT("선택된 Zone이 nullptr"));
+		return FVector::ZeroVector;
+	}
+ 	FBox Box = Zone->GetComponentsBoundingBox(true);
+
+	// 박스 내 랜덤 위치 할당
+	const float X = FMath::RandRange(Box.Min.X, Box.Max.X);
+    const float Y = FMath::RandRange(Box.Min.Y, Box.Max.Y);
+    const float Z = Box.Max.Z;
+	FVector RandomPoint(X, Y, Z);
+
 	if (NavSys)
 	{
-		FNavLocation RandomLocation;
+    	FNavLocation NavPoint;
 
-		// 이 Manager 액터의 위치를 기준으로 SpawnRadius 반경 내의 랜덤한 NavMesh 위 포인트를 찾습니다.
-		bool bFound = NavSys->GetRandomPointInNavigableRadius(GetActorLocation(), SpawnRadius, RandomLocation);
-
-		if (bFound)
+		// 검색 범위 내에서의 가까운 navmesh 찾기
+		if (NavSys->ProjectPointToNavigation(RandomPoint, NavPoint, FVector(300.f,300.f,800.f)))
 		{
-			
-			return RandomLocation.Location;
+			return NavPoint.Location;
+		}
+
+		// 선택된 존에서 주변에 완전히 랜덤한 nevmesh 위치(위 분기에서 못 찾았을 때)
+		if (NavSys->GetRandomPointInNavigableRadius(Zone->GetActorLocation(), 1500.f, NavPoint))
+		{
+			return NavPoint.Location;
 		}
 	}
 
-	// NavMesh가 없거나 유효한 위치를 찾지 못한 경우 반환값 0 벡터
-	return FVector::ZeroVector;
+	// navmesh가 없으면
+	return RandomPoint;
 }
 
 
@@ -235,7 +262,7 @@ EAnomalyCategory AAnomalyManager::GetRandomAnomalyCategory() const
 
 	int32 RandomIndex = FMath::RandRange(1, MaxCategoryIndex);
 	//return static_cast<EAnomalyCategory>(RandomIndex);
-	return EAnomalyCategory::EAC_Peculiarity; // 테스트용으로 항상 Peculiarity 반환
+	return EAnomalyCategory::EAC_Intrusion; // 테스트용으로 항상 Peculiarity 반환
 }
 
 

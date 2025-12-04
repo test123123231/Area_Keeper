@@ -79,12 +79,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	if (ViewCamera)
 	{
-		float TargetZ = (bIsCrouched) ? (DefaultCameraHeight - 40.f) : DefaultCameraHeight;
+		float TargetZ = (bIsCrouched) ? (DefaultCameraHeight - 20.f) : DefaultCameraHeight;
+		float TargetX = (bIsCrouched) ? (DefaultCameraForward + 20.f) : DefaultCameraForward;
 
 		CurrentCamHeight = FMath::FInterpConstantTo(CurrentCamHeight, TargetZ, DeltaTime, 100.f);
+		CurrentCamForward = FMath::FInterpConstantTo(CurrentCamForward, TargetX, DeltaTime, 100.f);
 
 		FVector NewLocation = ViewCamera->GetRelativeLocation();
 		NewLocation.Z = CurrentCamHeight; // 계산된 Z값만 덮어씌움
+		NewLocation.X = CurrentCamForward; // 계산된 Y값만 덮어씌움
 		ViewCamera->SetRelativeLocation(NewLocation);
 	}
 
@@ -114,8 +117,10 @@ void APlayerCharacter::BeginPlay()
 	if (ViewCamera)
 	{
 		DefaultCameraHeight = ViewCamera->GetRelativeLocation().Z;
-		// 현재 높이 변수도 초기화합니다.
 		CurrentCamHeight = DefaultCameraHeight;
+
+		DefaultCameraForward = ViewCamera->GetRelativeLocation().X;
+		CurrentCamForward = DefaultCameraForward;
 	}
 
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
@@ -533,10 +538,18 @@ void APlayerCharacter::FinishTalismanRitual(EAnomalyCategory SelectedCategory)
 	auto* PC = Cast<APlayerCharacterController>(GetController());
 	if (PC)
 	{
+		PC->HideText(0);  
 		PC->CloseTalismanUI();
 	}
 
-	if (SelectedCategory == EAnomalyCategory::EAC_None) return;
+	AStationaryAnomaly* Anomaly = Cast<AStationaryAnomaly>(CurrentFocusedInteractable.GetObject());
+	CurrentFocusedInteractable = nullptr;
+	TraceForInteractable();
+
+	if (SelectedCategory == EAnomalyCategory::EAC_None)
+	{
+		return;
+	}
 
 	// Talisman Count 감소
 	if (GetAttributes())
@@ -545,13 +558,11 @@ void APlayerCharacter::FinishTalismanRitual(EAnomalyCategory SelectedCategory)
 		GetAttributes()->SetTalisman(CurrentTalisman - 1.f);
 	}
 
-	AStationaryAnomaly* Anomaly = Cast<AStationaryAnomaly>(CurrentFocusedInteractable.GetObject());
+
 	if (Anomaly)
 	{
 		Anomaly->OnTalismanRitualFinished(SelectedCategory);
-		CurrentFocusedInteractable = nullptr;
 	}
-
 }
 // ---
 
@@ -571,7 +582,8 @@ void APlayerCharacter::UseTool()
 			// 사용 성공 시 손에서 제거
 			QuickSlotRef->RemoveItemAt(QuickSlotRef->GetCurrentSlotIndex());
 			HeldItem = nullptr;
-			Tool->Destroy();
+			Tool->SetLifeSpan(2.6f);
+			//Tool->Destroy();
 		}
 	}
 }
