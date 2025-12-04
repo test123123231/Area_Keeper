@@ -43,7 +43,9 @@ public:
 
 	UCameraComponent* GetViewCamera() const { return ViewCamera; }
 
-	
+	// 아이템을 들고 있는지 여부 반환
+	UFUNCTION(BlueprintPure)
+	bool IsHoldingItem() { return HeldItem != nullptr; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -94,9 +96,14 @@ protected:
 	// 기본 서 있을 때의 카메라 높이
 	float DefaultCameraHeight;
 
+	// 기본 서 있을 때의 카메라 전방 위치
+	float DefaultCameraForward;
+
 	// 카메라의 '현재 높이'를 기억할 변수
 	float CurrentCamHeight;
 
+	// 카메라의 '현재 전방 위치'를 기억할 변수
+	float CurrentCamForward;
 
 	// 입력 처리 함수 
 	void Move(const FInputActionValue& Value);
@@ -129,7 +136,7 @@ private:
 	// 아이템 교체/내려놓기
 	void ChangeItem(AItemBase* Item, const FVector& Location);
 
-	// 손에 들고 있는 아이템 (AItemBase 또는 AToolBase)
+	// 손에 들고 있는 아이템 (AToolBase)
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	AItemBase* HeldItem;
 

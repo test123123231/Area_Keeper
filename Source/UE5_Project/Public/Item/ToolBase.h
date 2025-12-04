@@ -40,6 +40,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Tool")
 	EToolType ToolType;
 
+	// 이 아이템이 장착될 때 사용할 소켓 이름 (블루프린트에서 설정 가능)
+	UPROPERTY(EditDefaultsOnly, Category = "Equip")
+	FName EquipSocketName;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Tool")
 	void PlayUseAnimation(); // 새로 추가
 

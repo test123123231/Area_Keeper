@@ -10,7 +10,7 @@ AToolSpawner::AToolSpawner()
 
 	// 스폰 위치를 나타낼 루트 컴포넌트 생성
 	SpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
-	RootComponent = SpawnPoint;
+	SpawnPoint->SetupAttachment(RootComponent);
 }
 
 
