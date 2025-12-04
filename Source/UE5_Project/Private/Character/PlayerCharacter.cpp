@@ -585,6 +585,15 @@ void APlayerCharacter::UseTool()
 			Tool->SetLifeSpan(2.6f);
 			//Tool->Destroy();
 		}
+		else
+		{
+			auto* PC = Cast<APlayerCharacterController>(GetController());
+			if (PC)
+			{
+				PC->ShowText(0);
+				PC->UpdateText(TEXT("도구 사용 실패"), 0);
+			}
+		}
 	}
 }
 // ---
