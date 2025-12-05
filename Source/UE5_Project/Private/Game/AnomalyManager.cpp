@@ -173,7 +173,7 @@ void AAnomalyManager::SpawnStationaryAnomaly()
 
 			// 원본 액터 숨김/복사/변조를 한 번에 처리
 			NewAnomaly->InitializeFromActor(TargetActor, Type, AnomalyEffect, Lifespan);
-			UE_LOG(LogTemp, Log, TEXT("AnomalyManager: '환경 변조' 이상현상 스폰. 대상: %s"), *TargetActor->GetName());
+			UE_LOG(LogTemp, Log, TEXT("AnomalyManager: '환경 변조' 이상현상 스폰. 대상 액터: %s, 범주: %d"), *TargetActor->GetName(), static_cast<int32>(AnomalyEffect));
 		}
 	}
 }
@@ -261,8 +261,8 @@ EAnomalyCategory AAnomalyManager::GetRandomAnomalyCategory() const
 	}
 
 	int32 RandomIndex = FMath::RandRange(1, MaxCategoryIndex);
-	//return static_cast<EAnomalyCategory>(RandomIndex);
-	return EAnomalyCategory::EAC_Intrusion; // 테스트용으로 항상 Peculiarity 반환
+	return static_cast<EAnomalyCategory>(RandomIndex);
+	//return EAnomalyCategory::EAC_Intrusion; // 테스트용으로 항상 Peculiarity 반환
 }
 
 
