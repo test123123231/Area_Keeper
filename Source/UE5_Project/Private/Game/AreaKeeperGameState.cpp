@@ -60,6 +60,7 @@ void AAreaKeeperGameState::Tick(float DeltaTime)
 				// 준비 시간 종료, 메인 게임 시작
 				CurrentPlayState = EAreaKeeperPlayState::EPS_InProgress;
 				UE_LOG(LogTemp, Log, TEXT("GameState: 준비 시간 종료. 메인 게임을 시작합니다."));
+				PCC -> UpdatePenaltyText(0);
 
 				// AnomalyManager에게 스폰 시작을 알림
 				if (AnomalyManagerRef.IsValid())

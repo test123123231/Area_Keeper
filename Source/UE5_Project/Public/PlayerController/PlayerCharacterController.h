@@ -103,8 +103,6 @@ protected:
 
     void ApplyMovementPenalty(APlayerCharacter* PlayerChar, int32 NewStackCount);
 
-    void UpdatePenaltyText(float NewStackCount);
-
     /** 2스택 패널티 사운드를 주기적으로 재생하기 위한 타이머 콜백 함수 */
     void PlayWhisperSound();
 
@@ -154,6 +152,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="UI")
     void UpdateText(const FString& Text, uint8 TextLocation);
+
+    void UpdatePenaltyText(float NewStackCount);
 
     FTimerHandle& GetHideHandle(uint8 TextLocation);
 
