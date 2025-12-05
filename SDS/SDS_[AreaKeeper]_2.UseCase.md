@@ -34,6 +34,8 @@ Player는 게임을 플레이하는 User이다.<br/>
  <img src = "image/UseCaseDiagram.png">
 </p>
 
+***
+
 | **Use case #1 : GameStart** |  |
 |:---:|:---:|
 | **GENERAL CHARACTERISTICS** |  |
