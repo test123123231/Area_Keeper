@@ -18,6 +18,7 @@
 #include "TimerManager.h"
 #include "Game/AreaKeeperGameState.h"
 #include "Game/GameTypes.h"
+#include "Kismet/GameplayStatics.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -54,10 +55,10 @@ APlayerCharacter::APlayerCharacter()
 
 	FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("FlashLightComponent"));
 	FlashLightComponent->SetupAttachment(ViewCamera); // 1인칭 시 카메라에 부착
-	FlashLightComponent->SetIntensity(8000.0f);
+	FlashLightComponent->SetIntensity(10000.0f);
 	FlashLightComponent->SetIntensityUnits(ELightUnits::Unitless);
 	FlashLightComponent->SetLightColor(FLinearColor::White);
-	FlashLightComponent->SetAttenuationRadius(2500.0f);
+	FlashLightComponent->SetAttenuationRadius(4000.0f);
 	FlashLightComponent->SetInnerConeAngle(15.0f);
 	FlashLightComponent->SetOuterConeAngle(25.0f);
 	FlashLightComponent->bAffectsWorld = true;
@@ -121,6 +122,11 @@ void APlayerCharacter::BeginPlay()
 
 		DefaultCameraForward = ViewCamera->GetRelativeLocation().X;
 		CurrentCamForward = DefaultCameraForward;
+
+		// 피격됐을 때 플래시용 기본 Tint 저장
+		DefaultSceneColorTint = ViewCamera->PostProcessSettings.SceneColorTint;
+		bDefaultTintOverride = ViewCamera->PostProcessSettings.bOverride_SceneColorTint;
+		bStoredDefaultTint = true;
 	}
 
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
@@ -611,6 +617,9 @@ void APlayerCharacter::HandleDamage(float DamageAmount)
 	{
 		Attributes->ReceiveDamage(DamageAmount);
 
+		// 피격 플래시 시작
+		StartHitFlash();
+
 		// 1초간 무적 상태로 만듦
 		bIsInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(
@@ -621,9 +630,6 @@ void APlayerCharacter::HandleDamage(float DamageAmount)
 			false
 		);
 
-		// 피격 시각 효과
-		// (구현 필요) APlayerCharacterController* PC = Cast<APlayerCharacterController>(GetController());
-		// if (PC) { PC->PlayHitEffect(); }
 
 		// 체력 0 이 됐는 지 확인 후 Die() 호출
 		if (!Attributes->IsAlive())
@@ -645,4 +651,68 @@ void APlayerCharacter::ResetInvincibility()
 bool APlayerCharacter::getIsInvincible()
 {
 	return bIsInvincible;
+}
+
+void APlayerCharacter::StartHitFlash()
+{
+	// 피격 사운드 재생 
+	if (HitSound && GetWorld())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), HitSound);
+	}
+
+	if (!ViewCamera)
+	{
+		return;
+	}
+
+	if (!bStoredDefaultTint)
+	{
+		DefaultSceneColorTint = ViewCamera->PostProcessSettings.SceneColorTint;
+		bDefaultTintOverride = ViewCamera->PostProcessSettings.bOverride_SceneColorTint;
+		bStoredDefaultTint = true;
+	}
+
+	// 이미 타이머가 돌고 있다면 일단 정지 (중복 호출 대비)
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(HitFlashTimerHandle);
+	}
+
+	// 화면을 바로 빨갛게
+	ViewCamera->PostProcessSettings.bOverride_SceneColorTint = true;
+	ViewCamera->PostProcessSettings.SceneColorTint = FLinearColor::Red;
+
+	// HitFlashDuration 후에 원상복구 호출
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			HitFlashTimerHandle,
+			this,
+			&APlayerCharacter::EndHitFlash,
+			HitFlashDuration,
+			false
+		);
+	}
+}
+
+void APlayerCharacter::EndHitFlash()
+{
+	if (!ViewCamera)
+	{
+		return;
+	}
+
+	// 원래 색깔과 override 상태로 복구
+	if (bStoredDefaultTint)
+	{
+		ViewCamera->PostProcessSettings.SceneColorTint = DefaultSceneColorTint;
+		ViewCamera->PostProcessSettings.bOverride_SceneColorTint = bDefaultTintOverride;
+	}
+
+	// 타이머 정리
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(HitFlashTimerHandle);
+	}
 }

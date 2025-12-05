@@ -16,6 +16,7 @@ class USpotLightComponent;
 class IInteractableInterface; // 인터페이스 참조
 class AAreaKeeperGameState;
 class APlayerCharacterController;
+class USoundBase;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityEnd, APlayerCharacter*, Player);
@@ -104,6 +105,29 @@ protected:
 
 	// 카메라의 '현재 전방 위치'를 기억할 변수
 	float CurrentCamForward;
+
+	// 피격 시 잠깐 화면을 빨갛게 만드는 효과
+	// 이펙트 지속 시간
+	UPROPERTY(EditAnywhere, Category = "HitEffect")
+	float HitFlashDuration = 0.15f;   // 0.15초
+
+	// 원래 SceneColorTint와 Override 플래그 저장용
+	FLinearColor DefaultSceneColorTint = FLinearColor::White;
+	bool bDefaultTintOverride = false;
+	bool bStoredDefaultTint = false;
+
+	// 원상복구용 타이머
+	FTimerHandle HitFlashTimerHandle;
+
+	//  피격 시 화면 빨갛게 만들기 시작
+	void StartHitFlash();
+
+	//  HitFlashDuration 이후 원상복구
+	void EndHitFlash();
+
+	// --- 피격 사운드 ---
+	UPROPERTY(EditAnywhere, Category = "HitEffect|Audio")
+	USoundBase* HitSound = nullptr;
 
 	// 입력 처리 함수 
 	void Move(const FInputActionValue& Value);
