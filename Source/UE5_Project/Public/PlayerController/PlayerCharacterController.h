@@ -37,11 +37,11 @@ protected:
     void UnbindFromPawnDelegates();
         
 
-    // 위젯의 HP가 바뀔때 호출 되는 함수
+    // 위젯의 HP를 바꿀 때 호출 되는 함수
     UFUNCTION()
     void HandleHealthChanged(float NewHealth);
     
-    // 위젯의 Amulet이 바뀔때 호출 되는 함수
+    // 위젯의 Amulet을 바꿀 때 호출 되는 함수
     UFUNCTION()
     void HandleAmuletChanged(float NewAmulet);
 
@@ -152,6 +152,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="UI")
     void UpdateText(const FString& Text, uint8 TextLocation);
+
+    void UpdatePenaltyText(float NewStackCount);
 
     FTimerHandle& GetHideHandle(uint8 TextLocation);
 
