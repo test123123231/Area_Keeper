@@ -5,6 +5,8 @@ Diagram 및 description에 관한 고려 사항은 다음과 같다.<br/>
 Use case diagram은 description에 대한 부가적인 결과물이다. 따라서 본 문서를 읽는 독자는 Use case diagram보다 Use case description에서 Use case에 대한 충분한 정보를 얻어야 한다.<br/>
 Use case diagram에 나타난 Use case는 모두 user-level use case이다.<br/>
 Player는 게임을 플레이하는 User이다.<br/>
+
+***
  
 <h3>본 프로젝트의 Use case 목록은 다음과 같다.<br/></h3>
 1. GameStart: 게임 시작하기 (메인 메뉴에서 시작 및 준비 구역에서 스테이지 진입 포함)<br/>
