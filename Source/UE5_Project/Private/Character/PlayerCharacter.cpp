@@ -18,6 +18,7 @@
 #include "TimerManager.h"
 #include "Game/AreaKeeperGameState.h"
 #include "Game/GameTypes.h"
+#include "Kismet/GameplayStatics.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -654,6 +655,12 @@ bool APlayerCharacter::getIsInvincible()
 
 void APlayerCharacter::StartHitFlash()
 {
+	// 피격 사운드 재생 
+	if (HitSound && GetWorld())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), HitSound);
+	}
+
 	if (!ViewCamera)
 	{
 		return;

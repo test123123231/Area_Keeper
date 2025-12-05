@@ -16,6 +16,7 @@ class USpotLightComponent;
 class IInteractableInterface; // 인터페이스 참조
 class AAreaKeeperGameState;
 class APlayerCharacterController;
+class USoundBase;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityEnd, APlayerCharacter*, Player);
@@ -124,6 +125,9 @@ protected:
 	//  HitFlashDuration 이후 원상복구
 	void EndHitFlash();
 
+	// --- 피격 사운드 ---
+	UPROPERTY(EditAnywhere, Category = "HitEffect|Audio")
+	USoundBase* HitSound = nullptr;
 
 	// 입력 처리 함수 
 	void Move(const FInputActionValue& Value);
