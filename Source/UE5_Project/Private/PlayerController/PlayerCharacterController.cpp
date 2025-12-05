@@ -365,8 +365,16 @@ void APlayerCharacterController::UpdateText(const FString& Text, uint8 TextLocat
 void APlayerCharacterController::OnPenaltyStackUpdated(int32 NewStackCount)
 {
     ApplyPenaltyEffects(NewStackCount);
+    UpdatePenaltyText(NewStackCount);
 }
 
+void APlayerCharacterController::UpdatePenaltyText(float NewPenalty)
+{
+    if(HUDRef)
+    {
+        HUDRef ->UpdateAmulet(NewPenalty);
+    }
+}
 
 void APlayerCharacterController::ApplyPenaltyEffects(int32 NewStackCount)
 {

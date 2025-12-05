@@ -37,11 +37,11 @@ protected:
     void UnbindFromPawnDelegates();
         
 
-    // 위젯의 HP가 바뀔때 호출 되는 함수
+    // 위젯의 HP를 바꿀 때 호출 되는 함수
     UFUNCTION()
     void HandleHealthChanged(float NewHealth);
     
-    // 위젯의 Amulet이 바뀔때 호출 되는 함수
+    // 위젯의 Amulet을 바꿀 때 호출 되는 함수
     UFUNCTION()
     void HandleAmuletChanged(float NewAmulet);
 
@@ -102,6 +102,8 @@ protected:
     void ApplyVignettePenalty(APlayerCharacter* PlayerChar, int32 NewStackCount);
 
     void ApplyMovementPenalty(APlayerCharacter* PlayerChar, int32 NewStackCount);
+
+    void UpdatePenaltyText(float NewAmulet);
 
     /** 2스택 패널티 사운드를 주기적으로 재생하기 위한 타이머 콜백 함수 */
     void PlayWhisperSound();
