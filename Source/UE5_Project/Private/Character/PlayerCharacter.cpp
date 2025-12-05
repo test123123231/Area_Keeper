@@ -55,10 +55,10 @@ APlayerCharacter::APlayerCharacter()
 
 	FlashLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("FlashLightComponent"));
 	FlashLightComponent->SetupAttachment(ViewCamera); // 1인칭 시 카메라에 부착
-	FlashLightComponent->SetIntensity(8000.0f);
+	FlashLightComponent->SetIntensity(10000.0f);
 	FlashLightComponent->SetIntensityUnits(ELightUnits::Unitless);
 	FlashLightComponent->SetLightColor(FLinearColor::White);
-	FlashLightComponent->SetAttenuationRadius(2500.0f);
+	FlashLightComponent->SetAttenuationRadius(4000.0f);
 	FlashLightComponent->SetInnerConeAngle(15.0f);
 	FlashLightComponent->SetOuterConeAngle(25.0f);
 	FlashLightComponent->bAffectsWorld = true;
