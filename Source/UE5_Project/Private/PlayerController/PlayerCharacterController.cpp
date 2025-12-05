@@ -372,7 +372,7 @@ void APlayerCharacterController::UpdatePenaltyText(float NewPenalty)
 {
     if(HUDRef)
     {
-        HUDRef ->UpdateAmulet(NewPenalty);
+        HUDRef ->UpdatePenalty(NewPenalty);
     }
 }
 
