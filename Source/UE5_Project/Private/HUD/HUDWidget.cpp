@@ -22,6 +22,24 @@ void UHUDWidget::UpdateAmulet(float CurrentAmulet)
     }
 }
 
+void UHUDWidget::UpdatePenalty(float CurrentPenalty)
+{
+    if (PenatyText) 
+    { 
+        if(PenatyText->GetVisibility() == ESlateVisibility::Visible)
+        {
+            PenatyText->SetText(FText::Format(
+            FText::FromString(TEXT("현재 저주 개수 : {0}")),
+            FText::AsNumber(CurrentPenalty))); 
+        }
+        else
+        {
+            PenatyText->SetVisibility(ESlateVisibility::Visible);
+        }
+    }
+}
+
+
 void UHUDWidget::ShowCenterText()
 {
     if (CenterText)
