@@ -45,6 +45,8 @@ public:
     // 슬롯 꽉 찼는지 확인
     bool IsFull() const;
 
+    // 빈 슬롯 찾기
+    int32 FindEmptySlot() const;
 
     int32 FindSlotIndexByItem(AItemBase* TargetItem) const;
     void UpdateSlotIcon(int32 SlotIndex, UTexture2D* NewIcon);

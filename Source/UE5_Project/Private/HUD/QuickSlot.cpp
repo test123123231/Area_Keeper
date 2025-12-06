@@ -28,6 +28,16 @@ void UQuickSlot::NativeConstruct()
     UpdateSlotHighlight();
 }
 
+// 빈 슬롯 찾기
+int32 UQuickSlot::FindEmptySlot() const
+{
+    for (int32 i = 0; i < Slots.Num(); i++)
+    {
+        if (!Slots[i].bIsOccupied)
+            return i;
+    }
+    return INDEX_NONE;
+}
 
 // 특정 아이템이 들어 있는 슬롯 인덱스 찾기
 int32 UQuickSlot::FindSlotIndexByItem(AItemBase* TargetItem) const

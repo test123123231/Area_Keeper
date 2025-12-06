@@ -343,26 +343,41 @@ void APlayerCharacter::OnInteractReleased()
 	}
 }
 
-
-// 아이템 줍기/버리기
 void APlayerCharacter::PickupItem(AItemBase* Item)
 {
 	if (!Item || !QuickSlotRef || !PlayerControllerRef) return;
-	PlayerControllerRef -> HideText(0);
-	int32 TargetSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
-	if (TargetSlotIndex == INDEX_NONE) TargetSlotIndex = 0;
 
+	PlayerControllerRef->HideText(0);
+
+	int32 CurrentSlotIndex = QuickSlotRef->GetCurrentSlotIndex();
+	if (CurrentSlotIndex == INDEX_NONE) CurrentSlotIndex = 0;
+
+	int32 TargetSlotIndex = INDEX_NONE;
+
+	if (QuickSlotRef->GetItemAt(CurrentSlotIndex) == nullptr)
+	{
+		TargetSlotIndex = CurrentSlotIndex;
+	}
+	else
+	{
+		TargetSlotIndex = QuickSlotRef->FindEmptySlot();
+
+		if (TargetSlotIndex == INDEX_NONE)
+		{
+			PlayerControllerRef->ShowAutoText(2.0f, 0);
+			PlayerControllerRef->UpdateText(TEXT("퀵슬롯이 가득 찼습니다."), 0);
+			return;
+		}
+	}
 	if (HeldItem && HeldItem != Item)
 	{
-		QuickSlotRef->RemoveItemAt(TargetSlotIndex);
-		FVector DropLocation = Item->GetActorLocation();
-		ChangeItem(HeldItem, DropLocation);
-		HeldItem = nullptr;
+		HeldItem->SetActorHiddenInGame(true);
 	}
-
 	Item->OnPickedUp(GetMesh(), HandSocketName);
 	HeldItem = Item;
 	QuickSlotRef->AssignItemToSlot(TargetSlotIndex, Item);
+
+	QuickSlotRef->SetCurrentSlot(TargetSlotIndex);
 
 	if (CurrentFocusedInteractable.GetObject() == Item)
 	{
@@ -372,12 +387,6 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 }
 
 
-void APlayerCharacter::ChangeItem(AItemBase* Item, const FVector& Location)
-{
-	if (!Item) return;
-	Item->OnDropped();
-	Item->SetActorLocation(Location);
-}
 
 
 void APlayerCharacter::OnDropItem()
@@ -395,7 +404,8 @@ void APlayerCharacter::OnDropItem()
 	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.f;
 	DropLocation.Z += 30.f;
 
-	ChangeItem(HeldItem, DropLocation);
+	HeldItem->OnDropped();
+	HeldItem->SetActorLocation(DropLocation);
 	HeldItem = nullptr;
 }
 // ---
