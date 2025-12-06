@@ -35,24 +35,23 @@ void AItemBase::Highlight_Implementation(bool bIsLooking)
 	if (DynamicMaterial)
 	{
 		// 머티리얼에 "Color"라는 파라미터가 있어야 작동함
-		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor::Red : FLinearColor::White);
+		DynamicMaterial->SetVectorParameterValue("Color", bIsLooking ? FLinearColor(1.0f, 0.0f, 0.0f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
 	}
 }
 
 // 플레이어가 상호작용(E)할 때
 void AItemBase::Interact_Implementation(APlayerCharacter* Interactor)
 {
-	if (Interactor)
+	if (!Interactor)
 	{
-		// 플레이어의 '아이템 줍기' 로직을 호출
-		Interactor->PickupItem(this);
+		return;
 	}
 }
 
 
 FString AItemBase::GetInteractText_Implementation()
 {
-	return FString(TEXT("줍기"));
+	return FString(TEXT("상호작용하기"));
 }
 
 
@@ -64,9 +63,6 @@ void AItemBase::OnPickedUp(USceneComponent* AttachTo, FName SocketName)
 	// 물리 및 충돌 비활성화
 	ItemMesh->SetSimulatePhysics(false);
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// 부모 컴포넌트에 부착
-	AttachToComponent(AttachTo, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), SocketName);
 }
 
 

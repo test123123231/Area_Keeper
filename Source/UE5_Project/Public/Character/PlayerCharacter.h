@@ -15,6 +15,8 @@ class UCameraComponent;
 class USpotLightComponent;
 class IInteractableInterface; // 인터페이스 참조
 class AAreaKeeperGameState;
+class APlayerCharacterController;
+class USoundBase;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityEnd, APlayerCharacter*, Player);
@@ -42,6 +44,10 @@ public:
 
 	UCameraComponent* GetViewCamera() const { return ViewCamera; }
 
+	// 아이템을 들고 있는지 여부 반환
+	UFUNCTION(BlueprintPure)
+	bool IsHoldingItem() { return HeldItem != nullptr; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -56,11 +62,14 @@ protected:
 	TWeakObjectPtr<AAreaKeeperGameState> GameStateRef;
 
 	// 컴포넌트
-	UPROPERTY(VisibleAnywhere, Category = "Camera")
-	USpringArmComponent* SpringArm;
+	/*UPROPERTY(VisibleAnywhere, Category = "Camera")
+	USpringArmComponent* SpringArm;*/
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	UCameraComponent* ViewCamera;
+
+	UPROPERTY(VisibleAnywhere, Category = "Light")
+	USpotLightComponent* FlashLightComponent;
 
 	// 입력 액션
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -85,6 +94,41 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* CrouchAction;
 
+	// 기본 서 있을 때의 카메라 높이
+	float DefaultCameraHeight;
+
+	// 기본 서 있을 때의 카메라 전방 위치
+	float DefaultCameraForward;
+
+	// 카메라의 '현재 높이'를 기억할 변수
+	float CurrentCamHeight;
+
+	// 카메라의 '현재 전방 위치'를 기억할 변수
+	float CurrentCamForward;
+
+	// 피격 시 잠깐 화면을 빨갛게 만드는 효과
+	// 이펙트 지속 시간
+	UPROPERTY(EditAnywhere, Category = "HitEffect")
+	float HitFlashDuration = 0.15f;   // 0.15초
+
+	// 원래 SceneColorTint와 Override 플래그 저장용
+	FLinearColor DefaultSceneColorTint = FLinearColor::White;
+	bool bDefaultTintOverride = false;
+	bool bStoredDefaultTint = false;
+
+	// 원상복구용 타이머
+	FTimerHandle HitFlashTimerHandle;
+
+	//  피격 시 화면 빨갛게 만들기 시작
+	void StartHitFlash();
+
+	//  HitFlashDuration 이후 원상복구
+	void EndHitFlash();
+
+	// --- 피격 사운드 ---
+	UPROPERTY(EditAnywhere, Category = "HitEffect|Audio")
+	USoundBase* HitSound = nullptr;
+
 	// 입력 처리 함수 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -99,9 +143,15 @@ private:
 	void OnInteractReleased();
 	// 아이템 버리기(G) 
 	void OnDropItem();
+	// flashlight 토글
+	void OnFlashlightPressed();
+	// 웅크리기 토글
+	void OnCrouchPressed();
 
 	// 매 틱마다 상호작용 가능한 객체를 찾음
 	void TraceForInteractable();
+
+	void UpdateInteractionPrompt(TScriptInterface<IInteractableInterface>& HitInteractable);
 
 	// 현재 바라보고 있는 상호작용 가능한 객체
 	UPROPERTY()
@@ -110,12 +160,14 @@ private:
 	// 아이템 교체/내려놓기
 	void ChangeItem(AItemBase* Item, const FVector& Location);
 
-	// 손에 들고 있는 아이템 (AItemBase 또는 AToolBase)
+	// 손에 들고 있는 아이템 (AToolBase)
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	AItemBase* HeldItem;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
-	FName HandSocketName = "RightHandSocket";
+	FName HandSocketName = "RightHand";
+
+	
 
 	// 퀵슬롯
 	UPROPERTY()
@@ -141,15 +193,19 @@ private:
 
 	TWeakObjectPtr<class AChargeableItem> ChargingTarget;
 
-	void StartCharge(AChargeableItem* Target);
-	void StopCharge();
-	void HandleCharging(float DeltaTime);
+	UPROPERTY()
+	TObjectPtr<APlayerCharacterController> PlayerControllerRef;
 
 	// 소지 UI가 열려있는지 여부, 틱 및 입력 차단용
 	bool bIsTalismanRitualUIOpen = false;
 
 	// 도구 사용 로직 
 	void UseTool();
+
+public:
+	void StartCharge(AChargeableItem* Target);
+	void StopCharge();
+	void HandleCharging(float DeltaTime);
 
 };
 

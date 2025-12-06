@@ -60,6 +60,7 @@ void AAreaKeeperGameState::Tick(float DeltaTime)
 				// 준비 시간 종료, 메인 게임 시작
 				CurrentPlayState = EAreaKeeperPlayState::EPS_InProgress;
 				UE_LOG(LogTemp, Log, TEXT("GameState: 준비 시간 종료. 메인 게임을 시작합니다."));
+				PCC -> UpdatePenaltyText(0);
 
 				// AnomalyManager에게 스폰 시작을 알림
 				if (AnomalyManagerRef.IsValid())
@@ -160,9 +161,6 @@ void AAreaKeeperGameState::BroadcastPenaltyStackChange()
 {
 	// UI가 바인딩할 델리게이트를 브로드캐스트합니다.
 	OnPenaltyStackChanged.Broadcast(CurrentPenaltyStack);
-
-	// (구현 필요) 여기에 스택 숫자에 따른 패널티 효과(소리, 비네트, 속도 저하)를
-	// 플레이어 컨트롤러나 캐릭터에 적용하는 로직을 추가할 수 있습니다.
 }
 
 

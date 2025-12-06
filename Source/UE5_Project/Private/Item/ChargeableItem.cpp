@@ -1,5 +1,7 @@
 #include "Item/ChargeableItem.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "PlayerController/PlayerCharacterController.h"
+#include "Character/PlayerCharacter.h" 
 
 AChargeableItem::AChargeableItem()
 {
@@ -16,7 +18,6 @@ void AChargeableItem::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // 충전이 된 상태면 쿨타임 경과
     if (bIsCharged)
     {
         Cooldown += DeltaTime;
@@ -49,11 +50,18 @@ void AChargeableItem::Highlight_Implementation(bool bOn)
 {
     if (DynamicMaterial)
     {
-		if(bOn){
-			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor::Green);
-		}
-		else{
-			DynamicMaterial->SetVectorParameterValue("Color", FLinearColor::White);
-		}
+		DynamicMaterial->SetVectorParameterValue("Color", bOn ? FLinearColor(0.5f, 3.0f, 0.5f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
     }
+}
+
+FString AChargeableItem::GetInteractText_Implementation()
+{
+    return FString(TEXT("충전하기"));
+}
+
+void AChargeableItem::Interact_Implementation(APlayerCharacter* Interactor)
+{
+    if(!Interactor) return;
+    
+    Interactor -> StartCharge(this);
 }

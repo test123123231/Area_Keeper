@@ -8,6 +8,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundBase.h"
 #include "Game/AreaKeeperGameState.h"
 
 
@@ -17,7 +19,7 @@ AChasingAnomaly::AChasingAnomaly()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	CurrentState = EAnomalyState::EAS_Idle;
+	CurrentState = EChasingAnomalyState::EAS_Idle;
 	PlayerTarget = nullptr;
 
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
@@ -42,6 +44,12 @@ AChasingAnomaly::AChasingAnomaly()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	RequiredToolType = EToolType::ETT_None;
+
+	ChasingAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("ChasingAudioComponent"));
+	ChasingAudioComponent->SetupAttachment(RootComponent);
+	ChasingAudioComponent->bAutoActivate = false;
+	ChasingAudioComponent->bIsUISound = false;
+	ChasingAudioComponent->bAllowSpatialization = true;
 }
 
 
@@ -67,6 +75,17 @@ void AChasingAnomaly::BeginPlay()
 		ChasingSpeed = 300.f;
 	}
 
+	 if (ChasingAudioComponent && ChasingLoopSound)
+    {
+        ChasingAudioComponent->SetSound(ChasingLoopSound);
+		if (ChasingWaveAsset)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Set Wave Param: %s"), *ChasingWaveAsset->GetName());
+			ChasingAudioComponent->SetWaveParameter(FName("ChasingSound"), ChasingWaveAsset);
+		}
+    }
+
+	DynamicMaterial = GetMesh()->CreateAndSetMaterialInstanceDynamic(0);
 	GameStateRef = GetWorld() ? GetWorld()->GetGameState<AAreaKeeperGameState>() : nullptr;
 }
 
@@ -76,7 +95,7 @@ void AChasingAnomaly::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 추적 상태일 때만 로직 실행
-	if (CurrentState == EAnomalyState::EAS_Chasing)
+	if (CurrentState == EChasingAnomalyState::EAS_Chasing)
 	{
 		if (PlayerTarget == nullptr)
 		{
@@ -128,20 +147,26 @@ void AChasingAnomaly::ChaseTarget(AActor* Target)
 
 	PlayerTarget = Target;
 
-	if (CurrentState == EAnomalyState::EAS_Idle)
+	if (CurrentState == EChasingAnomalyState::EAS_Idle)
 	{
-		CurrentState = EAnomalyState::EAS_Chasing;
+		CurrentState = EChasingAnomalyState::EAS_Chasing;
 		GetCharacterMovement()->MaxWalkSpeed = ChasingSpeed;
 	}
+    
+	if (ChasingAudioComponent && !ChasingAudioComponent->IsPlaying())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Play Loop Sound"));
+        ChasingAudioComponent->Play();
+    }
 }
 
 
 void AChasingAnomaly::StopChasing()
 {
-	if (CurrentState == EAnomalyState::EAS_Chasing)
+	if (CurrentState == EChasingAnomalyState::EAS_Chasing)
 	{
 		PlayerTarget = nullptr;
-		CurrentState = EAnomalyState::EAS_Idle;
+		CurrentState = EChasingAnomalyState::EAS_Idle;
 		GetCharacterMovement()->MaxWalkSpeed = 0.f;
 
 		if (AnomalyController)
@@ -149,6 +174,12 @@ void AChasingAnomaly::StopChasing()
 			AnomalyController->StopMovement();
 		}
 	}
+	
+	if (ChasingAudioComponent && ChasingAudioComponent->IsPlaying())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Anomaly] Stop Loop Sound"));
+        ChasingAudioComponent->Stop();
+    }
 }
 
 
@@ -247,7 +278,9 @@ void AChasingAnomaly::Banish()
 // IInteractableInterface 구현
 void AChasingAnomaly::Highlight_Implementation(bool bOn)
 {
-	// 메쉬의 머티리얼 또는 외곽선 효과 적용 (구현 필요)
+	if (DynamicMaterial) {
+		DynamicMaterial->SetVectorParameterValue("Color", bOn ? FLinearColor(0.5f, 0.5f, 3.0f, 1.0f) : FLinearColor(0.f, 0.f, 0.f, 1.f));
+	}
 }
 
 
@@ -261,4 +294,3 @@ FString AChasingAnomaly::GetInteractText_Implementation()
 {
 	return FString(TEXT("도구 사용"));
 }
-

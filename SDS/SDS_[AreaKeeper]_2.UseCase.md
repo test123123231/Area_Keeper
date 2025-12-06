@@ -5,6 +5,8 @@ Diagram 및 description에 관한 고려 사항은 다음과 같다.<br/>
 Use case diagram은 description에 대한 부가적인 결과물이다. 따라서 본 문서를 읽는 독자는 Use case diagram보다 Use case description에서 Use case에 대한 충분한 정보를 얻어야 한다.<br/>
 Use case diagram에 나타난 Use case는 모두 user-level use case이다.<br/>
 Player는 게임을 플레이하는 User이다.<br/>
+
+***
  
 <h3>본 프로젝트의 Use case 목록은 다음과 같다.<br/></h3>
 1. GameStart: 게임 시작하기 (메인 메뉴에서 시작 및 준비 구역에서 스테이지 진입 포함)<br/>
@@ -32,6 +34,7 @@ Player는 게임을 플레이하는 User이다.<br/>
  <img src = "image/UseCaseDiagram.png">
 </p>
 
+***
 
 | **Use case #1 : GameStart** |  |
 |:---:|:---:|
@@ -62,33 +65,33 @@ Player는 게임을 플레이하는 User이다.<br/>
 | **<Concurrency>** | 제한없음 |
 | **Due Date** |  |
 |  |  |
-| **Use case #2 : KeyMovement** |  |
-| **GENERAL CHARACTERISTICS** |  |
-| **Summary** | 캐릭터에게 각종 물리적 움직임을 제공하는 기능 |
-| **Scope** | Game System |
-| **Level** | User Level |
-| **Author** | 이강현 |
-| **Last Update** | 2025-10-29 |
-| **Status** | Analysis |
-| **Primary Actor** | 게임 플레이어 |
-| **Preconditions** | 플레이어는 게임 플레이 중 이어야 한다. |
-| **Trigger** | 플레이어가 키보드(w,a,s,d,c)를 누른다. |
-| **Success Post Condition** | 입력된 키보드에 따라서 캐릭터가 움직인다.  |
-| **Failed Post Condition** | 플레이어가 입력에 따라서 원하는 대로 움직이지 않는다. |
-| **MAIN SUCCESS SCENARIO** |  |
+| Use case #2 : KeyMovement |  |
+| GENERAL CHARACTERISTICS |  |
+| Summary | 캐릭터에게 각종 물리적 움직임을 제공하는 기능 |
+| Scope | Game System |
+| Level | User Level |
+| Author | 이강현 |
+| Last Update | 2025-10-29 |
+| Status | Analysis |
+| Primary Actor | 게임 플레이어 |
+| Preconditions | 플레이어는 게임 플레이 중 이어야 한다. |
+| Trigger | 플레이어가 키보드(w,a,s,d,ctrl)를 누른다. |
+| Success Post Condition | 입력된 키보드에 따라서 캐릭터가 움직인다.  |
+| Failed Post Condition | 플레이어가 입력에 따라서 원하는 대로 움직이지 않는다. |
+| MAIN SUCCESS SCENARIO |  |
 | Step | Action |
 | S | 플레이어가 입력하는 대로 움직인다. |
-| 1 | 이 Use Case는 플레이어가 조작 키(w,a,s,d,c)를 누르게 되면 시작된다. |
+| 1 | 이 Use Case는 플레이어가 조작 키(w,a,s,d,ctrl)를 누르게 되면 시작된다. |
 | 2 | 플레이어가 움직이거나 앉게 된다. |
 | 3 | 이 Use Case는 플레이어가 키보드의 입력을 멈추는 순간 멈추게 된다. |
-| **EXTENSION SCENARIOS** |  |
+| EXTENSION SCENARIOS |  |
 | Step | Branching Action |
 | 1 | 1a. 캐릭터가 앉은 상태로 움직인다. …1a1. 캐릭터의 시점이 앉으면 시점이 낮아지고 이동속도가 약간 느려진다. …1a2. 낮아진 시점, 느려진 이동속도는 유지된 채로 움직인다. 1b. 플레이어가 소지를 하고 있다. …1b1. 소지 단계에 진입하게 되면 게임은 일시정지 되기 때문에 키보드를 눌러서 캐릭터를 움직일 수 없다. |
-| **RELATED INFORMATION** |  |
-| **Performance** | ≤ 1 second |
-| **Frequency** | 제한없음 |
-| **<Concurrency>** | 제한없음 |
-| **Due Date** |  |
+| RELATED INFORMATION |  |
+| Performance | ≤ 1 second |
+| Frequency | 제한없음 |
+| <Concurrency> | 제한없음 |
+| Due Date |  |
 |  |  |
 | **Use case #3 : MouseMovement** |  |
 | **GENERAL CHARACTERISTICS** |  |
@@ -198,7 +201,7 @@ Player는 게임을 플레이하는 User이다.<br/>
 | 4 | 이 Use Case는 슬롯에 아이템이 들어가는 순간 종료된다. |
 | **EXTENSION SCENARIOS** |  |
 | Step | Branching Action |
-| 1 | 1a. 비어있는 슬롯이 없다. …1a1. 도구가 슬롯에 들어가지 않게 된다. …1a2. 가득 차있었다는 메시지를 출력한다. |
+| 1 | 1a. 도구를 손에 든 상태에서 도구에게 상호작용(e)를 누른다. …1a1. 손에 있는 도구와 서로 교체 된다. …1a2. 손에 있던 도구는 땅에 떨어진다. |
 | **RELATED INFORMATION** |  |
 | **Performance** | ≤ 1 second |
 | **Frequency** | 제한없음 |
@@ -245,7 +248,7 @@ Player는 게임을 플레이하는 User이다.<br/>
 | **Status** | Analysis |
 | **Primary Actor** | 게임 플레이어 |
 | **Preconditions** | 플레이어가 게임플레이 중 이어야 한다. |
-| **Trigger** | 이상현상이 일정 시간마다 랜덤한 지역에서 생성된다. |
+| **Trigger** | 이상현상이 일정 시간마다 정해진 장소 중 랜덤한 한 장소에서 생성된다. |
 | **Success Post Condition** | 이상현상이 정해진 시간(20초~15초)에 마다 생성된다. |
 | **Failed Post Condition** | 이상현상이 정해진 시간에 따라 생성되지 않는다. |
 | **MAIN SUCCESS SCENARIO** |  |
@@ -254,7 +257,7 @@ Player는 게임을 플레이하는 User이다.<br/>
 | 1 | 이 Use Case는 게임에서 처음으로 이상현상이 생기면 시작된다. |
 | 2 | 게임의 진행 시간에 따라서 생성주기 시간을 감소시킨다. (최종 감소된 시간 : 15초) |
 | 3 | 정해진 시간이 될때까지 시간을 센다. |
-| 4 | 정해진 시간이 되면 이전 이상현상의 위치, 종류를 제외하고 랜덤으로 선택된 이상현상이 생성된다. |
+| 4 | 정해진 시간이 되면 이전 이상현상의 위치, 종류를 제외하고 3가지 유형 중 하나의 유형으로 이상현상이 생성된다. |
 | 5 | 이 Use Case는 새로운 이상현상을 생성되는 순간 종료된다. |
 | **EXTENSION SCENARIOS** |  |
 | Step | - |
@@ -275,7 +278,7 @@ Player는 게임을 플레이하는 User이다.<br/>
 | **Status** | Analysis |
 | **Primary Actor** | 게임 플레이어 |
 | **Preconditions** | 플레이어가 게임플레이 중 이어야 한다. |
-| **Trigger** | 이상현상이 이상현상의 유지시간(35초)동안 해결되지 못했다. |
+| **Trigger** | 이상현상이 이상현상의 유지시간(45초)동안 해결되지 못했다. |
 | **Success Post Condition** | 이상현상이 정해진 대로(쫓아오는 이상현상/사라지는 이상현상) 변화한다. |
 | **Failed Post Condition** | 해결되지 못한 이상현상이 변하지 않는다. |
 | **MAIN SUCCESS SCENARIO** |  |
@@ -324,7 +327,7 @@ Player는 게임을 플레이하는 User이다.<br/>
 | **<Concurrency>** | 제한없음 |
 | **Due Date** |  |
 |  |  |
-| **Use case #11 : DisappearInteraction** |  |
+| **Use case #11 : StationaryInteraction** |  |
 | **GENERAL CHARACTERISTICS** |  |
 | **Summary** | 플레이어와 사라지는 이상현상의 상호작용에 대한 기능 |
 | **Scope** | Game System |

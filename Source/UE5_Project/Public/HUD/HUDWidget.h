@@ -31,6 +31,10 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* TimeText;
 
+	// 상단 페널티 스택 텍스트
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* PenatyText;
+
 public:
 	// HealthText를 업데이트한다
     UFUNCTION(BlueprintCallable)
@@ -39,6 +43,10 @@ public:
 	// AmuletText를 업데이트한다
     UFUNCTION(BlueprintCallable)
     void UpdateAmulet(float CurrentAmulet);
+
+	// PenaltyText를 업데이트한다
+    UFUNCTION(BlueprintCallable)
+    void UpdatePenalty(float CurrentPenalty);
 
 	//중앙 텍스트 보이게
 	UFUNCTION(BlueprintCallable)

@@ -58,7 +58,7 @@ void APlayerCharacterController::BeginPlay()
         QuickSlotWidget = CreateWidget<UQuickSlot>(this, QuickSlotWidgetClass);
         if (QuickSlotWidget)
         {
-            QuickSlotWidget->AddToViewport(0);
+            QuickSlotWidget->AddToViewport(1);
 
             // PlayerCharacter에 QuickSlot 위젯 참조 설정
             APlayerCharacter* PlayerChar1 = Cast<APlayerCharacter>(GetPawn());
@@ -365,8 +365,16 @@ void APlayerCharacterController::UpdateText(const FString& Text, uint8 TextLocat
 void APlayerCharacterController::OnPenaltyStackUpdated(int32 NewStackCount)
 {
     ApplyPenaltyEffects(NewStackCount);
+    UpdatePenaltyText(NewStackCount);
 }
 
+void APlayerCharacterController::UpdatePenaltyText(float NewPenalty)
+{
+    if(HUDRef)
+    {
+        HUDRef ->UpdatePenalty(NewPenalty);
+    }
+}
 
 void APlayerCharacterController::ApplyPenaltyEffects(int32 NewStackCount)
 {

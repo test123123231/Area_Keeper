@@ -55,7 +55,7 @@ private:
 
 	// '시작하기' 버튼 클릭 시 열릴 레벨 이름 (BP의 클래스 기본값에서 설정)
 	UPROPERTY(EditDefaultsOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))
-	FName GameLevelName = FName(TEXT("Default_TestMap_Noh"));
+	FName GameLevelName = FName(TEXT("AreaKeeper"));
 
 	// '설정' 버튼 클릭 시 열릴 옵션 메뉴 위젯 클래스 (BP에서 설정)
 	UPROPERTY(EditDefaultsOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))

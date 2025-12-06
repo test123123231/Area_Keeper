@@ -21,6 +21,24 @@ void AToolBase::OnPickedUp(USceneComponent* AttachTo, FName SocketName)
 {
 	// 부모 로직 실행 (물리 끄기)
 	Super::OnPickedUp(AttachTo, SocketName);
+
+	// 소켓의 회전값을 따라가야 하므로 Rotation도 SnapToTarget
+	FAttachmentTransformRules Rules(
+		EAttachmentRule::SnapToTarget,  // Location: 소켓 위치로 딱 붙음
+		EAttachmentRule::SnapToTarget,  // Rotation: 소켓 회전값으로 딱 붙음 (중요)
+		EAttachmentRule::KeepWorld,     // Scale: 아이템 크기는 유지 (혹은 SnapToTarget)
+		true
+	);
+
+	// 아이템 이름에 따라 적절한 소켓 이름 결정
+	FName TargetSocket = SocketName;
+	if (EquipSocketName != NAME_None)
+	{
+		TargetSocket = EquipSocketName;
+	}
+
+	AttachToComponent(AttachTo, Rules, TargetSocket);
+
 	// 자동 소멸 타이머 취소
 	GetWorld()->GetTimerManager().ClearTimer(DestroyTimerHandle);
 }
