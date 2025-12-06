@@ -369,7 +369,10 @@ void APlayerCharacter::PickupItem(AItemBase* Item)
 			return;
 		}
 	}
-
+	if (HeldItem && HeldItem != Item)
+	{
+		HeldItem->SetActorHiddenInGame(true);
+	}
 	Item->OnPickedUp(GetMesh(), HandSocketName);
 	HeldItem = Item;
 	QuickSlotRef->AssignItemToSlot(TargetSlotIndex, Item);
