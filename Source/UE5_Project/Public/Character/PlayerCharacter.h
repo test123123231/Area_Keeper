@@ -157,8 +157,6 @@ private:
 	UPROPERTY()
 	TScriptInterface<IInteractableInterface> CurrentFocusedInteractable;
 
-	// 아이템 교체/내려놓기
-	void ChangeItem(AItemBase* Item, const FVector& Location);
 
 	// 손에 들고 있는 아이템 (AToolBase)
 	UPROPERTY(VisibleAnywhere, Category = "Item")
