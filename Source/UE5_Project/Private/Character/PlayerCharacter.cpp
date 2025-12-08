@@ -598,8 +598,7 @@ void APlayerCharacter::UseTool()
 			// 사용 성공 시 손에서 제거
 			QuickSlotRef->RemoveItemAt(QuickSlotRef->GetCurrentSlotIndex());
 			HeldItem = nullptr;
-			Tool->SetLifeSpan(2.6f);
-			//Tool->Destroy();
+			Tool->Destroy();
 		}
 		else
 		{
