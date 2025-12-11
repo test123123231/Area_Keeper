@@ -7,7 +7,7 @@
 - 3.4 Item & Interaction System: IInteractableInterface, AItemBase, AToolBase, AChargeableItem
 - 3.6 UI System: UQuickSlot
 
-![image](image/CharacterDiagram.png)
+![image](image/Class2_CharacterSystem.png)
 
 ***
 
@@ -22,7 +22,7 @@
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| ABaseCharacter |  | public | 생성자이다. Attributes 컴포넌트를 생성하고, 1인칭 스타일의 캐릭터 무브먼트 회전 설정을 초기화한다. |
+| ABaseCharacter |  | public | 생성자이다. AttributeComponent를 CreateDefaultSubobject로 생성하고 기본 컴포넌트 설정만 수행한다. |
 | IsAlive | bool | public | AttributeComponent의 체력이 0보다 큰지(생존 여부)를 반환한다. (BlueprintPure) |
 | HandleDamage | void | public | AttributeComponent에 피해를 전달하고, 사망 시(IsAlive가 false 반환) Die()를 호출한다. |
 | BeginPlay | void | protected | 게임 시작 시 호출된다. (Override) |
@@ -41,7 +41,7 @@
 | bIsInvincible | bool | protected | 현재 1초 무적 상태인지 여부를 나타낸다. |
 | InvincibilityTimerHandle | FTimerHandle | protected | 무적 시간 해제를 위한 타이머 핸들이다. |
 | GameStateRef | TWeakObjectPtr<AAreaKeeperGameState> | protected | AAreaKeeperGameState의 캐시된 참조이다. |
-| SpringArm | USpringArmComponent* | protected | 카메라를 플레이어에 연결하고 거리를 유지하는 스프링 암이다. (VisibleAnywhere) |
+| SpringArm | USpringArmComponent* | protected | ViewCamera가 생성된다 |
 | ViewCamera | UCameraComponent* | protected | 플레이어의 시점을 담당하는 메인 카메라이다. (VisibleAnywhere) |
 | MoveAction | UInputAction* | protected | 이동(WASD)에 바인딩된 입력 액션이다. (EditAnywhere) |
 | LookAction | UInputAction* | protected | 시점(마우스)에 바인딩된 입력 액션이다. (EditAnywhere) |
@@ -58,7 +58,7 @@
 | RequiredChargeTime | float | private | 지방 충전을 완료하는 데 필요한 홀드 시간이다. (기본값: 2.0초) (EditAnywhere) |
 | ChargingTarget | TWeakObjectPtr<AChargeableItem> | private | 현재 충전 중인 대상(AChargeableItem)의 참조이다. |
 | bIsTalismanRitualUIOpen | bool | private | '소지' UI가 열려있는 동안 Tick 로직을 차단하기 위한 플래그이다. |
-| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | 플레이어 컨트롤러 참조이다. |
+
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
@@ -119,7 +119,7 @@
 | SetMaxHealth | void | public | MaxHealth 값을 NewMaxHealth로 설정한다. |
 | SetTalisman | void | public | Talisman 값을 NewTalisman으로 설정(Clamp)하고 이벤트를 방송한다. (지방 충전 시 사용) |
 | SetMaxTalisman | void | public | MaxTalisman 값을 NewMaxTalisman으로 설정한다. |
-| GetHelath | float | public | 현재 Health 값을 반환한다. |
-| GetMaxHelath | float | public | MaxHealth 값을 반환한다. |
+| GetHealth | float | public | 현재 Health 값을 반환한다. |
+| GetMaxHealth | float | public | MaxHealth 값을 반환한다. |
 | GetTalisman | float | public | 현재 Talisman 값을 반환한다. |
 | GetMaxTalisman | float | public | MaxTalisman 값을 반환한다. |
