@@ -1,4 +1,14 @@
 # 4. State machine diagram
+이 장은 시스템의 동적 동작을 묘사하는 Sequence Diagram(이하 SD)과 그에 대한 설명을 제공한다. 본 문서의 SD 작성 시 고려한 사항은 다음과 같다.
+
+- 모든 SD는 2. Use case analysis에서 식별한 특정 Use case와 1:1로 대응된다.
+- 각 SD의 흐름은 해당 Use case의 Main Success Scenario(주요 성공 시나리오) 또는 Extension Scenario(확장 시나리오)를 따른다.
+- 메시지를 주고받는 객체(LifeLine)들은 3. Class diagram에서 정의된 클래스 및 관계를 바탕으로 작성되었다.
+- 하단에 기술된 흐름 묘사는 SD의 내용을 글로 풀어 설명한 것으로, 다이어그램과 설계의 일치성을 검증하고 시각적 표현만으로는 이해하기 어려운 세부 로직이나 데이터 흐름을 보완하기 위해 작성되었다.
+- 다이어그램 상의 **'Player'**는 실제 코드상의 클래스가 아닌 시스템을 사용하는 사용자를 지칭하는 개념적 객체이다. 따라서 Player가 시스템(Controller, Character, UI 등)으로 보내는 메시지는 실제 함수 호출이 아닌 사용자의 입력 행위(키보드, 마우스 조작 등)를 의미한다.
+
+이어지는 절에서는 위 사항을 바탕으로 작성된 시퀀스 다이어그램을 제시하고, 다이어그램 하단에 해당 Use case의 실행 흐름에 따른 객체 간 메시지 전달 순서와 주요 로직의 처리 과정을 상세히 기술하여 분석한다.
+
 # 4.1 GameStart
 ![image](image/GameStartDiagram.png)
 
