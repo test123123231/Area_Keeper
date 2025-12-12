@@ -8,9 +8,7 @@
 - 3.7 Settings & Saving System: USettingSubsystem
 
 
-![image](image/UISystemDiagram_1.png)
-![image](image/UISystemDiagram_2.png)
-
+![image](image/Class6_UISystem.png)
 ***
 
 ### UHUDWidget
@@ -26,12 +24,15 @@
 | AmuletText | class UTextBlock* | protected | 지방(Amulet) 개수를 표시하는 텍스트 블록이다. |
 | CenterText | class UTextBlock* | protected | 화면 중앙에 텍스트(예: 충전 상태)를 표시하는 텍스트 블록이다. |
 | TimeText | class UTextBlock* | protected | 화면 상단에 텍스트(예: 남은 시간)를 표시하는 텍스트 블록이다. |
+| PenaltyText | class UTextBlock* | protected | 누적 패널티 수치를 표시하는 텍스트 블록이다. |
+
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | UpdateHealth | void | public | HealthText의 내용을 CurrentHealth 값으로 갱신한다. (BlueprintCallable) |
 | UpdateAmulet | void | public | AmuletText의 내용을 CurrentAmulet 값으로 갱신한다. (BlueprintCallable) |
+| UpdatePenaltyText | void | public | PenaltyText의 내용을 CurrentPenalty 값으로 갱신한다. (BlueprintCallable) |
 | ShowCenterText | void | public | CenterText를 보이도록 설정한다. (BlueprintCallable) |
 | HideCenterText | void | public | CenterText를 숨기도록 설정한다. (BlueprintCallable) |
 | UpdateCenterText | void | public | CenterText의 내용을 Text로 갱신한다. (BlueprintCallable) |
@@ -68,7 +69,6 @@
 | AssignItemToSlot | void | public | Index 슬롯의 FQuickSlotData에 NewItem 정보를 저장하고 아이콘을 갱신한다. |
 | RemoveItemAt | void | public | Index 슬롯의 FQuickSlotData를 비우고 아이콘을 nullptr로 갱신한다. |
 | NativeConstruct | void | protected | Slots 배열을 2개로 초기화하고 CurrentSlotIndex를 0으로 설정하며 아이콘을 정리한다. (Override) |
-| UpdateSlotHighlight | void | private | CurrentSlotIndex에 따라 Img_Icon1, Img_Icon2의 색상을 하이라이트 또는 기본으로 변경한다. |
 
 ***
 
@@ -78,21 +78,11 @@
 
 게임 오버 화면을 관리하는 C++ 기반 위젯이다. `UUserWidget`을 상속받는다. `NativeConstruct`에서 '재도전' 및 '메인 메뉴' 버튼에 C++ 함수를 바인딩하며, `InitializeWidget`을 통해 게임 오버 사유(사망 또는 패널티)를 받아 텍스트로 표시한다.
 
-#### 멤버 변수
-| 이름 | 타입 | 가시성 | 설명 |
-|:---:|:---:|:---:|:---:|
-| Button_Retry | UButton* | protected | '재도전' 버튼의 참조이다. |
-| Button_MainMenu | UButton* | protected | '메인 메뉴로 가기' 버튼의 참조이다. |
-| Text_GameOverReason | UTextBlock* | protected | 게임 오버 사유(예: 사망 (체력 0))를 표시할 텍스트의 참조이다. |
-| MainMenuLevelName | FName | protected | '메인 메뉴로' 버튼 클릭 시 로드할 레벨의 이름이다. (기본값: MainMenu) (EditDefaultsOnly) |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | InitializeWidget | void | public | 게임 오버 사유(bPlayerDied)를 받아 Text_GameOverReason의 텍스트를 설정한다. (BlueprintCallable) |
-| NativeConstruct | void | protected | Button_Retry와 Button_MainMenu의 OnClicked 델리게이트에 C++ 함수를 바인딩한다. (Override) |
-| OnRetryClicked | void | protected | '재도전' 버튼 클릭 시 호출된다. 현재 레벨을 다시 로드한다. |
-| OnMainMenuClicked | void | protected | '메인 메뉴로' 버튼 클릭 시 호출된다. MainMenuLevelName 레벨을 로드한다. |
 
 ***
 
@@ -102,21 +92,10 @@
 
 게임 클리어 시 표시되는 위젯이다. `UUserWidget`을 상속받는다. `NativeConstruct`에서 '메인 메뉴' 버튼을 바인딩하며, `InitializeWidget`을 통해 최종 게임 결과(패널티 스택, 해결한 이상현상 등)를 받아 텍스트로 표시한다.
 
-#### 멤버 변수
-| 이름 | 타입 | 가시성 | 설명 |
-|:---:|:---:|:---:|:---:|
-| Button_MainMenu | TObjectPtr<UButton> | protected | '메인 메뉴로 가기' 버튼의 참조이다 |
-| Text_PenaltyStack | TObjectPtr<UTextBlock> | protected | 최종 패널티 스택을 표시할 텍스트의 참조이다. (meta = (BindWidget)) |
-| Text_AnomaliesSolved | TObjectPtr<UTextBlock> | protected | 해결한 총 이상현상 개수를 표시할 텍스트의 참조이다. |
-| Text_ChasingHits | TObjectPtr<UTextBlock> | protected | 추격 개체 피격 횟수를 표시할 텍스트의 참조이다. |
-| MainMenuLevelName | FName | private | '메인 메뉴로' 버튼 클릭 시 로드할 레벨의 이름이다. (기본값: MainMenu) (EditDefaultsOnly) |
-
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | InitializeWidget | void | public | PenaltyStack, AnomaliesSolved, ChasingHits 값을 받아 UI 텍스트를 설정한다. (BlueprintCallable) |
-| NativeConstruct | void | protected | Button_MainMenu의 OnClicked 델리게이트에 OnMainMenuClicked 함수를 바인딩한다. (Override) |
-| OnMainMenuClicked | void | private | '메인 메뉴로' 버튼 클릭 시 호출된다. MainMenuLevelName 레벨을 로드한다. |
 
 ***
 
@@ -135,15 +114,15 @@
 | GameLevelName | FName | private | '시작하기' 버튼 클릭 시 열릴 레벨 이름이다. (EditDefaultsOnly) |
 | OptionMenuWidgetClass | TSubclassOf<UOptionMenuWidget> | private | '설정' 버튼 클릭 시 열릴 옵션 메뉴 위젯 클래스이다. (EditDefaultsOnly) |
 | OptionMenuInstance | TObjectPtr<UOptionMenuWidget> | private | OnOptionClicked 시 생성/캐시되는 옵션 메뉴 위젯의 인스턴스이다. |
-| PlayerControllerRef | TObjectPtr<APlayerController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| NativeConstruct | void | protected | Button들의 OnClicked 델리게이트를 C++ 함수에 바인딩하고 PlayerControllerRef를 캐시한다. (Override) |
-| OnStartClicked | void | private | '시작하기' 버튼 클릭 시 호출된다. 입력 모드를 GameOnly로 설정하고 GameLevelName 레벨을 연다. |
-| OnOptionClicked | void | private | '설정' 버튼 클릭 시 호출된다. OptionMenuInstance를 생성/표시하고 SetParentMenu를 호출하며 입력 모드를 변경한다. |
-| OnExitClicked | void | private | '종료' 버튼 클릭 시 호출된다. UKismetSystemLibrary::QuitGame()을 호출하여 게임을 종료한다. |
+| NativeConstruct | void | protected | 버튼 이벤트 바인딩 |
+| OnStartClicked | void | private | 게임 레벨로 이동 |
+| OnOptionClicked | void | private | 옵션 메뉴 표시 |
+| OnExitClicked | void | private | 게임 종료 |
 
 ***
 
@@ -156,15 +135,7 @@
 #### 멤버 변수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| Button_Resume | TObjectPtr<UButton> | private | '계속하기' 버튼의 참조이다. |
-| Button_Option | TObjectPtr<UButton> | private | '설정' 버튼의 참조이다. |
-| Button_Controls | TObjectPtr<UButton> | private | '조작법' 버튼의 참조이다. |
-| Button_MainMenu | TObjectPtr<UButton> | private | '메인 메뉴로' 버튼의 참조이다. |
-| Button_Exit | TObjectPtr<UButton> | private | '게임 종료' 버튼의 참조이다. |
 | PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
-| OptionMenuWidgetClass | TSubclassOf<UOptionMenuWidget> | private | '설정' 버튼 클릭 시 열릴 UOptionMenuWidget 클래스이다. (EditDefaultsOnly) |
-| ControlsMenuWidgetClass | TSubclassOf<UControlsMenuWidget> | private | '조작법' 버튼 클릭 시 열릴 UControlsMenuWidget 클래스이다. (EditDefaultsOnly) |
-| ConfirmMainMenuWidgetClass | TSubclassOf<UConfirmMainMenuWidget> | private | '메인 메뉴로' 버튼 클릭 시 열릴 UConfirmMainMenuWidget 팝업 클래스이다. (EditDefaultsOnly) |
 | OptionMenuInstance | TObjectPtr<UOptionMenuWidget> | private | 생성된 옵션 메뉴 위젯의 인스턴스이다. (VisibleInstanceOnly) |
 | ControlsMenuInstance | TObjectPtr<UControlsMenuWidget> | private | 생성된 조작법 메뉴 위젯의 인스턴스이다. (VisibleInstanceOnly) |
 | ConfirmMainMenuPopupInstance | TObjectPtr<UConfirmMainMenuWidget> | private | 생성된 메인 메뉴 확인 팝업의 인스턴스이다. (VisibleInstanceOnly) |
@@ -174,7 +145,7 @@
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | NativeConstruct | void | protected | PlayerControllerRef를 캐시하고 모든 Button의 OnClicked 델리게이트를 C++ 함수에 바인딩한다. (Override) |
-| OnResumeClicked | void | private | '계속하기' 버튼 클릭 시 PlayerControllerRef->ClosePauseMenu()를 호출한다. |
+| OnResumeClicked | void | private | '계속하기' 버튼 클릭 시 PlayerCharacterControllerRef->ClosePauseMenu()를 호출한다. |
 | OnOptionClicked | void | private | '설정' 버튼 클릭 시 OptionMenuInstance를 생성/표시하고 입력 모드를 변경하며 자신을 숨긴다. |
 | OnControlsClicked | void | private | '조작법' 버튼 클릭 시 ControlsMenuInstance를 생성/표시하고 입력 모드를 변경하며 자신을 숨긴다. |
 | OnMainMenuClicked | void | private | '메인 메뉴로' 버튼 클릭 시 ConfirmMainMenuPopupInstance를 생성/표시하고 입력 모드를 변경한다. |
@@ -191,59 +162,25 @@
 #### 멤버 변수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| Slider_MasterVolume | TObjectPtr<USlider> | private | 마스터 볼륨 슬라이더 참조이다. |
-| Slider_MouseSensitivity | TObjectPtr<USlider> | private | 마우스 감도 슬라이더 참조이다. |
-| Slider_ScreenBrightness | TObjectPtr<USlider> | private | 화면 밝기 슬라이더 참조이다. |
-| ComboBoxString_ScreenResolution | TObjectPtr<UComboBoxString> | private | 화면 해상도 콤보박스 참조이다. |
-| ComboBoxString_WindowMode | TObjectPtr<UComboBoxString> | private | 창 모드 콤보박스 참조이다. |
-| Button_Apply | TObjectPtr<UButton> | private | '적용' 버튼 참조이다. |
-| Button_ResetAll | TObjectPtr<UButton> | private | '초기화' 버튼 참조이다. |
-| Button_OK | TObjectPtr<UButton> | private | '확인' 버튼 참조이다. |
-| Button_Cancel | TObjectPtr<UButton> | private | '취소' 버튼 참조이다. |
-| Button_ResetMasterVolume | TObjectPtr<UButton> | private | '마스터 볼륨' 개별 초기화 버튼 참조이다. |
-| Button_ResetMouseSensitivity | TObjectPtr<UButton> | private | '마우스 감도' 개별 초기화 버튼 참조이다. |
-| Button_ResetScreenBrightness | TObjectPtr<UButton> | private | '화면 밝기' 개별 초기화 버튼 참조이다. |
-| Button_ResetScreenResolution | TObjectPtr<UButton> | private | '해상도' 개별 초기화 버튼 참조이다. |
-| Button_ResetWindowMode | TObjectPtr<UButton> | private | '창 모드' 개별 초기화 버튼 참조이다. |
 | SettingSubsystem | TObjectPtr<USettingSubsystem> | private | USettingSubsystem의 캐시된 참조이다. |
-| ParentMenu | TObjectPtr<UUserWidget> | private | 이 위젯을 연 부모 메뉴(예: UPauseMenuWidget)의 참조이다. |
-| PlayerControllerRef | TObjectPtr<APlayerController> | private | APlayerController의 캐시된 참조이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | APlayerController의 캐시된 참조이다. |
 | StagedSettings | FDisplaySettings | private | UI에서 변경되었으나 아직 적용/저장되지 않은 임시 설정 값이다. |
 | SavedSettings | FDisplaySettings | private | 현재 디스크에 저장된(로드된) 설정 값이다. |
 | DefaultSettings | FDisplaySettings | private | 게임의 하드코딩된 기본 설정 값이다. |
-| AvailableResolutionStrings | TArray<FString> | private | ComboBoxString_ScreenResolution을 채우기 위한 문자열 목록이다. |
-| AvailableWindowModeStrings | TArray<FString> | private | ComboBoxString_WindowMode를 채우기 위한 문자열 목록이다. |
 | ConfirmChangesPopupClass | TSubclassOf<UConfirmChangesWidget> | private | '변경사항 저장' 팝업 위젯의 블루프린트 클래스이다. (EditDefaultsOnly) |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| SetParentMenu | void | public | 이 위젯을 생성한 부모 위젯(ParentMenu)을 설정한다. |
-| GetParentMenu | UUserWidget* | public | ParentMenu의 참조를 반환한다. (const, BlueprintCallable) |
-| OnConfirmChangesYes | void | public | ConfirmChangesPopupClass의 '예' 버튼 클릭 시 호출된다. CloseMenu(true)를 실행한다. (BlueprintCallable) |
-| OnConfirmChangesNo | void | public | ConfirmChangesPopupClass의 '아니오' 버튼 클릭 시 호출된다. CloseMenu(false)를 실행한다. (BlueprintCallable) |
-| NativeConstruct | void | protected | SettingSubsystem 참조를 캐시하고, 콤보박스를 채우며, 모든 UI 델리게이트를 바인딩한다. (Override) |
-| NativeOnKeyDown | FReply | protected | ESC 키 입력을 감지하여 OnOKClicked를 호출하고 입력을 처리(Handled)한다. (Override) |
-| NativeOnMouseButtonDown | FReply | protected | 위젯 배경 클릭 시 키보드 포커스를 유지한다. (Override) |
-| OnMasterVolumeChanged | void | private | Slider_MasterVolume 값 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다.  |
-| OnMouseSensitivityChanged | void | private | Slider_MouseSensitivity 값 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다.  |
-| OnScreenBrightnessChanged | void | private | Slider_ScreenBrightness 값 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다.  |
-| OnScreenResolutionChanged | void | private | ComboBoxString_ScreenResolution 선택 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다.  |
-| OnWindowModeChanged | void | private | ComboBoxString_WindowMode 선택 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다. |
+| InitializeSettings | void | private | SettingSubsystem에서 SavedSettings와 DefaultSettings를 로드하고 UI를 초기화한다. |
+| PopulateUIFromStagedSettings | void | private | StagedSettings의 데이터를 실제 UI 컴포넌트(슬라이더, 콤보박스)에 반영한다. |
+| ShowConfirmChangesPopup | void | private | ConfirmChangesPopupClass 위젯을 생성하여 뷰포트에 추가하고 포커스를 설정한다. |
 | OnApplyClicked | void | private | '적용' 버튼 클릭 시. StagedSettings를 SettingSubsystem에 적용하고 저장한다. |
 | OnResetAllClicked | void | private | '초기화' 버튼 클릭 시. StagedSettings를 DefaultSettings로 되돌리고 UI를 갱신한다. |
 | OnOKClicked | void | private | '확인' 버튼 클릭 시. 변경 사항이 있으면 ShowConfirmChangesPopup을, 없으면 CloseMenu(false)를 호출한다. |
 | OnCancelClicked | void | private | '취소' 버튼 클릭 시. CloseMenu(false)를 호출한다. |
-| OnResetMasterVolumeClicked | void | private | '마스터 볼륨' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| OnResetMouseSensitivityClicked | void | private | '마우스 감도' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| OnResetScreenBrightnessClicked | void | private | '화면 밝기' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| OnResetScreenResolutionClicked | void | private | '해상도' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| OnResetWindowModeClicked | void | private | '창 모드' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| InitializeSettings | void | private | SettingSubsystem에서 SavedSettings와 DefaultSettings를 로드하고 UI를 초기화한다. |
-| PopulateUIFromStagedSettings | void | private | StagedSettings의 데이터를 실제 UI 컴포넌트(슬라이더, 콤보박스)에 반영한다. |
-| UpdateUIState | void | private | Staged, Saved, Default 설정을 비교하여 '적용' 및 '초기화' 버튼의 활성화/가시성 상태를 갱신한다. |
-| CloseMenu | void | private | bSaveChanges 값에 따라 변경사항을 적용(Apply)할지 결정하고, ParentMenu를 다시 표시하며 자신을 닫는다. |
-| ShowConfirmChangesPopup | void | private | ConfirmChangesPopupClass 위젯을 생성하여 뷰포트에 추가하고 포커스를 설정한다. |
+| OnConfirmChangesYes | void | public | ConfirmChangesPopupClass의 '예' 버튼 클릭 시 호출된다. CloseMenu(true)를 실행한다. (BlueprintCallable) |
+| OnConfirmChangesNo | void | public | ConfirmChangesPopupClass의 '아니오' 버튼 클릭 시 호출된다. CloseMenu(false)를 실행한다. (BlueprintCallable) |
 
 ***
 
@@ -258,7 +195,7 @@
 |:---:|:---:|:---:|:---:|
 | Button_Back | TObjectPtr<UButton> | private | '뒤로가기' 버튼의 참조이다. |
 | ParentMenu | TObjectPtr<UUserWidget> | private | 이 위젯을 생성한 부모 위젯(UPauseMenuWidget)의 참조이다. |
-| PlayerControllerRef | TObjectPtr<APlayerController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
@@ -285,7 +222,7 @@
 | Button_No | TObjectPtr<UButton> | private | '아니오' 버튼의 참조이다. |
 | MainMenuLevelName | FName | private | '예' 버튼 클릭 시 로드할 레벨의 이름이다. (기본값: MainMenu) (EditDefaultsOnly) |
 | ParentMenu | TObjectPtr<UUserWidget> | private | 이 팝업을 생성한 부모 위젯(UPauseMenuWidget)의 참조이다. |
-| PlayerControllerRef | TObjectPtr<APlayerController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
