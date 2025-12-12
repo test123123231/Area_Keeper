@@ -33,7 +33,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 - 3.6 UI System: UHUDWidget, UQuickSlot, UGameOverWidget, UGameClearWidget, UMainMenuWidget, UPauseMenuWidget, UTalismanWidget
 
 
-![image](image/CoreGameSystem.png)
+![image](image/Class1_CoreGameSystem.png)
 
 ***
 
@@ -45,12 +45,36 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 |:---:|:---:|:---:|:---:|
 | OnGameOver | FOnGameOver | public | 게임 오버 시 BP GameMode가 바인딩할 델리게이트이다. (BlueprintAssignable) |
 | OnGameClear | FOnGameClear | public | 게임 클리어 시 BP GameMode가 바인딩할 델리게이트이다. (BlueprintAssignable) |
+| OnPenaltyStackChanged | FOnPenaltyStackChanged | public | 패널티 스택 변동 시 방송되는 델리게이트이다(BlueprintAssignable) |
+| CurrentPlayState | EAreaKeeperPlayState | protected | 현재 플레이 상태 변수이다 |
+| AnomalyManagerRef | TWeakObjectPtr<AAnomalyManager> | protected | 이상 현상 매니저를 참조한다 |
+| ReadyZoneTimer | float | protected | 준비 구역 타이머이다 |
+| GameTimer | float | protected | 게임 클리어 판정을 위한 누적 시간이다 |
+| PenaltyStack | int32 | protected | 현재 패널티 스택 값이다 |
+| MaxPenaltyStack | int32 | protected | 패널티 스택 최대값이다 |
+| InitialSpawnInterval | float | protected | 이상현상 초기 스폰 간격(20초)이다 |
+| FinalSpawnInterval | float | protected | 이상현상 최소 스폰 간격(15초)이다 |
+| TotalTimeToMinInterval | float | protected | Lerp가 적용되는 총 시간이다 |
+| AnomaliesSolvedCount | int32 | protected | 해결한 이상 현상 개수이다 |
+| ChasingHitCount | int32 | protected | 체이싱 타입 피격 횟수이다 |
+
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | AAreaKeeperGameState |  | public | 생성자이다. PrimaryActorTick.bCanEverTick을 true로 설정하고 상태 변수들을 초기화한다. |
+| Tick | void | public | 매 프레임 호출된다. ReadyZoneTimer, GameTimer 및 스폰 간격 보간을 처리한다 |
+| StartReadyZoneTimer | void | public | ReadyZone에서 호출되며 게임 상태를 InProgress로 전환한다 |
+|IncrementPenaltyStack	void | public | 패널티 스택을 증가시키고 OnPenaltyStackChanged를 호출한다 | 
+|DecrementPenaltyStack | void | public | 패널티 스택을 감소시키고 OnPenaltyStackChanged를 호출한다 | 
+|GetPenaltyStack | int32 | public | 현재 패널티 스택을 반환한다. | 
 | GetCurrentAnomalySpawnInterval | float | public | CurrentAnomalySpawnInterval 값을 반환한다. (BlueprintPure) |
+| SetPlayState | void | public | 플레이 상태를 변경한다 |
+| IncrementAnomaliesSolved |void | public | 해결된 이상 현상 수를 증가시킨다 |
+| IncrementChasingHits | void | public | 체이싱 타입 피격 횟수를 증가시킨다 |
+| CheckGameClear | void | protected | GameTimer 기반으로 클리어 조건을 검사한다 |
+| TriggerGameOver | void | protected | 패널티 또는 사망 조건 발생 시 GameOver 흐름을 실행한다 |
+| BroadcastPenaltyChange | void | protected | 패널티 스택 변경 시 델리게이트를 브로드캐스트한다 |
 
 ***
 
@@ -65,6 +89,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | GameStateRef | TWeakObjectPtr<AAreaKeeperGameState> | private | BeginPlay 시 캐시된 AAreaKeeperGameState의 참조이다. |
 | CurrentScreenWidget | TObjectPtr<UUserWidget> | private | 현재 화면에 표시된 게임 오버 또는 게임 클리어 위젯의 인스턴스이다. |
 | SetPlayerInputModeToUIOnly | void | protected | 플레이어 컨트롤러의 입력 모드를 FInputModeUIOnly로 설정하고 마우스 커서를 표시한다. |
+| RemoveInGameUI | void | private | HUD·QuickSlot 등 인게임 UI를 모두 제거한다 |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
@@ -133,7 +158,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | ApplyVignettePenalty | void | protected | 3스택 이상일 때 PlayerChar의 ViewCamera에 비네트 효과를 적용/제거한다. |
 | ApplyMovementPenalty | void | protected | 4스택 이상일 때 PlayerChar의 이동 속도를 DefaultWalkSpeed의 80%로 감소/복원한다. |
 | PlayWhisperSound | void | protected | WhisperSounds 배열에서 랜덤한 사운드를 PlaySound2D로 재생한다. |
-
+| UpdatePenaltyText | void | protected | HUD의 패널티 텍스트를 갱신한다. |
 ***
 
 ### AMainMenuPlayerController
@@ -179,7 +204,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 - 3.4 Item & Interaction System: IInteractableInterface, AItemBase, AToolBase, AChargeableItem
 - 3.6 UI System: UQuickSlot
 
-![image](image/CharacterDiagram.png)
+![image](image/Class2_CharacterSystem.png)
 
 ***
 
@@ -194,7 +219,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| ABaseCharacter |  | public | 생성자이다. Attributes 컴포넌트를 생성하고, 1인칭 스타일의 캐릭터 무브먼트 회전 설정을 초기화한다. |
+| ABaseCharacter |  | public | 생성자이다. AttributeComponent를 CreateDefaultSubobject로 생성하고 기본 컴포넌트 설정만 수행한다. |
 | IsAlive | bool | public | AttributeComponent의 체력이 0보다 큰지(생존 여부)를 반환한다. (BlueprintPure) |
 | HandleDamage | void | public | AttributeComponent에 피해를 전달하고, 사망 시(IsAlive가 false 반환) Die()를 호출한다. |
 | BeginPlay | void | protected | 게임 시작 시 호출된다. (Override) |
@@ -213,7 +238,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | bIsInvincible | bool | protected | 현재 1초 무적 상태인지 여부를 나타낸다. |
 | InvincibilityTimerHandle | FTimerHandle | protected | 무적 시간 해제를 위한 타이머 핸들이다. |
 | GameStateRef | TWeakObjectPtr<AAreaKeeperGameState> | protected | AAreaKeeperGameState의 캐시된 참조이다. |
-| SpringArm | USpringArmComponent* | protected | 카메라를 플레이어에 연결하고 거리를 유지하는 스프링 암이다. (VisibleAnywhere) |
+| SpringArm | USpringArmComponent* | protected | ViewCamera가 생성된다 |
 | ViewCamera | UCameraComponent* | protected | 플레이어의 시점을 담당하는 메인 카메라이다. (VisibleAnywhere) |
 | MoveAction | UInputAction* | protected | 이동(WASD)에 바인딩된 입력 액션이다. (EditAnywhere) |
 | LookAction | UInputAction* | protected | 시점(마우스)에 바인딩된 입력 액션이다. (EditAnywhere) |
@@ -230,6 +255,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | RequiredChargeTime | float | private | 지방 충전을 완료하는 데 필요한 홀드 시간이다. (기본값: 2.0초) (EditAnywhere) |
 | ChargingTarget | TWeakObjectPtr<AChargeableItem> | private | 현재 충전 중인 대상(AChargeableItem)의 참조이다. |
 | bIsTalismanRitualUIOpen | bool | private | '소지' UI가 열려있는 동안 Tick 로직을 차단하기 위한 플래그이다. |
+
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
@@ -259,6 +285,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | HandleCharging | void | private | bIsCharging이 true일 때 매 틱 실행된다. 충전 대상(ChargingTarget)을 계속 바라보는지, 쿨타임 중인지 확인하고, RequiredChargeTime 도달 시 AChargeableItem::OnCharged를 호출하며 UAttributeComponent::SetTalisman으로 지방을 가득 채운다. |
 | UseTool | void | private | OnInteractPressed에 의해 호출된다. HeldItem이 AToolBase인지 확인하고, 대상 AChasingAnomaly에 UseTool을 실행하고 성공 시 아이템을 파괴(소모)한다. |
 | GetViewCamera | UCameraComponent* | public | UCameraComponent를 반환한다. |
+| UpdateInteractionPrompt | void | private | 플레이어가 바라보는 대상에 맞춰 '줍기', '소지하기', '도구 사용' 같은 상호작용 안내 텍스트를 HUD에 표시하거나 숨긴다. |
 
 ***
 
@@ -289,8 +316,8 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | SetMaxHealth | void | public | MaxHealth 값을 NewMaxHealth로 설정한다. |
 | SetTalisman | void | public | Talisman 값을 NewTalisman으로 설정(Clamp)하고 이벤트를 방송한다. (지방 충전 시 사용) |
 | SetMaxTalisman | void | public | MaxTalisman 값을 NewMaxTalisman으로 설정한다. |
-| GetHelath | float | public | 현재 Health 값을 반환한다. |
-| GetMaxHelath | float | public | MaxHealth 값을 반환한다. |
+| GetHealth | float | public | 현재 Health 값을 반환한다. |
+| GetMaxHealth | float | public | MaxHealth 값을 반환한다. |
 | GetTalisman | float | public | 현재 Talisman 값을 반환한다. |
 | GetMaxTalisman | float | public | MaxTalisman 값을 반환한다. |
 
@@ -302,24 +329,23 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 - 3.2 Character: APlayerCharacter
 - 3.4 Item & Interaction System: IInteractableInterface
 
-![image](image/AnomalySystem.png)
+![image](image/Class3_AnomalySystem.png)
 
 ***
 
 ### AAnomalyManager
 #### 클래스 개요
-게임 내 모든 이상 현상의 스폰, 타이밍, 생명 주기를 관리하는 액터이다. `AActor`를 상속받는다. `AAreaKeeperGameState`의 상태(`CurrentPlayState`, `CurrentAnomalySpawnInterval`)에 따라 `StartSpawning`/`StopSpawning`이 호출되며, `OnSpawnTimerExpired` 타이머를 통해 주기적으로 `SpawnStationaryAnomaly`를 실행한다. 또한 `AStationaryAnomaly`의 요청을 받아 `SpawnChasingAnomaly`를 실행하는 스포너(Spawner) 역할을 한다.
+게임 내 모든 이상 현상의 스폰, 타이밍, 생명 주기를 관리하는 액터이다. `AActor`를 상속받는다. `AAreaKeeperGameState`의 상태(`CurrentPlayState`)에 따라 `StartSpawning`/`StopSpawning`이 호출되며, `OnSpawnTimerExpired` 타이머를 통해 주기적으로 `SpawnStationaryAnomaly`를 실행한다. 또한 `AStationaryAnomaly`의 요청을 받아 `SpawnChasingAnomaly`를 실행하는 스포너(Spawner) 역할을 한다.
 
 #### 멤버 변수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | StationaryAnomalyClassList | TArray<TSubclassOf<AStationaryAnomaly>> | protected | 스폰할 '정지된 이상현상'의 블루프린트 클래스 목록이다. (EditDefaultsOnly) |
 | ChasingAnomalyClassList | TArray<TSubclassOf<AChasingAnomaly>> | protected | 스폰할 '쫓아오는 이상현상'의 블루프린트 클래스 목록이다. (EditDefaultsOnly) |
-| StationaryAnomalyLifespan | float | private | '정지된 이상현상'의 생성 유지 시간(초)이다. (EditAnywhere) |
+| StationaryAnomalyLifeSpan | float | private | '정지된 이상현상'의 생성 유지 시간(초)이다. (EditAnywhere) |
 | SpawnTimerHandle | FTimerHandle | private | OnSpawnTimerExpired를 주기적으로 호출하기 위한 타이머 핸들이다. |
 | SpawnRadius | float | private | GetRandomSpawnLocation에서 사용할 네비게이션 반경이다. (EditAnywhere) |
 | CurrentSpawnInterval | float | private | 현재 이상현상 생성 주기(초)이다. (EditAnywhere) |
-| MimicSpawnTimerHandle | FTimerHandle | private | (미구현) 흉내쟁이 귀신 스폰 타이머 핸들이다. |
 | GameStateRef | TWeakObjectPtr<AAreaKeeperGameState> | private | AAreaKeeperGameState의 캐시된 참조이다. |
 
 #### 멤버 함수
@@ -334,7 +360,6 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | OnSpawnTimerExpired | void | private | GameStateRef에서 CurrentSpawnInterval을 갱신받아 타이머를 재설정하고 SpawnStationaryAnomaly를 호출한다. |
 | GetRandomSpawnLocation | bool | private | NavMesh 반경 내 랜덤 위치를 OutLocation에 반환한다. |
 | GetRandomAnomalyType | EAnomalyType | private | EAnomalyType (Disappearing/Chasing) 중 하나를 랜덤 반환한다. |
-| GetRandomAnomalyCategory | EAnomalyCategory | private | EAnomalyCategory (None 제외) 중 랜덤 범주를 반환한다. |
 | GetRandomStationaryAnomalyClass | TSubclassOf<AStationaryAnomaly> | private | StationaryAnomalyClassList 배열에서 랜덤 클래스를 반환한다. |
 | GetRandomChasingAnomalyClass | TSubclassOf<AChasingAnomaly> | private | ChasingAnomalyClassList 배열에서 랜덤 클래스를 반환한다. |
 
@@ -350,14 +375,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | CurrentState | EAnomalyState | protected | 현재 AI 상태(Idle 또는 Chasing)이다. (VisibleAnywhere, BlueprintReadOnly) |
 | AIPerception | UAIPerceptionComponent* | protected | AI 시야 감지를 위한 퍼셉션 컴포넌트이다. (EditAnywhere, BlueprintReadOnly) |
 | SightConfig | UAISenseConfig_Sight* | protected | AIPerception에 사용될 시야 설정 오브젝트이다. (EditAnywhere, BlueprintReadOnly) |
-| AnomalyController | TObjectPtr<AAIController> | protected | 이 캐릭터를 제어하는 AI 컨트롤러의 참조이다. |
 | PlayerTarget | TObjectPtr<AActor> | protected | 현재 추적 중인 플레이어 대상의 참조이다. (VisibleAnywhere, BlueprintReadOnly) |
-| RequiredToolType | EToolType | protected | 이 이상 현상을 퇴치하는 데 필요한 도구 타입이다. (EditDefaultsOnly, BlueprintReadOnly) |
-| ChasingSpeed | float | protected | 플레이어 추적 속도이다. BeginPlay 시 플레이어 속도의 70%로 설정된다. (EditAnywhere, BlueprintReadWrite) |
-| CloseAttackRange | float | protected | 이 거리 안으로 들어오면 NavMesh를 무시하고 돌진한다. (기본값: 100.f) (EditAnywhere, BlueprintReadWrite) |
-| AcceptanceRadius | float | protected | MoveToTarget이 목표에 도달했다고 판단하는 반경이다. (기본값: 10.f) (EditAnywhere, BlueprintReadWrite) |
-| SightRadius | float | protected | 플레이어를 감지하는 시야 반경이다. (기본값: 1000.f) (EditAnywhere, BlueprintReadWrite) |
-| LoseChaseRange | float | protected | 이 거리보다 멀어지면 추적을 중단한다. (기본값: 1200.f) (EditAnywhere, BlueprintReadWrite) |
 | GameStateRef | TWeakObjectPtr<AAreaKeeperGameState> | protected | AAreaKeeperGameState의 캐시된 참조이다. |
 
 #### 멤버 함수
@@ -374,8 +392,6 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | OnSeePawn | void | protected | AIPerception이 플레이어를 감지하면 ChaseTarget을 호출한다. |
 | ChaseTarget | void | protected | PlayerTarget을 설정하고, CurrentState를 EAS_Chasing로 변경하며 이동 속도를 높인다.  |
 | StopChasing | void | protected | PlayerTarget을 해제하고, CurrentState를 EAS_Idle로 변경하며 이동을 멈춘다. |
-| MoveToTarget | void | private | AnomalyController를 사용해 PlayerTarget을 향해 NavMesh 기반으로 이동한다. |
-| MoveDirectlyToTarget | void | private | MoveTo를 멈추고 PlayerTarget을 향해 AddMovementInput으로 직접 돌진한다. |
 | OnAnomalyOverlap | void | protected | 캡슐 컴포넌트가 APlayerCharacter와 오버랩될 때 호출된다. 플레이어가 무적이 아니면 ApplyDamageToPlayer를 호출하고, 무적이면 OnPlayerInvincibilityEnd에 바인딩한다. |
 | ApplyDamageToPlayer | void | private | Player->HandleDamage(1.0f)를 호출하고, GameStateRef->IncrementChasingHits()를 호출한 뒤, Banish()를 호출하여 자신을 소멸시킨다. |
 | OnPlayerInvincibilityEnd | void | protected | 플레이어의 무적이 끝났을 때 델리게이트에 의해 호출된다. 이 때 아직 플레이어와 오버랩 중이고 생존 상태라면 ApplyDamageToPlayer를 호출한다.  |
@@ -420,9 +436,20 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 - 3.3 Anomaly System: AChasingAnomaly
 - 3.6 UI System: UQuickSlot
 
-![image](image/Item&ToolSystemDiagram.png)
+![image](image/Class4_Item&ToolSystem.png)
 
 ***
+### IInteractableInterface
+#### 클래스 개요
+플레이어가 월드 오브젝트와 상호작용할 수 있도록 하는 공통 인터페이스이다. 하이라이트 처리, 상호작용 트리거, 상호작용 텍스트 제공을 위한 함수들을 정의하며, 실제 동작은 이를 구현하는 클래스에서 정의된다.
+
+#### 멤버 함수
+| 이름 | 타입 | 가시성 | 설명 |
+|---|---|---|---|
+| Highlight_Implementation | void | public | 플레이어가 객체를 바라보거나 포커싱할 때 호출된다. 하이라이트 효과의 On/Off를 처리한다. |
+| Interact_Implementation | void | public | 플레이어가 상호작용 키를 눌렀을 때 호출된다. 실제 상호작용 로직은 구현 클래스에서 정의된다. |
+| GetInteractText_Implementation | FString | public | 상호작용 UI에 표시할 텍스트를 반환한다. |
+
 
 ### AItemBase
 #### 클래스 개요
@@ -439,12 +466,12 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | AItemBase |  | public | 생성자이다. ItemMesh를 루트 컴포넌트로 생성하고 Visibility 채널에 충돌 응답을 설정한다. |
+| BeginPlay | void | protected | 게임 시작 시 호출된다. ItemMesh에서 DynamicMaterial을 생성한다. (Override) |
 | OnPickedUp | void | public | APlayerCharacter가 아이템을 주웠을 때 호출된다. 물리 시뮬레이션과 충돌을 비활성화하고 AttachTo 컴포넌트의 SocketName에 부착한다. |
 | OnDropped | void | public | APlayerCharacter가 아이템을 버렸을 때 호출된다. 부모로부터 분리하고 물리 시뮬레이션과 충돌을 활성화한다. |
 | Highlight_Implementation | void | public | 플레이어가 바라볼 때 호출된다. DynamicMaterial의 Color 파라미터를 변경하여 하이라이트 효과를 준다. (Override) |
 | Interact_Implementation | void | public | 플레이어가 E키로 상호작용할 때 호출된다. Interactor(플레이어)의 PickupItem 함수를 호출하여 자신을 줍도록 한다. (Override) |
 | GetInteractText_Implementation | FString | public | 상호작용 UI에 줍기 텍스트를 반환한다. (Override) |
-| BeginPlay | void | protected | 게임 시작 시 호출된다. ItemMesh에서 DynamicMaterial을 생성한다. (Override) |
 
 ***
 
@@ -504,18 +531,18 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 #### 멤버 변수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| bIsCharged | bool | public | 현재 쿨타임이 적용 중인지 여부를 나타낸다. (EditAnywhere, BlueprintReadOnly) |
-| RechargeCooldown | float | public | 충전 후 재사용 대기시간(쿨타임)이다. (기본값: 15.0초) (EditAnywhere, BlueprintReadWrite) |
-| Cooldown | float | public | Tick 함수에서 계산되는, 현재 경과한 쿨타임 시간이다. |
+| RequiredChargeTime | float | public | 충전이 완료되기까지 필요한 총 시간이다. |
+| CurrentChargeTime | float | public | 현재까지 누적된 충전 시간이다. |
+| bIsCharging | bool | public | 현재 충전 중인지 여부를 나타낸다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | AChargeableItem |  | public | 생성자이다. Tick을 활성화한다. |
-| BeginPlay | void | public | 게임 시작 시 호출된다. (Override) |
-| Tick | void | public | bIsCharged가 true일 때만 실행되어 Cooldown을 증가시킨다. RechargeCooldown에 도달하면 bIsCharged를 false로 리셋하고 Tick을 비활성화한다. (Override) |
-| OnCharged | bool | public | APlayerCharacter의 HandleCharging에 의해 호출된다. bIsCharged가 false일 때만 bIsCharged = true로 설정, Tick을 활성화하고 true를 반환한다. ( BlueprintCallable) |
-| Highlight_Implementation | void | public | 플레이어가 바라볼 때 호출된다. bIsCharged(쿨타임 중)이면 하얀색, 아니면(충전 가능) 초록색으로 하이라이트 색상을 변경한다. (Override) |
+| BeginPlay | void | public | 충전 관련 변수들을 초기화한다. |
+| Tick | void | public | 충전 중일 경우 CurrentChargeTime을 증가시킨다. |
+| IsFullyCharged | bool | public | 충전 시간이 RequiredChargeTime에 도달했는지 여부를 반환한다. |
+| Highlight_Implementation | void | protected | 충전 대상 아이템 하이라이트를 처리한다. |
 
 ## 3.5 Talisman Ritual System
 본 절은 '소지(Talisman Ritual)' 기능의 상호작용을 다룬다. 이 절에서 새롭게 기술하는 클래스는 없으며, 대신 APlayerCharacter(3.2절)가 AStationaryAnomaly(3.3절)와 상호작용하여 APlayerCharacterController(3.1절)를 통해 UTalismanWidget(3.6절)을 여는 일련의 과정을 다이어그램으로 기술한다.
@@ -526,7 +553,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 - 3.3 Anomaly System: AStationaryAnomaly, EAnomalyCategory
 - 3.6 UI System: UTalismanWidget
 
-![image](image/TalismanRitualSystem.png)
+![image](image/Class5_TalismanRitualSystem.png)
 
 ## 3.6 UI System
 본 절은 C++ 기반 위젯과 블루프린트 위젯을 포함한 모든 사용자 인터페이스(UI)를 다룬다. 인게임 정보를 표시하는 UHUDWidget과 아이템 슬롯을 관리하는 UQuickSlot을 기술한다. 또한, UMainMenuWidget, UPauseMenuWidget, UTalismanWidget, UOptionMenuWidget, UControlsMenuWidget, UConfirmMainMenuWidget, UConfirmChangesWidget, UGameOverWidget, UGameClearWidget의 상세 내용을 기술한다.
@@ -538,9 +565,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 - 3.7 Settings & Saving System: USettingSubsystem
 
 
-![image](image/UISystemDiagram_1.png)
-![image](image/UISystemDiagram_2.png)
-
+![image](image/Class6_UISystem.png)
 ***
 
 ### UHUDWidget
@@ -556,12 +581,15 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | AmuletText | class UTextBlock* | protected | 지방(Amulet) 개수를 표시하는 텍스트 블록이다. |
 | CenterText | class UTextBlock* | protected | 화면 중앙에 텍스트(예: 충전 상태)를 표시하는 텍스트 블록이다. |
 | TimeText | class UTextBlock* | protected | 화면 상단에 텍스트(예: 남은 시간)를 표시하는 텍스트 블록이다. |
+| PenaltyText | class UTextBlock* | protected | 누적 패널티 수치를 표시하는 텍스트 블록이다. |
+
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | UpdateHealth | void | public | HealthText의 내용을 CurrentHealth 값으로 갱신한다. (BlueprintCallable) |
 | UpdateAmulet | void | public | AmuletText의 내용을 CurrentAmulet 값으로 갱신한다. (BlueprintCallable) |
+| UpdatePenaltyText | void | public | PenaltyText의 내용을 CurrentPenalty 값으로 갱신한다. (BlueprintCallable) |
 | ShowCenterText | void | public | CenterText를 보이도록 설정한다. (BlueprintCallable) |
 | HideCenterText | void | public | CenterText를 숨기도록 설정한다. (BlueprintCallable) |
 | UpdateCenterText | void | public | CenterText의 내용을 Text로 갱신한다. (BlueprintCallable) |
@@ -598,7 +626,6 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | AssignItemToSlot | void | public | Index 슬롯의 FQuickSlotData에 NewItem 정보를 저장하고 아이콘을 갱신한다. |
 | RemoveItemAt | void | public | Index 슬롯의 FQuickSlotData를 비우고 아이콘을 nullptr로 갱신한다. |
 | NativeConstruct | void | protected | Slots 배열을 2개로 초기화하고 CurrentSlotIndex를 0으로 설정하며 아이콘을 정리한다. (Override) |
-| UpdateSlotHighlight | void | private | CurrentSlotIndex에 따라 Img_Icon1, Img_Icon2의 색상을 하이라이트 또는 기본으로 변경한다. |
 
 ***
 
@@ -608,21 +635,11 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 
 게임 오버 화면을 관리하는 C++ 기반 위젯이다. `UUserWidget`을 상속받는다. `NativeConstruct`에서 '재도전' 및 '메인 메뉴' 버튼에 C++ 함수를 바인딩하며, `InitializeWidget`을 통해 게임 오버 사유(사망 또는 패널티)를 받아 텍스트로 표시한다.
 
-#### 멤버 변수
-| 이름 | 타입 | 가시성 | 설명 |
-|:---:|:---:|:---:|:---:|
-| Button_Retry | UButton* | protected | '재도전' 버튼의 참조이다. |
-| Button_MainMenu | UButton* | protected | '메인 메뉴로 가기' 버튼의 참조이다. |
-| Text_GameOverReason | UTextBlock* | protected | 게임 오버 사유(예: 사망 (체력 0))를 표시할 텍스트의 참조이다. |
-| MainMenuLevelName | FName | protected | '메인 메뉴로' 버튼 클릭 시 로드할 레벨의 이름이다. (기본값: MainMenu) (EditDefaultsOnly) |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | InitializeWidget | void | public | 게임 오버 사유(bPlayerDied)를 받아 Text_GameOverReason의 텍스트를 설정한다. (BlueprintCallable) |
-| NativeConstruct | void | protected | Button_Retry와 Button_MainMenu의 OnClicked 델리게이트에 C++ 함수를 바인딩한다. (Override) |
-| OnRetryClicked | void | protected | '재도전' 버튼 클릭 시 호출된다. 현재 레벨을 다시 로드한다. |
-| OnMainMenuClicked | void | protected | '메인 메뉴로' 버튼 클릭 시 호출된다. MainMenuLevelName 레벨을 로드한다. |
 
 ***
 
@@ -632,21 +649,10 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 
 게임 클리어 시 표시되는 위젯이다. `UUserWidget`을 상속받는다. `NativeConstruct`에서 '메인 메뉴' 버튼을 바인딩하며, `InitializeWidget`을 통해 최종 게임 결과(패널티 스택, 해결한 이상현상 등)를 받아 텍스트로 표시한다.
 
-#### 멤버 변수
-| 이름 | 타입 | 가시성 | 설명 |
-|:---:|:---:|:---:|:---:|
-| Button_MainMenu | TObjectPtr<UButton> | protected | '메인 메뉴로 가기' 버튼의 참조이다 |
-| Text_PenaltyStack | TObjectPtr<UTextBlock> | protected | 최종 패널티 스택을 표시할 텍스트의 참조이다. (meta = (BindWidget)) |
-| Text_AnomaliesSolved | TObjectPtr<UTextBlock> | protected | 해결한 총 이상현상 개수를 표시할 텍스트의 참조이다. |
-| Text_ChasingHits | TObjectPtr<UTextBlock> | protected | 추격 개체 피격 횟수를 표시할 텍스트의 참조이다. |
-| MainMenuLevelName | FName | private | '메인 메뉴로' 버튼 클릭 시 로드할 레벨의 이름이다. (기본값: MainMenu) (EditDefaultsOnly) |
-
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | InitializeWidget | void | public | PenaltyStack, AnomaliesSolved, ChasingHits 값을 받아 UI 텍스트를 설정한다. (BlueprintCallable) |
-| NativeConstruct | void | protected | Button_MainMenu의 OnClicked 델리게이트에 OnMainMenuClicked 함수를 바인딩한다. (Override) |
-| OnMainMenuClicked | void | private | '메인 메뉴로' 버튼 클릭 시 호출된다. MainMenuLevelName 레벨을 로드한다. |
 
 ***
 
@@ -665,15 +671,15 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | GameLevelName | FName | private | '시작하기' 버튼 클릭 시 열릴 레벨 이름이다. (EditDefaultsOnly) |
 | OptionMenuWidgetClass | TSubclassOf<UOptionMenuWidget> | private | '설정' 버튼 클릭 시 열릴 옵션 메뉴 위젯 클래스이다. (EditDefaultsOnly) |
 | OptionMenuInstance | TObjectPtr<UOptionMenuWidget> | private | OnOptionClicked 시 생성/캐시되는 옵션 메뉴 위젯의 인스턴스이다. |
-| PlayerControllerRef | TObjectPtr<APlayerController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| NativeConstruct | void | protected | Button들의 OnClicked 델리게이트를 C++ 함수에 바인딩하고 PlayerControllerRef를 캐시한다. (Override) |
-| OnStartClicked | void | private | '시작하기' 버튼 클릭 시 호출된다. 입력 모드를 GameOnly로 설정하고 GameLevelName 레벨을 연다. |
-| OnOptionClicked | void | private | '설정' 버튼 클릭 시 호출된다. OptionMenuInstance를 생성/표시하고 SetParentMenu를 호출하며 입력 모드를 변경한다. |
-| OnExitClicked | void | private | '종료' 버튼 클릭 시 호출된다. UKismetSystemLibrary::QuitGame()을 호출하여 게임을 종료한다. |
+| NativeConstruct | void | protected | 버튼 이벤트 바인딩 |
+| OnStartClicked | void | private | 게임 레벨로 이동 |
+| OnOptionClicked | void | private | 옵션 메뉴 표시 |
+| OnExitClicked | void | private | 게임 종료 |
 
 ***
 
@@ -686,15 +692,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 #### 멤버 변수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| Button_Resume | TObjectPtr<UButton> | private | '계속하기' 버튼의 참조이다. |
-| Button_Option | TObjectPtr<UButton> | private | '설정' 버튼의 참조이다. |
-| Button_Controls | TObjectPtr<UButton> | private | '조작법' 버튼의 참조이다. |
-| Button_MainMenu | TObjectPtr<UButton> | private | '메인 메뉴로' 버튼의 참조이다. |
-| Button_Exit | TObjectPtr<UButton> | private | '게임 종료' 버튼의 참조이다. |
 | PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
-| OptionMenuWidgetClass | TSubclassOf<UOptionMenuWidget> | private | '설정' 버튼 클릭 시 열릴 UOptionMenuWidget 클래스이다. (EditDefaultsOnly) |
-| ControlsMenuWidgetClass | TSubclassOf<UControlsMenuWidget> | private | '조작법' 버튼 클릭 시 열릴 UControlsMenuWidget 클래스이다. (EditDefaultsOnly) |
-| ConfirmMainMenuWidgetClass | TSubclassOf<UConfirmMainMenuWidget> | private | '메인 메뉴로' 버튼 클릭 시 열릴 UConfirmMainMenuWidget 팝업 클래스이다. (EditDefaultsOnly) |
 | OptionMenuInstance | TObjectPtr<UOptionMenuWidget> | private | 생성된 옵션 메뉴 위젯의 인스턴스이다. (VisibleInstanceOnly) |
 | ControlsMenuInstance | TObjectPtr<UControlsMenuWidget> | private | 생성된 조작법 메뉴 위젯의 인스턴스이다. (VisibleInstanceOnly) |
 | ConfirmMainMenuPopupInstance | TObjectPtr<UConfirmMainMenuWidget> | private | 생성된 메인 메뉴 확인 팝업의 인스턴스이다. (VisibleInstanceOnly) |
@@ -704,7 +702,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | NativeConstruct | void | protected | PlayerControllerRef를 캐시하고 모든 Button의 OnClicked 델리게이트를 C++ 함수에 바인딩한다. (Override) |
-| OnResumeClicked | void | private | '계속하기' 버튼 클릭 시 PlayerControllerRef->ClosePauseMenu()를 호출한다. |
+| OnResumeClicked | void | private | '계속하기' 버튼 클릭 시 PlayerCharacterControllerRef->ClosePauseMenu()를 호출한다. |
 | OnOptionClicked | void | private | '설정' 버튼 클릭 시 OptionMenuInstance를 생성/표시하고 입력 모드를 변경하며 자신을 숨긴다. |
 | OnControlsClicked | void | private | '조작법' 버튼 클릭 시 ControlsMenuInstance를 생성/표시하고 입력 모드를 변경하며 자신을 숨긴다. |
 | OnMainMenuClicked | void | private | '메인 메뉴로' 버튼 클릭 시 ConfirmMainMenuPopupInstance를 생성/표시하고 입력 모드를 변경한다. |
@@ -721,59 +719,25 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 #### 멤버 변수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| Slider_MasterVolume | TObjectPtr<USlider> | private | 마스터 볼륨 슬라이더 참조이다. |
-| Slider_MouseSensitivity | TObjectPtr<USlider> | private | 마우스 감도 슬라이더 참조이다. |
-| Slider_ScreenBrightness | TObjectPtr<USlider> | private | 화면 밝기 슬라이더 참조이다. |
-| ComboBoxString_ScreenResolution | TObjectPtr<UComboBoxString> | private | 화면 해상도 콤보박스 참조이다. |
-| ComboBoxString_WindowMode | TObjectPtr<UComboBoxString> | private | 창 모드 콤보박스 참조이다. |
-| Button_Apply | TObjectPtr<UButton> | private | '적용' 버튼 참조이다. |
-| Button_ResetAll | TObjectPtr<UButton> | private | '초기화' 버튼 참조이다. |
-| Button_OK | TObjectPtr<UButton> | private | '확인' 버튼 참조이다. |
-| Button_Cancel | TObjectPtr<UButton> | private | '취소' 버튼 참조이다. |
-| Button_ResetMasterVolume | TObjectPtr<UButton> | private | '마스터 볼륨' 개별 초기화 버튼 참조이다. |
-| Button_ResetMouseSensitivity | TObjectPtr<UButton> | private | '마우스 감도' 개별 초기화 버튼 참조이다. |
-| Button_ResetScreenBrightness | TObjectPtr<UButton> | private | '화면 밝기' 개별 초기화 버튼 참조이다. |
-| Button_ResetScreenResolution | TObjectPtr<UButton> | private | '해상도' 개별 초기화 버튼 참조이다. |
-| Button_ResetWindowMode | TObjectPtr<UButton> | private | '창 모드' 개별 초기화 버튼 참조이다. |
 | SettingSubsystem | TObjectPtr<USettingSubsystem> | private | USettingSubsystem의 캐시된 참조이다. |
-| ParentMenu | TObjectPtr<UUserWidget> | private | 이 위젯을 연 부모 메뉴(예: UPauseMenuWidget)의 참조이다. |
-| PlayerControllerRef | TObjectPtr<APlayerController> | private | APlayerController의 캐시된 참조이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | APlayerController의 캐시된 참조이다. |
 | StagedSettings | FDisplaySettings | private | UI에서 변경되었으나 아직 적용/저장되지 않은 임시 설정 값이다. |
 | SavedSettings | FDisplaySettings | private | 현재 디스크에 저장된(로드된) 설정 값이다. |
 | DefaultSettings | FDisplaySettings | private | 게임의 하드코딩된 기본 설정 값이다. |
-| AvailableResolutionStrings | TArray<FString> | private | ComboBoxString_ScreenResolution을 채우기 위한 문자열 목록이다. |
-| AvailableWindowModeStrings | TArray<FString> | private | ComboBoxString_WindowMode를 채우기 위한 문자열 목록이다. |
 | ConfirmChangesPopupClass | TSubclassOf<UConfirmChangesWidget> | private | '변경사항 저장' 팝업 위젯의 블루프린트 클래스이다. (EditDefaultsOnly) |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| SetParentMenu | void | public | 이 위젯을 생성한 부모 위젯(ParentMenu)을 설정한다. |
-| GetParentMenu | UUserWidget* | public | ParentMenu의 참조를 반환한다. (const, BlueprintCallable) |
-| OnConfirmChangesYes | void | public | ConfirmChangesPopupClass의 '예' 버튼 클릭 시 호출된다. CloseMenu(true)를 실행한다. (BlueprintCallable) |
-| OnConfirmChangesNo | void | public | ConfirmChangesPopupClass의 '아니오' 버튼 클릭 시 호출된다. CloseMenu(false)를 실행한다. (BlueprintCallable) |
-| NativeConstruct | void | protected | SettingSubsystem 참조를 캐시하고, 콤보박스를 채우며, 모든 UI 델리게이트를 바인딩한다. (Override) |
-| NativeOnKeyDown | FReply | protected | ESC 키 입력을 감지하여 OnOKClicked를 호출하고 입력을 처리(Handled)한다. (Override) |
-| NativeOnMouseButtonDown | FReply | protected | 위젯 배경 클릭 시 키보드 포커스를 유지한다. (Override) |
-| OnMasterVolumeChanged | void | private | Slider_MasterVolume 값 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다.  |
-| OnMouseSensitivityChanged | void | private | Slider_MouseSensitivity 값 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다.  |
-| OnScreenBrightnessChanged | void | private | Slider_ScreenBrightness 값 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다.  |
-| OnScreenResolutionChanged | void | private | ComboBoxString_ScreenResolution 선택 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다.  |
-| OnWindowModeChanged | void | private | ComboBoxString_WindowMode 선택 변경 시 StagedSettings를 갱신하고 UpdateUIState를 호출한다. |
+| InitializeSettings | void | private | SettingSubsystem에서 SavedSettings와 DefaultSettings를 로드하고 UI를 초기화한다. |
+| PopulateUIFromStagedSettings | void | private | StagedSettings의 데이터를 실제 UI 컴포넌트(슬라이더, 콤보박스)에 반영한다. |
+| ShowConfirmChangesPopup | void | private | ConfirmChangesPopupClass 위젯을 생성하여 뷰포트에 추가하고 포커스를 설정한다. |
 | OnApplyClicked | void | private | '적용' 버튼 클릭 시. StagedSettings를 SettingSubsystem에 적용하고 저장한다. |
 | OnResetAllClicked | void | private | '초기화' 버튼 클릭 시. StagedSettings를 DefaultSettings로 되돌리고 UI를 갱신한다. |
 | OnOKClicked | void | private | '확인' 버튼 클릭 시. 변경 사항이 있으면 ShowConfirmChangesPopup을, 없으면 CloseMenu(false)를 호출한다. |
 | OnCancelClicked | void | private | '취소' 버튼 클릭 시. CloseMenu(false)를 호출한다. |
-| OnResetMasterVolumeClicked | void | private | '마스터 볼륨' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| OnResetMouseSensitivityClicked | void | private | '마우스 감도' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| OnResetScreenBrightnessClicked | void | private | '화면 밝기' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| OnResetScreenResolutionClicked | void | private | '해상도' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| OnResetWindowModeClicked | void | private | '창 모드' 개별 초기화 버튼 클릭 시. StagedSettings를 DefaultSettings 값으로 되돌린다. |
-| InitializeSettings | void | private | SettingSubsystem에서 SavedSettings와 DefaultSettings를 로드하고 UI를 초기화한다. |
-| PopulateUIFromStagedSettings | void | private | StagedSettings의 데이터를 실제 UI 컴포넌트(슬라이더, 콤보박스)에 반영한다. |
-| UpdateUIState | void | private | Staged, Saved, Default 설정을 비교하여 '적용' 및 '초기화' 버튼의 활성화/가시성 상태를 갱신한다. |
-| CloseMenu | void | private | bSaveChanges 값에 따라 변경사항을 적용(Apply)할지 결정하고, ParentMenu를 다시 표시하며 자신을 닫는다. |
-| ShowConfirmChangesPopup | void | private | ConfirmChangesPopupClass 위젯을 생성하여 뷰포트에 추가하고 포커스를 설정한다. |
+| OnConfirmChangesYes | void | public | ConfirmChangesPopupClass의 '예' 버튼 클릭 시 호출된다. CloseMenu(true)를 실행한다. (BlueprintCallable) |
+| OnConfirmChangesNo | void | public | ConfirmChangesPopupClass의 '아니오' 버튼 클릭 시 호출된다. CloseMenu(false)를 실행한다. (BlueprintCallable) |
 
 ***
 
@@ -788,7 +752,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 |:---:|:---:|:---:|:---:|
 | Button_Back | TObjectPtr<UButton> | private | '뒤로가기' 버튼의 참조이다. |
 | ParentMenu | TObjectPtr<UUserWidget> | private | 이 위젯을 생성한 부모 위젯(UPauseMenuWidget)의 참조이다. |
-| PlayerControllerRef | TObjectPtr<APlayerController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
@@ -815,7 +779,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 | Button_No | TObjectPtr<UButton> | private | '아니오' 버튼의 참조이다. |
 | MainMenuLevelName | FName | private | '예' 버튼 클릭 시 로드할 레벨의 이름이다. (기본값: MainMenu) (EditDefaultsOnly) |
 | ParentMenu | TObjectPtr<UUserWidget> | private | 이 팝업을 생성한 부모 위젯(UPauseMenuWidget)의 참조이다. |
-| PlayerControllerRef | TObjectPtr<APlayerController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
+| PlayerControllerRef | TObjectPtr<APlayerCharacterController> | private | NativeConstruct에서 캐시되는 플레이어 컨트롤러 참조이다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
@@ -884,7 +848,7 @@ Class diagram 작성 시 다음과 같은 Unreal Engine C++ 코딩 표준 네이
 본 절의 클래스 다이어그램에는 다음 시스템의 클래스들이 참조로 포함될 수 있으며, 해당 클래스들의 상세 기술서는 명시된 세부 절에 작성되어 있다.
 - 3.6 UI System: UOptionMenuWidget
 
-![image](image/SettingsSavingSystem.png)
+![image](image/Class7_SettingsSavingSystem.png)
 
 ***
 
