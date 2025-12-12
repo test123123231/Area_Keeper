@@ -101,12 +101,13 @@ OnDropItem 함수 내부에서는 먼저 HeldItem과 QuickSlotRef가 유효한�
 
 **[그림 4-8]**
 
-[그림 4-8]은 게임 진행 중 이상현상(정지형 이상현상)을 관리하고 스폰하는 과정을 나타내는 Sequence diagram이다.
-먼저 AreaKeeperGameState는 Tick 함수에서 메인 게임 플레이 상태일 때마다 매 프레임 GameTimer를 증가시키고, SetCurrentAnomalySpawnInterval() 함수를 호출하여 게임 경과 시간에 비례해 현재 이상현상 스폰 간격(CurrentAnomalySpawnInterval)을 갱신한다. 이로 인해 게임이 진행될수록 스폰 간격이 점점 짧아지도록 구현된다.
-준비 구역 시간이 종료되면 GameState는 플레이 상태를 메인 게임 플레이 상태로 변경하고, 레벨에 배치된 AnomalyManager를 찾아 StartSpawning 함수를 한 번 호출한다. StartSpawning 함수 내부에서는 별도의 지연 없이 바로 OnSpawnTimerExpired 함수를 호출하여 첫 스폰을 즉시 수행한다.
-OnSpawnTimerExpired 함수는 이상현상 스폰 루프의 중심이 되는 콜백이다. 먼저 GameState 참조를 통해 GetCurrentAnomalySpawnInterval 함수를 호출하여 최신 스폰 간격을 가져온 뒤, GetWorld()->GetTimerManager().SetTimer 함수를 사용해 동일한 콜백(OnSpawnTimerExpired)을 현재 스폰 간격으로 다시 등록한다. 이를 통해 스폰 주기가 GameState가 관리하는 값에 따라 동적으로 변하도록 만든다.
-이후 AnomalyManager는 NavMesh 기반의 랜덤 스폰 위치를 얻기 위해 NavigationSystem(UNavigationSystemV1)의 GetRandomPointInNavigableRadius 함수를 호출한다. 유효한 위치를 찾은 경우, UWorld의 SpawnActor<AStationaryAnomaly> 함수를 사용해 정지형 이상현상 액터를 해당 위치에 생성한다. 스폰 가능한 NavMesh를 찾지 못한 경우에는 스폰을 수행하지 않고 로그만 출력한다.
-
+[그림 4-8]은 게임 진행 중 정지형 이상현상(AStationaryAnomaly)을 관리하고 생성하는 과정을 나타낸 Sequence Diagram이다.
+먼저 AreaKeeperGameState는 매 프레임 Tick 함수에서 GameTimer를 증가시키고, SetCurrentAnomalySpawnInterval()을 호출하여 게임 경과 시간에 따라 이상현상 스폰 간격을 동적으로 갱신한다. 이 값은 이후 실제 스폰 주기를 결정하는 기준으로 사용된다.
+게임이 본격적인 플레이 상태로 전환되면, AreaKeeperGameState는 레벨에 배치된 AnomalyManager의 StartSpawning() 함수를 호출한다. AnomalyManager는 첫 스폰을 지연 없이 수행하기 위해 즉시 OnSpawnTimerExpired()를 한 번 호출한다.
+OnSpawnTimerExpired()는 이상현상 스폰 루프의 핵심 콜백이다. 함수가 호출되면 먼저 GameState로부터 최신 스폰 간격(GetCurrentAnomalySpawnInterval)을 가져온 뒤, FTimerManager::SetTimer를 통해 동일한 콜백을 해당 간격으로 다시 등록한다. 이를 통해 스폰 주기가 게임 진행 상황에 따라 지속적으로 변화하도록 설계되어 있다.
+이후 AnomalyManager는 GetRandomAnomalyCategory()를 호출하여 생성할 정지형 이상현상의 범주를 결정한다. 범주가 EAC_Intrusion인 경우에는 새로운 물체 형태의 이상현상을 생성하며, 이때 GetRandomSpawnLocation()과 UNavigationSystemV1을 이용해 NavMesh 상의 유효한 위치를 계산한 뒤 SpawnActor<AStationaryAnomaly>를 호출한다. 생성된 이상현상은 InitializeAnomaly()를 통해 타입, 범주, 유지 시간이 설정된다.
+반면 환경 변조 계열 범주가 선택된 경우에는, AvailableModifiableActors 목록에서 기존 월드 액터를 하나 선택하여 제거한 뒤, 동일한 위치에 정지형 이상현상을 스폰한다. 이 경우 InitializeFromActor()를 통해 원본 액터의 숨김, 변조, 패널티 성격의 이상현상 초기화가 한 번에 처리된다.
+이러한 과정을 통해 AnomalyManager는 새 물체 생성형 이상현상과 환경 변조형 이상현상을 상황에 맞게 분기 생성하며, 모든 스폰은 동일한 타이머 기반 루프 안에서 일관되게 관리된다.
 
 # 4.9 StationaryUnSolvedManagement
 ![image](image/UnSolvedManagementDiagram.png)
