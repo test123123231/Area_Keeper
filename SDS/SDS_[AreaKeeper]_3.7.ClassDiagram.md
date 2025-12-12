@@ -4,7 +4,7 @@
 본 절의 클래스 다이어그램에는 다음 시스템의 클래스들이 참조로 포함될 수 있으며, 해당 클래스들의 상세 기술서는 명시된 세부 절에 작성되어 있다.
 - 3.6 UI System: UOptionMenuWidget
 
-![image](image/SettingsSavingSystem.png)
+![image](image/Class7_SettingsSavingSystem.png)
 
 ***
 

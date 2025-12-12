@@ -7,7 +7,7 @@
 - 3.6 UI System: UHUDWidget, UQuickSlot, UGameOverWidget, UGameClearWidget, UMainMenuWidget, UPauseMenuWidget, UTalismanWidget
 
 
-![image](image/CoreGameSystem.png)
+![image](image/Class1_CoreGameSystem.png)
 
 ***
 
@@ -19,12 +19,36 @@
 |:---:|:---:|:---:|:---:|
 | OnGameOver | FOnGameOver | public | 게임 오버 시 BP GameMode가 바인딩할 델리게이트이다. (BlueprintAssignable) |
 | OnGameClear | FOnGameClear | public | 게임 클리어 시 BP GameMode가 바인딩할 델리게이트이다. (BlueprintAssignable) |
+| OnPenaltyStackChanged | FOnPenaltyStackChanged | public | 패널티 스택 변동 시 방송되는 델리게이트이다(BlueprintAssignable) |
+| CurrentPlayState | EAreaKeeperPlayState | protected | 현재 플레이 상태 변수이다 |
+| AnomalyManagerRef | TWeakObjectPtr<AAnomalyManager> | protected | 이상 현상 매니저를 참조한다 |
+| ReadyZoneTimer | float | protected | 준비 구역 타이머이다 |
+| GameTimer | float | protected | 게임 클리어 판정을 위한 누적 시간이다 |
+| PenaltyStack | int32 | protected | 현재 패널티 스택 값이다 |
+| MaxPenaltyStack | int32 | protected | 패널티 스택 최대값이다 |
+| InitialSpawnInterval | float | protected | 이상현상 초기 스폰 간격(20초)이다 |
+| FinalSpawnInterval | float | protected | 이상현상 최소 스폰 간격(15초)이다 |
+| TotalTimeToMinInterval | float | protected | Lerp가 적용되는 총 시간이다 |
+| AnomaliesSolvedCount | int32 | protected | 해결한 이상 현상 개수이다 |
+| ChasingHitCount | int32 | protected | 체이싱 타입 피격 횟수이다 |
+
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | AAreaKeeperGameState |  | public | 생성자이다. PrimaryActorTick.bCanEverTick을 true로 설정하고 상태 변수들을 초기화한다. |
+| Tick | void | public | 매 프레임 호출된다. ReadyZoneTimer, GameTimer 및 스폰 간격 보간을 처리한다 |
+| StartReadyZoneTimer | void | public | ReadyZone에서 호출되며 게임 상태를 InProgress로 전환한다 |
+|IncrementPenaltyStack	void | public | 패널티 스택을 증가시키고 OnPenaltyStackChanged를 호출한다 | 
+|DecrementPenaltyStack | void | public | 패널티 스택을 감소시키고 OnPenaltyStackChanged를 호출한다 | 
+|GetPenaltyStack | int32 | public | 현재 패널티 스택을 반환한다. | 
 | GetCurrentAnomalySpawnInterval | float | public | CurrentAnomalySpawnInterval 값을 반환한다. (BlueprintPure) |
+| SetPlayState | void | public | 플레이 상태를 변경한다 |
+| IncrementAnomaliesSolved |void | public | 해결된 이상 현상 수를 증가시킨다 |
+| IncrementChasingHits | void | public | 체이싱 타입 피격 횟수를 증가시킨다 |
+| CheckGameClear | void | protected | GameTimer 기반으로 클리어 조건을 검사한다 |
+| TriggerGameOver | void | protected | 패널티 또는 사망 조건 발생 시 GameOver 흐름을 실행한다 |
+| BroadcastPenaltyChange | void | protected | 패널티 스택 변경 시 델리게이트를 브로드캐스트한다 |
 
 ***
 
@@ -39,6 +63,7 @@
 | GameStateRef | TWeakObjectPtr<AAreaKeeperGameState> | private | BeginPlay 시 캐시된 AAreaKeeperGameState의 참조이다. |
 | CurrentScreenWidget | TObjectPtr<UUserWidget> | private | 현재 화면에 표시된 게임 오버 또는 게임 클리어 위젯의 인스턴스이다. |
 | SetPlayerInputModeToUIOnly | void | protected | 플레이어 컨트롤러의 입력 모드를 FInputModeUIOnly로 설정하고 마우스 커서를 표시한다. |
+| RemoveInGameUI | void | private | HUD·QuickSlot 등 인게임 UI를 모두 제거한다 |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
@@ -107,7 +132,7 @@
 | ApplyVignettePenalty | void | protected | 3스택 이상일 때 PlayerChar의 ViewCamera에 비네트 효과를 적용/제거한다. |
 | ApplyMovementPenalty | void | protected | 4스택 이상일 때 PlayerChar의 이동 속도를 DefaultWalkSpeed의 80%로 감소/복원한다. |
 | PlayWhisperSound | void | protected | WhisperSounds 배열에서 랜덤한 사운드를 PlaySound2D로 재생한다. |
-
+| UpdatePenaltyText | void | protected | HUD의 패널티 텍스트를 갱신한다. |
 ***
 
 ### AMainMenuPlayerController

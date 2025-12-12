@@ -6,9 +6,20 @@
 - 3.3 Anomaly System: AChasingAnomaly
 - 3.6 UI System: UQuickSlot
 
-![image](image/Item&ToolSystemDiagram.png)
+![image](image/Class4_Item&ToolSystem.png)
 
 ***
+### IInteractableInterface
+#### 클래스 개요
+플레이어가 월드 오브젝트와 상호작용할 수 있도록 하는 공통 인터페이스이다. 하이라이트 처리, 상호작용 트리거, 상호작용 텍스트 제공을 위한 함수들을 정의하며, 실제 동작은 이를 구현하는 클래스에서 정의된다.
+
+#### 멤버 함수
+| 이름 | 타입 | 가시성 | 설명 |
+|---|---|---|---|
+| Highlight_Implementation | void | public | 플레이어가 객체를 바라보거나 포커싱할 때 호출된다. 하이라이트 효과의 On/Off를 처리한다. |
+| Interact_Implementation | void | public | 플레이어가 상호작용 키를 눌렀을 때 호출된다. 실제 상호작용 로직은 구현 클래스에서 정의된다. |
+| GetInteractText_Implementation | FString | public | 상호작용 UI에 표시할 텍스트를 반환한다. |
+
 
 ### AItemBase
 #### 클래스 개요
@@ -25,12 +36,12 @@
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | AItemBase |  | public | 생성자이다. ItemMesh를 루트 컴포넌트로 생성하고 Visibility 채널에 충돌 응답을 설정한다. |
+| BeginPlay | void | protected | 게임 시작 시 호출된다. ItemMesh에서 DynamicMaterial을 생성한다. (Override) |
 | OnPickedUp | void | public | APlayerCharacter가 아이템을 주웠을 때 호출된다. 물리 시뮬레이션과 충돌을 비활성화하고 AttachTo 컴포넌트의 SocketName에 부착한다. |
 | OnDropped | void | public | APlayerCharacter가 아이템을 버렸을 때 호출된다. 부모로부터 분리하고 물리 시뮬레이션과 충돌을 활성화한다. |
 | Highlight_Implementation | void | public | 플레이어가 바라볼 때 호출된다. DynamicMaterial의 Color 파라미터를 변경하여 하이라이트 효과를 준다. (Override) |
 | Interact_Implementation | void | public | 플레이어가 E키로 상호작용할 때 호출된다. Interactor(플레이어)의 PickupItem 함수를 호출하여 자신을 줍도록 한다. (Override) |
 | GetInteractText_Implementation | FString | public | 상호작용 UI에 줍기 텍스트를 반환한다. (Override) |
-| BeginPlay | void | protected | 게임 시작 시 호출된다. ItemMesh에서 DynamicMaterial을 생성한다. (Override) |
 
 ***
 
@@ -90,15 +101,15 @@
 #### 멤버 변수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
-| bIsCharged | bool | public | 현재 쿨타임이 적용 중인지 여부를 나타낸다. (EditAnywhere, BlueprintReadOnly) |
-| RechargeCooldown | float | public | 충전 후 재사용 대기시간(쿨타임)이다. (기본값: 15.0초) (EditAnywhere, BlueprintReadWrite) |
-| Cooldown | float | public | Tick 함수에서 계산되는, 현재 경과한 쿨타임 시간이다. |
+| RequiredChargeTime | float | public | 충전이 완료되기까지 필요한 총 시간이다. |
+| CurrentChargeTime | float | public | 현재까지 누적된 충전 시간이다. |
+| bIsCharging | bool | public | 현재 충전 중인지 여부를 나타낸다. |
 
 #### 멤버 함수
 | 이름 | 타입 | 가시성 | 설명 |
 |:---:|:---:|:---:|:---:|
 | AChargeableItem |  | public | 생성자이다. Tick을 활성화한다. |
-| BeginPlay | void | public | 게임 시작 시 호출된다. (Override) |
-| Tick | void | public | bIsCharged가 true일 때만 실행되어 Cooldown을 증가시킨다. RechargeCooldown에 도달하면 bIsCharged를 false로 리셋하고 Tick을 비활성화한다. (Override) |
-| OnCharged | bool | public | APlayerCharacter의 HandleCharging에 의해 호출된다. bIsCharged가 false일 때만 bIsCharged = true로 설정, Tick을 활성화하고 true를 반환한다. ( BlueprintCallable) |
-| Highlight_Implementation | void | public | 플레이어가 바라볼 때 호출된다. bIsCharged(쿨타임 중)이면 하얀색, 아니면(충전 가능) 초록색으로 하이라이트 색상을 변경한다. (Override) |
+| BeginPlay | void | public | 충전 관련 변수들을 초기화한다. |
+| Tick | void | public | 충전 중일 경우 CurrentChargeTime을 증가시킨다. |
+| IsFullyCharged | bool | public | 충전 시간이 RequiredChargeTime에 도달했는지 여부를 반환한다. |
+| Highlight_Implementation | void | protected | 충전 대상 아이템 하이라이트를 처리한다. |

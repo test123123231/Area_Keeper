@@ -1,4 +1,14 @@
 # 4. State machine diagram
+이 장은 시스템의 동적 동작을 묘사하는 Sequence Diagram(이하 SD)과 그에 대한 설명을 제공한다. 본 문서의 SD 작성 시 고려한 사항은 다음과 같다.
+
+- 모든 SD는 2. Use case analysis에서 식별한 특정 Use case와 1:1로 대응된다.
+- 각 SD의 흐름은 해당 Use case의 Main Success Scenario(주요 성공 시나리오) 또는 Extension Scenario(확장 시나리오)를 따른다.
+- 메시지를 주고받는 객체(LifeLine)들은 3. Class diagram에서 정의된 클래스 및 관계를 바탕으로 작성되었다.
+- 하단에 기술된 흐름 묘사는 SD의 내용을 글로 풀어 설명한 것으로, 다이어그램과 설계의 일치성을 검증하고 시각적 표현만으로는 이해하기 어려운 세부 로직이나 데이터 흐름을 보완하기 위해 작성되었다.
+- 다이어그램 상의 **'Player'**는 실제 코드상의 클래스가 아닌 시스템을 사용하는 사용자를 지칭하는 개념적 객체이다. 따라서 Player가 시스템(Controller, Character, UI 등)으로 보내는 메시지는 실제 함수 호출이 아닌 사용자의 입력 행위(키보드, 마우스 조작 등)를 의미한다.
+
+이어지는 절에서는 위 사항을 바탕으로 작성된 시퀀스 다이어그램을 제시하고, 다이어그램 하단에 해당 Use case의 실행 흐름에 따른 객체 간 메시지 전달 순서와 주요 로직의 처리 과정을 상세히 기술하여 분석한다.
+
 # 4.1 GameStart
 ![image](image/GameStartDiagram.png)
 
@@ -86,19 +96,20 @@ OnDropItem 함수 내부에서는 먼저 HeldItem과 QuickSlotRef가 유효한�
 그 다음, 드랍 위치를 계산한다. 드랍 위치는 플레이어의 현재 위치에서 Forward * 100만큼 떨어진 지점에, 약간의 높이 (0,0,30)를 더한 좌표로 설정된다. 계산된 드랍 위치와 HeldItem을 인자로 하여 ChangeItem 함수를 호출하면, ChangeItem 내부에서 HeldItem에 대해 OnDropped 함수를 실행하고, 액터 위치를 드랍 위치로 옮기며, 마지막으로 HeldItem 포인터를 nullptr로 설정하여 더 이상 아이템을 들고 있지 않은 상태로 만든다.
 
 
-# 4.8 AbnomalyManagement
-![image](image/AbnormalManagementDiagram.png)
+# 4.8 AnomalyManagement
+![image](image/AnomalyManagementDiagram.png)
 
 **[그림 4-8]**
 
-[그림 4-8]은 게임 진행 중 이상현상(정지형 이상현상)을 관리하고 스폰하는 과정을 나타내는 Sequence diagram이다.
-먼저 AreaKeeperGameState는 Tick 함수에서 메인 게임 플레이 상태일 때마다 매 프레임 GameTimer를 증가시키고, SetCurrentAnomalySpawnInterval() 함수를 호출하여 게임 경과 시간에 비례해 현재 이상현상 스폰 간격(CurrentAnomalySpawnInterval)을 갱신한다. 이로 인해 게임이 진행될수록 스폰 간격이 점점 짧아지도록 구현된다.
-준비 구역 시간이 종료되면 GameState는 플레이 상태를 메인 게임 플레이 상태로 변경하고, 레벨에 배치된 AnomalyManager를 찾아 StartSpawning 함수를 한 번 호출한다. StartSpawning 함수 내부에서는 별도의 지연 없이 바로 OnSpawnTimerExpired 함수를 호출하여 첫 스폰을 즉시 수행한다.
-OnSpawnTimerExpired 함수는 이상현상 스폰 루프의 중심이 되는 콜백이다. 먼저 GameState 참조를 통해 GetCurrentAnomalySpawnInterval 함수를 호출하여 최신 스폰 간격을 가져온 뒤, GetWorld()->GetTimerManager().SetTimer 함수를 사용해 동일한 콜백(OnSpawnTimerExpired)을 현재 스폰 간격으로 다시 등록한다. 이를 통해 스폰 주기가 GameState가 관리하는 값에 따라 동적으로 변하도록 만든다.
-이후 AnomalyManager는 NavMesh 기반의 랜덤 스폰 위치를 얻기 위해 NavigationSystem(UNavigationSystemV1)의 GetRandomPointInNavigableRadius 함수를 호출한다. 유효한 위치를 찾은 경우, UWorld의 SpawnActor<AStationaryAnomaly> 함수를 사용해 정지형 이상현상 액터를 해당 위치에 생성한다. 스폰 가능한 NavMesh를 찾지 못한 경우에는 스폰을 수행하지 않고 로그만 출력한다.
+[그림 4-8]은 게임 진행 중 정지형 이상현상(AStationaryAnomaly)을 관리하고 생성하는 과정을 나타낸 Sequence Diagram이다.
+먼저 AreaKeeperGameState는 매 프레임 Tick 함수에서 GameTimer를 증가시키고, SetCurrentAnomalySpawnInterval()을 호출하여 게임 경과 시간에 따라 이상현상 스폰 간격을 동적으로 갱신한다. 이 값은 이후 실제 스폰 주기를 결정하는 기준으로 사용된다.
+게임이 본격적인 플레이 상태로 전환되면, AreaKeeperGameState는 레벨에 배치된 AnomalyManager의 StartSpawning() 함수를 호출한다. AnomalyManager는 첫 스폰을 지연 없이 수행하기 위해 즉시 OnSpawnTimerExpired()를 한 번 호출한다.
+OnSpawnTimerExpired()는 이상현상 스폰 루프의 핵심 콜백이다. 함수가 호출되면 먼저 GameState로부터 최신 스폰 간격(GetCurrentAnomalySpawnInterval)을 가져온 뒤, FTimerManager::SetTimer를 통해 동일한 콜백을 해당 간격으로 다시 등록한다. 이를 통해 스폰 주기가 게임 진행 상황에 따라 지속적으로 변화하도록 설계되어 있다.
+이후 AnomalyManager는 GetRandomAnomalyCategory()를 호출하여 생성할 정지형 이상현상의 범주를 결정한다. 범주가 EAC_Intrusion인 경우에는 새로운 물체 형태의 이상현상을 생성하며, 이때 GetRandomSpawnLocation()과 UNavigationSystemV1을 이용해 NavMesh 상의 유효한 위치를 계산한 뒤 SpawnActor<AStationaryAnomaly>를 호출한다. 생성된 이상현상은 InitializeAnomaly()를 통해 타입, 범주, 유지 시간이 설정된다.
+반면 환경 변조 계열 범주가 선택된 경우에는, AvailableModifiableActors 목록에서 기존 월드 액터를 하나 선택하여 제거한 뒤, 동일한 위치에 정지형 이상현상을 스폰한다. 이 경우 InitializeFromActor()를 통해 원본 액터의 숨김, 변조, 패널티 성격의 이상현상 초기화가 한 번에 처리된다.
+이러한 과정을 통해 AnomalyManager는 새 물체 생성형 이상현상과 환경 변조형 이상현상을 상황에 맞게 분기 생성하며, 모든 스폰은 동일한 타이머 기반 루프 안에서 일관되게 관리된다.
 
-
-# 4.9 UnSolvedManagement
+# 4.9 StationaryUnSolvedManagement
 ![image](image/UnSolvedManagementDiagram.png)
 
 **[그림 4-9]**
@@ -167,7 +178,7 @@ HandleDamage가 반환된 후, AChasingAnomaly는 AAreaKeeperGameState::Incremen
 
 
 
-# 4.14 UnSolvedManagement
+# 4.14 ToolUsage
 ![image](image/ToolUsage.png)
 
 **[그림 4-14]**
