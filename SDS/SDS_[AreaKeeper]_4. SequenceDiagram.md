@@ -96,8 +96,8 @@ OnDropItem 함수 내부에서는 먼저 HeldItem과 QuickSlotRef가 유효한�
 그 다음, 드랍 위치를 계산한다. 드랍 위치는 플레이어의 현재 위치에서 Forward * 100만큼 떨어진 지점에, 약간의 높이 (0,0,30)를 더한 좌표로 설정된다. 계산된 드랍 위치와 HeldItem을 인자로 하여 ChangeItem 함수를 호출하면, ChangeItem 내부에서 HeldItem에 대해 OnDropped 함수를 실행하고, 액터 위치를 드랍 위치로 옮기며, 마지막으로 HeldItem 포인터를 nullptr로 설정하여 더 이상 아이템을 들고 있지 않은 상태로 만든다.
 
 
-# 4.8 AbnomalyManagement
-![image](image/AbnormalManagementDiagram.png)
+# 4.8 AnomalyManagement
+![image](image/AnomalyManagementDiagram.png)
 
 **[그림 4-8]**
 
@@ -108,7 +108,7 @@ OnSpawnTimerExpired 함수는 이상현상 스폰 루프의 중심이 되는 콜
 이후 AnomalyManager는 NavMesh 기반의 랜덤 스폰 위치를 얻기 위해 NavigationSystem(UNavigationSystemV1)의 GetRandomPointInNavigableRadius 함수를 호출한다. 유효한 위치를 찾은 경우, UWorld의 SpawnActor<AStationaryAnomaly> 함수를 사용해 정지형 이상현상 액터를 해당 위치에 생성한다. 스폰 가능한 NavMesh를 찾지 못한 경우에는 스폰을 수행하지 않고 로그만 출력한다.
 
 
-# 4.9 UnSolvedManagement
+# 4.9 StationaryUnSolvedManagement
 ![image](image/UnSolvedManagementDiagram.png)
 
 **[그림 4-9]**
@@ -177,7 +177,7 @@ HandleDamage가 반환된 후, AChasingAnomaly는 AAreaKeeperGameState::Incremen
 
 
 
-# 4.14 UnSolvedManagement
+# 4.14 ToolUsage
 ![image](image/ToolUsage.png)
 
 **[그림 4-14]**
